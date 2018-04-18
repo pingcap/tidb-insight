@@ -1,3 +1,5 @@
+tidb-metrics-collector
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
