@@ -1,6 +1,6 @@
-// tidb-metrics-collector project doc.go
+// tidb-insight project doc.go
 
 /*
-tidb-metrics-collector document
+tidb-insight document
 */
 package main

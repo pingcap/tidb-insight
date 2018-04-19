@@ -1,4 +1,4 @@
-// tidb-metrics-collector project main.go
+// tidb-insight project main.go
 package main
 
 import (
