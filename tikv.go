@@ -22,6 +22,9 @@ func getTiKVVersion() TiKVMeta {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if tikv_proc == nil {
+		return tikv_ver
+	}
 	file, err := tikv_proc.Exe()
 	if err != nil {
 		log.Fatal(err)

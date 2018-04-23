@@ -36,6 +36,9 @@ func GetProcStats() []ProcessStat {
 		if err != nil {
 			log.Fatal(err)
 		}
+		if proc == nil {
+			continue
+		}
 		stat.getProcessStat(proc)
 		stats = append(stats, stat)
 	}
@@ -132,6 +135,9 @@ func (proc_stat *ProcessStat) getProcessStat(proc *process.Process) {
 func getProcessesByName(search_name string) (*process.Process, error) {
 	proc_list, err := process.Processes()
 	if err != nil {
+		return nil, err
+	}
+	if len(proc_list) < 1 {
 		return nil, err
 	}
 	for _, proc := range proc_list {

@@ -21,6 +21,9 @@ func getPDVersion() PDMeta {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if pd_proc == nil {
+		return pd_ver
+	}
 	file, err := pd_proc.Exe()
 	if err != nil {
 		log.Fatal(err)

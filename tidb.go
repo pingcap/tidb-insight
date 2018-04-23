@@ -22,6 +22,9 @@ func getTiDBVersion() TiDBMeta {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if tidb_proc == nil {
+		return tidb_ver
+	}
 	file, err := tidb_proc.Exe()
 	if err != nil {
 		log.Fatal(err)
