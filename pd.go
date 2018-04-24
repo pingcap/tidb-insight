@@ -9,10 +9,10 @@ import (
 )
 
 type PDMeta struct {
-	ReleaseVer string `json:"release_version"`
-	GitCommit  string `json:"git_commit"`
-	GitBranch  string `json:"git_branch"`
-	BuildTime  string `json:"utc_build_time"`
+	ReleaseVer string `json:"release_version,omitempty"`
+	GitCommit  string `json:"git_commit,omitempty"`
+	GitBranch  string `json:"git_branch,omitempty"`
+	BuildTime  string `json:"utc_build_time,omitempty"`
 }
 
 func getPDVersion() PDMeta {

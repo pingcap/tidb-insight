@@ -1,4 +1,7 @@
-// tidb-insight project main.go
+// Copyright © 2018 PingCAP Inc.
+//
+// Use of this source code is governed by an MIT-style license that can be found in the LICENSE file.
+
 package main
 
 import (
@@ -7,8 +10,7 @@ import (
 	"log"
 	"time"
 
-	//"github.com/AstroProfundis/sysinfo"
-	"../../go/sysinfo"
+	"github.com/AstroProfundis/sysinfo"
 )
 
 type Meta struct {
