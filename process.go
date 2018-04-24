@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/AstroProfundis/gopsutil/cpu"
-	"github.com/AstroProfundis/gopsutil/process"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/process"
 )
 
 type ProcessStat struct {
