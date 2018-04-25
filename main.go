@@ -31,9 +31,10 @@ type Meta struct {
 }
 
 type Metrics struct {
-	Meta      Meta            `json:"meta"`
-	SysInfo   sysinfo.SysInfo `json:"sysinfo"`
-	ProcStats []ProcessStat   `json:"proc_stats"`
+	Meta       Meta            `json:"meta"`
+	SysInfo    sysinfo.SysInfo `json:"sysinfo"`
+	Partitions []BlockDev      `json:"partitions"`
+	ProcStats  []ProcessStat   `json:"proc_stats"`
 }
 
 func main() {
@@ -41,6 +42,7 @@ func main() {
 
 	metrics.GetMeta()
 	metrics.SysInfo.GetSysInfo()
+	metrics.Partitions = GetPartitionStats()
 	metrics.ProcStats = GetProcStats()
 
 	data, err := json.MarshalIndent(&metrics, "", "  ")
