@@ -1,0 +1,164 @@
+// get partitions info of the system
+
+package main
+
+import (
+	//"fmt"
+	//"io/ioutil"
+	"os"
+	"path"
+	"strconv"
+	"strings"
+
+	si "github.com/AstroProfundis/sysinfo"
+)
+
+type BlockDev struct {
+	// similiar to blkdev_cxt in lsblk (from util-linux)
+	Name      string `json:"name"`
+	DMName    string
+	Filename  string
+	Partition bool
+	FSType    string
+	PartType  string
+	UUID      string `json:"uuid,omitempty"`
+	Label     string
+	Size      uint64
+	SubDev    []BlockDev `json:"subdev,omitempty"`
+	Holder    []string   `json:"holder_of,omitempty"`
+	Slave     []string   `json:"slave_of,omitempty"`
+}
+
+const sysClassBlock = "/sys/block"
+
+func GetPartitionStats() []BlockDev {
+	part_stats := make([]BlockDev, 0)
+	if dir_sys_blk, err := os.Lstat(sysClassBlock); err == nil &&
+		dir_sys_blk.IsDir() {
+		fi, _ := os.Open(sysClassBlock)
+		block_devs, _ := fi.Readdir(0)
+		for _, blk := range block_devs {
+			var blkdev BlockDev
+			if blkdev.getBlockDevice(blk, nil) {
+				part_stats = append(part_stats, blkdev)
+			}
+		}
+		matchUUIDs(part_stats, checkUUIDs())
+	}
+	return part_stats
+}
+
+func (blkdev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool {
+	var fullpath string
+	var dev string
+	if parent != nil {
+		fullpath = path.Join(sysClassBlock, parent.Name(), blk.Name())
+		dev = fullpath
+	} else {
+		fullpath = path.Join(sysClassBlock, blk.Name())
+		dev, _ = os.Readlink(fullpath)
+	}
+
+	if strings.HasPrefix(dev, "../devices/virtual/") &&
+		(strings.Contains(dev, "ram") ||
+			strings.Contains(dev, "loop")) {
+		return false
+	}
+
+	// open the dir
+	var fi *os.File
+	if parent != nil {
+		fi, _ = os.Open(dev)
+	} else {
+		fi, _ = os.Open(path.Join(sysClassBlock, dev))
+	}
+	subfiles, err := fi.Readdir(0)
+	if err != nil {
+		return false
+	}
+
+	// check for sub devices
+	for _, subfile := range subfiles {
+		// check if this is a partition
+		if subfile.Name() == "partition" {
+			blkdev.Partition = true
+		}
+
+		// populate subdev
+		if strings.HasPrefix(subfile.Name(), blk.Name()) {
+			var subblk BlockDev
+			subblk.getBlockDevice(subfile, blk)
+			blkdev.SubDev = append(blkdev.SubDev, subblk)
+		}
+	}
+
+	blkdev.Name = blk.Name()
+	blksize, err := strconv.Atoi(si.SlurpFile(path.Join(fullpath, "size")))
+	if err == nil {
+		blkdev.Size = uint64(blksize)
+	}
+
+	slaves, holders := listDeps(blk.Name())
+	if len(slaves) > 0 {
+		for _, slave := range slaves {
+			blkdev.Slave = append(blkdev.Slave, slave.Name())
+		}
+	}
+	if len(holders) > 0 {
+		for _, holder := range holders {
+			blkdev.Holder = append(blkdev.Holder, holder.Name())
+		}
+	}
+
+	return true
+}
+
+func listDeps(blk string) ([]os.FileInfo, []os.FileInfo) {
+	fi_slaves, _ := os.Open(path.Join(sysClassBlock, blk, "slaves"))
+	fi_holders, _ := os.Open(path.Join(sysClassBlock, blk, "holders"))
+	slaves, _ := fi_slaves.Readdir(0)
+	holders, _ := fi_holders.Readdir(0)
+	return slaves, holders
+}
+
+func checkUUIDs() map[string]string {
+	sysDiskUUID := "/dev/disk/by-uuid"
+	fi, err := os.Open(sysDiskUUID)
+	if err != nil {
+		return nil
+	}
+	links, err := fi.Readdir(0)
+	if err != nil {
+		return nil
+	}
+	disk_by_uuid := make(map[string]string)
+	for _, link := range links {
+		if link.IsDir() {
+			continue
+		}
+		blk, err := os.Readlink(path.Join(sysDiskUUID, link.Name()))
+		if err != nil {
+			continue
+		}
+		blkname := strings.TrimPrefix(blk, "../../")
+		disk_by_uuid[blkname] = link.Name()
+	}
+	return disk_by_uuid
+}
+
+func matchUUIDs(devs []BlockDev, disk_by_uuid map[string]string) {
+	if len(devs) < 1 || disk_by_uuid == nil {
+		return
+	}
+
+	// match devs to their UUIDs
+	for i := 0; i < len(devs); i++ {
+		devs[i].UUID = disk_by_uuid[devs[i].Name]
+
+		// sub devices
+		if len(devs[i].SubDev) < 1 {
+			continue
+		}
+		matchUUIDs(devs[i].SubDev, disk_by_uuid)
+	}
+}
