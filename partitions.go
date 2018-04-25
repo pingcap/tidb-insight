@@ -4,7 +4,7 @@ package main
 
 import (
 	//"fmt"
-	//"io/ioutil"
+	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -16,17 +16,19 @@ import (
 type BlockDev struct {
 	// similiar to blkdev_cxt in lsblk (from util-linux)
 	Name      string `json:"name"`
-	DMName    string
-	Filename  string
 	Partition bool
-	FSType    string
-	PartType  string
-	UUID      string `json:"uuid,omitempty"`
-	Label     string
+	Mount     MountInfo `json:"mount,omitempty"`
+	UUID      string    `json:"uuid,omitempty"`
 	Size      uint64
 	SubDev    []BlockDev `json:"subdev,omitempty"`
 	Holder    []string   `json:"holder_of,omitempty"`
 	Slave     []string   `json:"slave_of,omitempty"`
+}
+
+type MountInfo struct {
+	MountPoint string `json:"mount_point,omitempty"`
+	FSType     string `json:"filesystem,omitempty"`
+	Options    string `json:"mount_options,omitempty"`
 }
 
 const sysClassBlock = "/sys/block"
@@ -44,6 +46,7 @@ func GetPartitionStats() []BlockDev {
 			}
 		}
 		matchUUIDs(part_stats, checkUUIDs())
+		matchMounts(part_stats, checkMounts())
 	}
 	return part_stats
 }
@@ -160,5 +163,49 @@ func matchUUIDs(devs []BlockDev, disk_by_uuid map[string]string) {
 			continue
 		}
 		matchUUIDs(devs[i].SubDev, disk_by_uuid)
+	}
+}
+
+func checkMounts() map[string]MountInfo {
+	raw, err := ioutil.ReadFile("/proc/mounts")
+	if err != nil {
+		return nil
+	}
+	raw_lines := strings.Split(string(raw), "\n")
+	mount_points := make(map[string]MountInfo)
+
+	for _, line := range raw_lines {
+		_tmp := strings.Split(line, " ")
+		if len(_tmp) < 6 {
+			continue
+		}
+		var mp MountInfo
+		mp.MountPoint = _tmp[1]
+		mp.FSType = _tmp[2]
+		mp.Options = _tmp[3]
+		_devpath := strings.Split(_tmp[0], "/")
+		if len(_devpath) < 1 {
+			continue
+		}
+		_devname := _devpath[len(_devpath)-1:][0]
+		mount_points[_devname] = mp
+	}
+
+	return mount_points
+}
+
+func matchMounts(devs []BlockDev, mount_points map[string]MountInfo) {
+	if len(devs) < 1 || mount_points == nil {
+		return
+	}
+
+	for i := 0; i < len(devs); i++ {
+		devs[i].Mount = mount_points[devs[i].Name]
+
+		// sub devices
+		if len(devs[i].SubDev) < 1 {
+			continue
+		}
+		matchMounts(devs[i].SubDev, mount_points)
 	}
 }
