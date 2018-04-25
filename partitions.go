@@ -3,7 +3,6 @@
 package main
 
 import (
-	//"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -15,11 +14,11 @@ import (
 
 type BlockDev struct {
 	// similiar to blkdev_cxt in lsblk (from util-linux)
-	Name      string `json:"name"`
-	Partition bool
-	Mount     MountInfo `json:"mount,omitempty"`
-	UUID      string    `json:"uuid,omitempty"`
-	Size      uint64
+	Name      string     `json:"name,omitempty"`
+	Partition bool       `json:"partition,omitempty"`
+	Mount     MountInfo  `json:"mount,omitempty"`
+	UUID      string     `json:"uuid,omitempty"`
+	Size      uint64     `json:"size,omitempty"`
 	SubDev    []BlockDev `json:"subdev,omitempty"`
 	Holder    []string   `json:"holder_of,omitempty"`
 	Slave     []string   `json:"slave_of,omitempty"`
