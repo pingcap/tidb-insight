@@ -191,6 +191,30 @@ func checkMounts() map[string]MountInfo {
 		mount_points[_devname] = mp
 	}
 
+	// check for swap partitions
+	// note: swap file is not supported yet, as virtual block devices
+	// are excluded from final result
+	if swaps, err := ioutil.ReadFile("/proc/swaps"); err == nil {
+		swap_lines := strings.Split(string(swaps), "\n")
+		for i, line := range swap_lines {
+			// skip table headers and empty line
+			if i == 0 ||
+				line == "" {
+				continue
+			}
+			_tmp := strings.Fields(line)
+			_devpath := strings.Split(_tmp[0], "/")
+			if len(_devpath) < 1 {
+				continue
+			}
+			var mp MountInfo
+			mp.MountPoint = "[SWAP]"
+			mp.FSType = "swap"
+			_devname := _devpath[len(_devpath)-1:][0]
+			mount_points[_devname] = mp
+		}
+	}
+
 	return mount_points
 }
 
