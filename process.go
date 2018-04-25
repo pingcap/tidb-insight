@@ -141,10 +141,8 @@ func getProcessesByName(search_name string) (*process.Process, error) {
 		return nil, err
 	}
 	for _, proc := range proc_list {
-		proc_name, err := proc.Name()
-		if err != nil {
-			return nil, err
-		}
+		// skip when process no longer exist
+		proc_name, _ := proc.Name()
 		// TODO: return multiple processes that match the search
 		if strings.Contains(proc_name, search_name) {
 			return proc, err
