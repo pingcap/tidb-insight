@@ -3,8 +3,8 @@ sudo: false
 language: go
 
 go:
-  - 1.9.x
-  - 1.10.x
+  - "1.9.x"
+  - "1.10.x"
   - master
 
 matrix:
@@ -13,4 +13,8 @@ matrix:
 
 notifications:
   email:
-    on_success: always
+    on_success: change
+    on_failure: always
+
+before_script:
+    - go get -t -v ./collector/...
