@@ -11,11 +11,11 @@ You may find it useful when you don't have access to the machines running TiDB s
 
 The `collector` is a simple binary tool that collects various infomation of the server, including system infomation, TiDB/TiKV/PD versions, etc.
 
-The output of collector is a JSON to stdout.
+The output of `collector` is a JSON to stdout.
 
 ## Scripts
 
-The scripts to call other tools (e.g., collector) and organize their results.
+WIP: The scripts to call other tools (e.g., collector) and organize their results.
 
 ## Insight
 
