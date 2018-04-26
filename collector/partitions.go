@@ -12,7 +12,7 @@ import (
 	si "github.com/AstroProfundis/sysinfo"
 )
 
-// BlockDev is similar to blkdev_cxt in lsblk (from util-linux)
+// BlockDev is similar to blkDev_cxt in lsblk (from util-linux)
 // contains metadata of a block device
 type BlockDev struct {
 	Name      string     `json:"name,omitempty"`
@@ -41,9 +41,9 @@ func GetPartitionStats() []BlockDev {
 		fi, _ := os.Open(sysClassBlock)
 		blockDevs, _ := fi.Readdir(0)
 		for _, blk := range blockDevs {
-			var blkdev BlockDev
-			if blkdev.getBlockDevice(blk, nil) {
-				partStats = append(partStats, blkdev)
+			var blkDev BlockDev
+			if blkDev.getBlockDevice(blk, nil) {
+				partStats = append(partStats, blkDev)
 			}
 		}
 		matchUUIDs(partStats, checkUUIDs())
@@ -52,7 +52,7 @@ func GetPartitionStats() []BlockDev {
 	return partStats
 }
 
-func (blkdev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool {
+func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool {
 	var fullpath string
 	var dev string
 	if parent != nil {
@@ -85,32 +85,32 @@ func (blkdev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool
 	for _, subfile := range subfiles {
 		// check if this is a partition
 		if subfile.Name() == "partition" {
-			blkdev.Partition = true
+			blkDev.Partition = true
 		}
 
 		// populate subdev
 		if strings.HasPrefix(subfile.Name(), blk.Name()) {
 			var subblk BlockDev
 			subblk.getBlockDevice(subfile, blk)
-			blkdev.SubDev = append(blkdev.SubDev, subblk)
+			blkDev.SubDev = append(blkDev.SubDev, subblk)
 		}
 	}
 
-	blkdev.Name = blk.Name()
-	blksize, err := strconv.Atoi(si.SlurpFile(path.Join(fullpath, "size")))
+	blkDev.Name = blk.Name()
+	blkSize, err := strconv.Atoi(si.SlurpFile(path.Join(fullpath, "size")))
 	if err == nil {
-		blkdev.Size = uint64(blksize)
+		blkDev.Size = uint64(blkSize)
 	}
 
 	slaves, holders := listDeps(blk.Name())
 	if len(slaves) > 0 {
 		for _, slave := range slaves {
-			blkdev.Slave = append(blkdev.Slave, slave.Name())
+			blkDev.Slave = append(blkDev.Slave, slave.Name())
 		}
 	}
 	if len(holders) > 0 {
 		for _, holder := range holders {
-			blkdev.Holder = append(blkdev.Holder, holder.Name())
+			blkDev.Holder = append(blkDev.Holder, holder.Name())
 		}
 	}
 
@@ -144,8 +144,8 @@ func checkUUIDs() map[string]string {
 		if err != nil {
 			continue
 		}
-		blkname := strings.TrimPrefix(blk, "../../")
-		diskByUUID[blkname] = link.Name()
+		blkName := strings.TrimPrefix(blk, "../../")
+		diskByUUID[blkName] = link.Name()
 	}
 	return diskByUUID
 }
@@ -184,12 +184,12 @@ func checkMounts() map[string]MountInfo {
 		mp.MountPoint = _tmp[1]
 		mp.FSType = _tmp[2]
 		mp.Options = _tmp[3]
-		_devpath := strings.Split(_tmp[0], "/")
-		if len(_devpath) < 1 {
+		_devPath := strings.Split(_tmp[0], "/")
+		if len(_devPath) < 1 {
 			continue
 		}
-		_devname := _devpath[len(_devpath)-1:][0]
-		mountPoints[_devname] = mp
+		_devName := _devPath[len(_devPath)-1:][0]
+		mountPoints[_devName] = mp
 	}
 
 	// check for swap partitions
@@ -204,15 +204,15 @@ func checkMounts() map[string]MountInfo {
 				continue
 			}
 			_tmp := strings.Fields(line)
-			_devpath := strings.Split(_tmp[0], "/")
-			if len(_devpath) < 1 {
+			_devPath := strings.Split(_tmp[0], "/")
+			if len(_devPath) < 1 {
 				continue
 			}
 			var mp MountInfo
 			mp.MountPoint = "[SWAP]"
 			mp.FSType = "swap"
-			_devname := _devpath[len(_devpath)-1:][0]
-			mountPoints[_devname] = mp
+			_devName := _devPath[len(_devPath)-1:][0]
+			mountPoints[_devName] = mp
 		}
 	}
 
