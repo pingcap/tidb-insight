@@ -76,23 +76,23 @@ func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool
 	} else {
 		fi, _ = os.Open(path.Join(sysClassBlock, dev))
 	}
-	subfiles, err := fi.Readdir(0)
+	subFiles, err := fi.Readdir(0)
 	if err != nil {
 		return false
 	}
 
 	// check for sub devices
-	for _, subfile := range subfiles {
+	for _, subFile := range subFiles {
 		// check if this is a partition
-		if subfile.Name() == "partition" {
+		if subFile.Name() == "partition" {
 			blkDev.Partition = true
 		}
 
 		// populate subdev
-		if strings.HasPrefix(subfile.Name(), blk.Name()) {
-			var subblk BlockDev
-			subblk.getBlockDevice(subfile, blk)
-			blkDev.SubDev = append(blkDev.SubDev, subblk)
+		if strings.HasPrefix(subFile.Name(), blk.Name()) {
+			var subBlk BlockDev
+			subBlk.getBlockDevice(subFile, blk)
+			blkDev.SubDev = append(blkDev.SubDev, subBlk)
 		}
 	}
 
