@@ -23,7 +23,7 @@ import (
 	"github.com/AstroProfundis/sysinfo"
 )
 
-// Version infomation
+// Version information
 var (
 	// InsightGitBranch is initialized during make
 	InsightGitBranch = "Not Provided"
