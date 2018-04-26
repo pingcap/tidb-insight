@@ -9,17 +9,19 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
+// ProcessStat contains basic info of a running process
 type ProcessStat struct {
 	Name     string                  `json:"name"`
 	Pid      int32                   `json:"pid"`
 	Exec     string                  `json:"exec"`
 	Cmdline  string                  `json:"cmd"`
 	Status   string                  `json:"status"`
-	CpuTimes *cpu.TimesStat          `json:"cpu_times"`
+	CPUTimes *cpu.TimesStat          `json:"cpu_times"`
 	Memory   *process.MemoryInfoStat `json:"memory"`
 	Rlimit   []RlimitUsage           `json:"resource_limit"`
 }
 
+// RlimitUsage is the resource limit usage of a process
 type RlimitUsage struct {
 	Resource string `json:"resource"`
 	Soft     int64  `json:"soft"`
@@ -29,9 +31,9 @@ type RlimitUsage struct {
 
 func GetProcStats() []ProcessStat {
 	stats := make([]ProcessStat, 0)
-	ti_servers := []string{"pd-server", "tikv-server", "tidb-server"}
-	for _, proc_name := range ti_servers {
-		proc, err := getProcessesByName(proc_name)
+	tiServers := []string{"pd-server", "tikv-server", "tidb-server"}
+	for _, procName := range tiServers {
+		proc, err := getProcessesByName(procName)
 		var stat ProcessStat
 		if err != nil {
 			log.Fatal(err)
@@ -127,24 +129,24 @@ func (proc_stat *ProcessStat) getProcessStat(proc *process.Process) {
 	proc_stat.Exec, _ = proc.Exe()
 	proc_stat.Cmdline, _ = proc.Cmdline()
 	proc_stat.Status, _ = proc.Status()
-	proc_stat.CpuTimes, _ = proc.Times()
+	proc_stat.CPUTimes, _ = proc.Times()
 	proc_stat.Memory, _ = proc.MemoryInfo()
 	proc_stat.Rlimit = getRlimitUsage(proc)
 }
 
-func getProcessesByName(search_name string) (*process.Process, error) {
-	proc_list, err := process.Processes()
+func getProcessesByName(searchName string) (*process.Process, error) {
+	procList, err := process.Processes()
 	if err != nil {
 		return nil, err
 	}
-	if len(proc_list) < 1 {
+	if len(procList) < 1 {
 		return nil, err
 	}
-	for _, proc := range proc_list {
+	for _, proc := range procList {
 		// skip when process no longer exist
-		proc_name, _ := proc.Name()
+		procName, _ := proc.Name()
 		// TODO: return multiple processes that match the search
-		if strings.Contains(proc_name, search_name) {
+		if strings.Contains(procName, searchName) {
 			return proc, err
 		}
 	}
