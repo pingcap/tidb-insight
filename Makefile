@@ -9,7 +9,7 @@ endif
 CURDIR := $(shell pwd)
 
 GO        := go
-GOBUILD   := GOPATH=$(CURDIR):$(GOPATH) $(GO) build
+GOBUILD   := GOPATH=$(GOPATH) $(GO) build
 
 COMMIT=$(shell git rev-parse HEAD)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
