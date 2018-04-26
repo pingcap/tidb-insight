@@ -22,7 +22,7 @@ import (
 	"github.com/AstroProfundis/sysinfo"
 )
 
-type Meta struct {
+type meta struct {
 	Timestamp time.Time `json:"timestamp"`
 	SiVer     string    `json:"sysinfo_ver"`
 	TiDBVer   TiDBMeta  `json:"tidb"`
@@ -30,22 +30,22 @@ type Meta struct {
 	PDVer     PDMeta    `json:"pd"`
 }
 
-type Metrics struct {
-	Meta       Meta            `json:"meta"`
+type metrics struct {
+	meta       meta            `json:"meta"`
 	SysInfo    sysinfo.SysInfo `json:"sysinfo"`
 	Partitions []BlockDev      `json:"partitions"`
 	ProcStats  []ProcessStat   `json:"proc_stats"`
 }
 
 func main() {
-	var metrics Metrics
+	var metric metrics
 
-	metrics.GetMeta()
-	metrics.SysInfo.GetSysInfo()
-	metrics.Partitions = GetPartitionStats()
-	metrics.ProcStats = GetProcStats()
+	metric.getMeta()
+	metric.SysInfo.GetSysInfo()
+	metric.Partitions = GetPartitionStats()
+	metric.ProcStats = GetProcStats()
 
-	data, err := json.MarshalIndent(&metrics, "", "  ")
+	data, err := json.MarshalIndent(&metric, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,10 +53,10 @@ func main() {
 	fmt.Println(string(data))
 }
 
-func (metrics *Metrics) GetMeta() {
-	metrics.Meta.Timestamp = time.Now()
-	metrics.Meta.SiVer = sysinfo.Version
-	metrics.Meta.TiDBVer = getTiDBVersion()
-	metrics.Meta.TiKVVer = getTiKVVersion()
-	metrics.Meta.PDVer = getPDVersion()
+func (metric *metrics) getMeta() {
+	metric.meta.Timestamp = time.Now()
+	metric.meta.SiVer = sysinfo.Version
+	metric.meta.TiDBVer = getTiDBVersion()
+	metric.meta.TiKVVer = getTiKVVersion()
+	metric.meta.PDVer = getPDVersion()
 }

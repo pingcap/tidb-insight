@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// TiDBMeta is the metadata struct of a TiDB server
 type TiDBMeta struct {
 	ReleaseVer string `json:"release_version,omitempty"`
 	GitCommit  string `json:"git_commit,omitempty"`
@@ -17,15 +18,15 @@ type TiDBMeta struct {
 }
 
 func getTiDBVersion() TiDBMeta {
-	var tidb_ver TiDBMeta
-	tidb_proc, err := getProcessesByName("tidb-server")
+	var tidbVer TiDBMeta
+	tidbProc, err := getProcessesByName("tidb-server")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if tidb_proc == nil {
-		return tidb_ver
+	if tidbProc == nil {
+		return tidbVer
 	}
-	file, err := tidb_proc.Exe()
+	file, err := tidbProc.Exe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,20 +47,20 @@ func getTiDBVersion() TiDBMeta {
 		}
 		switch _tmp[0] {
 		case "Release Version":
-			tidb_ver.ReleaseVer = strings.TrimSpace(_tmp[1])
+			tidbVer.ReleaseVer = strings.TrimSpace(_tmp[1])
 		case "Git Commit Hash":
-			tidb_ver.GitCommit = strings.TrimSpace(_tmp[1])
+			tidbVer.GitCommit = strings.TrimSpace(_tmp[1])
 		case "Git Commit Branch":
-			tidb_ver.GitBranch = strings.TrimSpace(_tmp[1])
+			tidbVer.GitBranch = strings.TrimSpace(_tmp[1])
 		case "UTC Build Time":
-			tidb_ver.BuildTime = strings.TrimSpace(strings.Join(_tmp[1:], ":"))
+			tidbVer.BuildTime = strings.TrimSpace(strings.Join(_tmp[1:], ":"))
 		case "GoVersion":
-			_tmp_trimmed := strings.TrimSpace(_tmp[1])
-			tidb_ver.GoVersion = strings.TrimPrefix(_tmp_trimmed, "go version ")
+			_tmpTrimed := strings.TrimSpace(_tmp[1])
+			tidbVer.GoVersion = strings.TrimPrefix(_tmpTrimed, "go version ")
 		default:
 			continue
 		}
 	}
 
-	return tidb_ver
+	return tidbVer
 }

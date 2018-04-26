@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// TiKVMeta is the metada struct of a TiKV server
 type TiKVMeta struct {
 	ReleaseVer  string `json:"release_version,omitempty"`
 	GitCommit   string `json:"git_commit,omitempty"`
@@ -17,15 +18,15 @@ type TiKVMeta struct {
 }
 
 func getTiKVVersion() TiKVMeta {
-	var tikv_ver TiKVMeta
-	tikv_proc, err := getProcessesByName("tikv-server")
+	var tikvVer TiKVMeta
+	tikvProc, err := getProcessesByName("tikv-server")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if tikv_proc == nil {
-		return tikv_ver
+	if tikvProc == nil {
+		return tikvVer
 	}
-	file, err := tikv_proc.Exe()
+	file, err := tikvProc.Exe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,19 +47,19 @@ func getTiKVVersion() TiKVMeta {
 		}
 		switch _tmp[0] {
 		case "Release Version":
-			tikv_ver.ReleaseVer = strings.TrimSpace(_tmp[1])
+			tikvVer.ReleaseVer = strings.TrimSpace(_tmp[1])
 		case "Git Commit Hash":
-			tikv_ver.GitCommit = strings.TrimSpace(_tmp[1])
+			tikvVer.GitCommit = strings.TrimSpace(_tmp[1])
 		case "Git Commit Branch":
-			tikv_ver.GitBranch = strings.TrimSpace(_tmp[1])
+			tikvVer.GitBranch = strings.TrimSpace(_tmp[1])
 		case "UTC Build Time":
-			tikv_ver.BuildTime = strings.TrimSpace(strings.Join(_tmp[1:], ":"))
+			tikvVer.BuildTime = strings.TrimSpace(strings.Join(_tmp[1:], ":"))
 		case "Rust Version":
-			tikv_ver.RustVersion = strings.TrimSpace(_tmp[1])
+			tikvVer.RustVersion = strings.TrimSpace(_tmp[1])
 		default:
 			continue
 		}
 	}
 
-	return tikv_ver
+	return tikvVer
 }
