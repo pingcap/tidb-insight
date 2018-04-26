@@ -7,7 +7,6 @@ endif
 
 GO        := go
 GOBUILD   := GOPATH=$(GOPATH) $(GO) build
-GOVER     := $(shell $(GO) version)
 
 COMMIT    := $(shell git rev-parse HEAD)
 BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
@@ -16,7 +15,6 @@ BUILDTIME := $(shell date -u '+%Y-%m-%d %I:%M:%S')
 LDFLAGS   += -X "main.InsightGitBranch=$(BRANCH)"
 LDFLAGS   += -X "main.InsightGitCommit=$(COMMIT)"
 LDFLAGS   += -X "main.InsightBuildTime=$(BUILDTIME)"
-LDFLAGS   += -X "main.InsightGoVersion=$(GOVER)"
 
 default: release
 
