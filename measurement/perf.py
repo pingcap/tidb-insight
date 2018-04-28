@@ -76,7 +76,7 @@ class InsightPerf():
             # perf on given process(es)
             for pid, pname in self.process_info.items():
                 cmd = self.build_cmd(pid, pname)
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = p.communicate()
                 util.WriteFile(path.join(outputdir, "%s.stdout" % pname), stdout)
@@ -85,7 +85,7 @@ class InsightPerf():
         else:
             # perf the entire system
             cmd = self.build_cmd()
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             # TODO: unified output: "Now perf recording..."
             stdout, stderr = p.communicate()
             util.WriteFile(path.join(outputdir, "perf.stdout"), stdout)

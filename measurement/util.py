@@ -11,8 +11,8 @@ def ReadFile(filename):
     return data
 
 def WriteFile(filename, data):
-    with open(filename, 'w') as f:
-        f.write(data)
+    with open(filename, 'w+') as f:
+        f.write(str(data))
     f.close()
 
 def CheckPrivilege():
@@ -24,7 +24,7 @@ def CheckPrivilege():
 
 def CheckDir(path):
     try:
-        os.mkdir(path, 755)
+        os.mkdir(path)
         return path
     except OSError:
         if os.path.isdir(path):
