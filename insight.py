@@ -19,6 +19,8 @@
 
 import os
 
+from measurement import perf
+
 def check_privilege():
     if os.getuid() != 0:
         print('''Warning: Running TiDB Insight with non-superuser privilege may result
