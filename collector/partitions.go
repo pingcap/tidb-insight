@@ -176,19 +176,19 @@ func checkMounts() map[string]MountInfo {
 	mountPoints := make(map[string]MountInfo)
 
 	for _, line := range rawLines {
-		_tmp := strings.Split(line, " ")
-		if len(_tmp) < 6 {
+		tmp := strings.Split(line, " ")
+		if len(tmp) < 6 {
 			continue
 		}
 		var mp MountInfo
-		mp.MountPoint = _tmp[1]
-		mp.FSType = _tmp[2]
-		mp.Options = _tmp[3]
-		_devPath := strings.Split(_tmp[0], "/")
-		if len(_devPath) < 1 {
+		mp.MountPoint = tmp[1]
+		mp.FSType = tmp[2]
+		mp.Options = tmp[3]
+		devPath := strings.Split(tmp[0], "/")
+		if len(devPath) < 1 {
 			continue
 		}
-		_devName := _devPath[len(_devPath)-1:][0]
+		_devName := devPath[len(devPath)-1:][0]
 		mountPoints[_devName] = mp
 	}
 
@@ -203,15 +203,14 @@ func checkMounts() map[string]MountInfo {
 				line == "" {
 				continue
 			}
-			_tmp := strings.Fields(line)
-			_devPath := strings.Split(_tmp[0], "/")
-			if len(_devPath) < 1 {
+			devPath := strings.Split(strings.Fields(line)[0], "/")
+			if len(devPath) < 1 {
 				continue
 			}
 			var mp MountInfo
 			mp.MountPoint = "[SWAP]"
 			mp.FSType = "swap"
-			_devName := _devPath[len(_devPath)-1:][0]
+			_devName := devPath[len(devPath)-1:][0]
 			mountPoints[_devName] = mp
 		}
 	}
