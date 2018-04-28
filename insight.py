@@ -20,35 +20,21 @@
 import os
 
 from measurement import perf
-
-def check_privilege():
-    if os.getuid() != 0:
-        print('''Warning: Running TiDB Insight with non-superuser privilege may result
-         in lack of some information or data in the final output, if
-         you find certain data missing or empty in result, please try
-         to run this script again with root.''')
+from measurement import util
 
 class Insight():
-    # full directory path of this script
-    def pwd(this):
-        return os.path.dirname(os.path.realpath(__file__))
-
-    # full path of current working directory
-    def cwd(this):
-        return os.getcwd()
-
     # data collected by `collector`
     collector_data = {}
     # collect data with `collector` and store it to disk
-    def collector(this):
+    def collector(self):
         # TODO: check existance of output dir
         # TODO: warn on non-empty output dir
         # TODO: call `collector` and store data to output dir
         return
 
 if __name__ == "__main__":
-    check_privilege()
+    util.CheckPrivilege()
     # TODO: add params to set output dir / overwriting on non-empty target dir
     insight = Insight()
     # TODO: call scripts that collect metrics of the node
-    print(insight.pwd())
+    print(util.pwd(), util.cwd())
