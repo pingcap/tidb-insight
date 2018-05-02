@@ -3,7 +3,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -20,14 +19,14 @@ func getPDVersion() PDMeta {
 	var pdVer PDMeta
 	pdProc, err := getProcessesByName("pd-server")
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 	if pdProc == nil {
 		return pdVer
 	}
 	file, err := pdProc.Exe()
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	cmd := exec.Command(file, "-V")
@@ -35,24 +34,24 @@ func getPDVersion() PDMeta {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	output := strings.Split(out.String(), "\n")
 	for _, line := range output {
-		_tmp := strings.Split(line, ":")
-		if len(_tmp) <= 1 {
+		tmp := strings.Split(line, ":")
+		if len(tmp) <= 1 {
 			continue
 		}
-		switch _tmp[0] {
+		switch tmp[0] {
 		case "Release Version":
-			pdVer.ReleaseVer = strings.TrimSpace(_tmp[1])
+			pdVer.ReleaseVer = strings.TrimSpace(tmp[1])
 		case "Git Commit Hash":
-			pdVer.GitCommit = strings.TrimSpace(_tmp[1])
+			pdVer.GitCommit = strings.TrimSpace(tmp[1])
 		case "Git Branch":
-			pdVer.GitBranch = strings.TrimSpace(_tmp[1])
+			pdVer.GitBranch = strings.TrimSpace(tmp[1])
 		case "UTC Build Time":
-			pdVer.BuildTime = strings.TrimSpace(strings.Join(_tmp[1:], ":"))
+			pdVer.BuildTime = strings.TrimSpace(strings.Join(tmp[1:], ":"))
 		default:
 			continue
 		}

@@ -16,23 +16,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"runtime"
 	"time"
 
 	"github.com/AstroProfundis/sysinfo"
-)
-
-// Version information
-var (
-	// InsightGitBranch is initialized during make
-	InsightGitBranch = "Not Provided"
-
-	// InsightGitCommit is initialized during make
-	InsightGitCommit = "Not Provided"
-
-	// InsightBuildDate is initialized during make
-	InsightBuildTime = "Not Provided"
 )
 
 type meta struct {
@@ -64,7 +51,7 @@ func main() {
 
 	data, err := json.MarshalIndent(&metric, "", "  ")
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	fmt.Println(string(data))
