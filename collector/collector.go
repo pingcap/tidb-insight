@@ -23,18 +23,6 @@ import (
 	"github.com/AstroProfundis/sysinfo"
 )
 
-// Version infomation
-var (
-	// InsightGitBranch is initialized during make
-	InsightGitBranch = "Not Provided"
-
-	// InsightGitCommit is initialized during make
-	InsightGitCommit = "Not Provided"
-
-	// InsightBuildDate is initialized during make
-	InsightBuildTime = "Not Provided"
-)
-
 type meta struct {
 	Timestamp time.Time `json:"timestamp"`
 	SiVer     string    `json:"sysinfo_ver"`
