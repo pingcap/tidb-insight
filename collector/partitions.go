@@ -38,8 +38,14 @@ func GetPartitionStats() []BlockDev {
 	partStats := make([]BlockDev, 0)
 	if dirSysBlk, err := os.Lstat(sysClassBlock); err == nil &&
 		dirSysBlk.IsDir() {
-		fi, _ := os.Open(sysClassBlock)
-		blockDevs, _ := fi.Readdir(0)
+		fi, err := os.Open(sysClassBlock)
+		if err != nil {
+			printErr(err)
+		}
+		blockDevs, err := fi.Readdir(0)
+		if err != nil {
+			printErr(err)
+		}
 		for _, blk := range blockDevs {
 			var blkDev BlockDev
 			if blkDev.getBlockDevice(blk, nil) {
@@ -55,12 +61,16 @@ func GetPartitionStats() []BlockDev {
 func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool {
 	var fullpath string
 	var dev string
+	var err error
 	if parent != nil {
 		fullpath = path.Join(sysClassBlock, parent.Name(), blk.Name())
 		dev = fullpath
 	} else {
 		fullpath = path.Join(sysClassBlock, blk.Name())
-		dev, _ = os.Readlink(fullpath)
+		dev, err = os.Readlink(fullpath)
+		if err != nil {
+			printErr(err)
+		}
 	}
 
 	if strings.HasPrefix(dev, "../devices/virtual/") &&
@@ -72,12 +82,20 @@ func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool
 	// open the dir
 	var fi *os.File
 	if parent != nil {
-		fi, _ = os.Open(dev)
+		fi, err = os.Open(dev)
+		if err != nil {
+			printErr(err)
+		}
 	} else {
-		fi, _ = os.Open(path.Join(sysClassBlock, dev))
+		fi, err = os.Open(path.Join(sysClassBlock, dev))
+		if err != nil {
+			printErr(err)
+		}
 	}
+
 	subfiles, err := fi.Readdir(0)
 	if err != nil {
+		printErr(err)
 		return false
 	}
 
@@ -118,10 +136,22 @@ func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool
 }
 
 func listDeps(blk string) ([]os.FileInfo, []os.FileInfo) {
-	fiSlaves, _ := os.Open(path.Join(sysClassBlock, blk, "slaves"))
-	fiHolders, _ := os.Open(path.Join(sysClassBlock, blk, "holders"))
-	slaves, _ := fiSlaves.Readdir(0)
-	holders, _ := fiHolders.Readdir(0)
+	fiSlaves, err := os.Open(path.Join(sysClassBlock, blk, "slaves"))
+	if err != nil {
+		printErr(err)
+	}
+	fiHolders, err := os.Open(path.Join(sysClassBlock, blk, "holders"))
+	if err != nil {
+		printErr(err)
+	}
+	slaves, err := fiSlaves.Readdir(0)
+	if err != nil {
+		printErr(err)
+	}
+	holders, err := fiHolders.Readdir(0)
+	if err != nil {
+		printErr(err)
+	}
 	return slaves, holders
 }
 

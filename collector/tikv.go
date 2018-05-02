@@ -3,7 +3,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -21,14 +20,14 @@ func getTiKVVersion() TiKVMeta {
 	var tikvVer TiKVMeta
 	tikvProc, err := getProcessesByName("tikv-server")
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 	if tikvProc == nil {
 		return tikvVer
 	}
 	file, err := tikvProc.Exe()
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	cmd := exec.Command(file, "-V")
@@ -36,7 +35,7 @@ func getTiKVVersion() TiKVMeta {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	output := strings.Split(out.String(), "\n")

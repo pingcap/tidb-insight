@@ -3,7 +3,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -20,14 +19,14 @@ func getPDVersion() PDMeta {
 	var pdVer PDMeta
 	pdProc, err := getProcessesByName("pd-server")
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 	if pdProc == nil {
 		return pdVer
 	}
 	file, err := pdProc.Exe()
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	cmd := exec.Command(file, "-V")
@@ -35,7 +34,7 @@ func getPDVersion() PDMeta {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	output := strings.Split(out.String(), "\n")

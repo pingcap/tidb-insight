@@ -16,7 +16,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"runtime"
 	"time"
 
@@ -52,7 +51,7 @@ func main() {
 
 	data, err := json.MarshalIndent(&metric, "", "  ")
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	fmt.Println(string(data))
