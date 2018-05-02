@@ -110,7 +110,10 @@ func getRlimitUsage(proc *process.Process) []RlimitUsage {
 	}
 
 	result := make([]RlimitUsage, 0)
-	rlimit, _ := proc.RlimitUsage(true)
+	rlimit, err := proc.RlimitUsage(true)
+	if err != nil {
+		printErr(err)
+	}
 	for _, res := range rlimit {
 		var usage RlimitUsage
 		usage.Resource = resources[res.Resource]
@@ -123,13 +126,32 @@ func getRlimitUsage(proc *process.Process) []RlimitUsage {
 }
 
 func (proc_stat *ProcessStat) getProcessStat(proc *process.Process) {
+	var err error
 	proc_stat.Pid = proc.Pid
-	proc_stat.Name, _ = proc.Name()
-	proc_stat.Exec, _ = proc.Exe()
-	proc_stat.Cmdline, _ = proc.Cmdline()
-	proc_stat.Status, _ = proc.Status()
-	proc_stat.CPUTimes, _ = proc.Times()
-	proc_stat.Memory, _ = proc.MemoryInfo()
+	proc_stat.Name, err = proc.Name()
+	if err != nil {
+		printErr(err)
+	}
+	proc_stat.Exec, err = proc.Exe()
+	if err != nil {
+		printErr(err)
+	}
+	proc_stat.Cmdline, err = proc.Cmdline()
+	if err != nil {
+		printErr(err)
+	}
+	proc_stat.Status, err = proc.Status()
+	if err != nil {
+		printErr(err)
+	}
+	proc_stat.CPUTimes, err = proc.Times()
+	if err != nil {
+		printErr(err)
+	}
+	proc_stat.Memory, err = proc.MemoryInfo()
+	if err != nil {
+		printErr(err)
+	}
 	proc_stat.Rlimit = getRlimitUsage(proc)
 }
 
