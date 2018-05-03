@@ -29,7 +29,7 @@ def CheckDir(path):
     except OSError:
         if os.path.isdir(path):
             return path
-        return None
+    return None
 
 # full directory path of this script
 def pwd():

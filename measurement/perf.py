@@ -33,13 +33,13 @@ class InsightPerf():
                 "--call-graph dwarf"]
         try:
             # user defined path of perf
-            cmd[0] = self.perf_options["exec"]
-        except KeyError:
+            cmd[0] = self.perf_options["perf_exec"]
+        except (KeyError, TypeError):
             pass
 
         try:
-            cmd.append("-F %d", self.perf_options["freq"])
-        except KeyError:
+            cmd.append("-F %d", self.perf_options["perf_freq"])
+        except (KeyError, TypeError):
             cmd.append("-F 120") # default to 120Hz
 
         if pid != None:
@@ -50,8 +50,8 @@ class InsightPerf():
             cmd.append("-o %s.data", outfile)
 
         try:
-            cmd.append("sleep %d", self.perf_options["time"])
-        except KeyError:
+            cmd.append("sleep %d", self.perf_options["perf_time"])
+        except (KeyError, TypeError):
             cmd.append("sleep 10") # default to 10s
 
         return cmd
@@ -91,3 +91,9 @@ class InsightPerf():
             util.WriteFile(path.join(outputdir, "perf.stdout"), stdout)
             if stderr != None:
                 util.WriteFile(path.join(outputdir, "perf.stderr"), stderr)
+
+def format_proc_info(proc_stats):
+    result = {}
+    for proc in proc_stats:
+        result[proc.pid] = proc.name
+    return result
