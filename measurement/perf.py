@@ -54,7 +54,7 @@ class InsightPerf():
             cmd.append("%s/%s.data" % (outdir, outfile))
         elif outfile == None and pid != None:
             cmd.append("-o")
-            cmd.append("%s/%d.data" % (outidr, pid))
+            cmd.append("%s/%d.data" % (outdir, pid))
 
         cmd.append("sleep")
         try:
