@@ -4,9 +4,8 @@
 # TODO: - switch to perf entire system or only given process(es)
 #       - set time of perf record, default to 10s
 
-import subprocess
-
 from os import path
+from subprocess import Popen, PIPE
 
 from . import util
 
@@ -30,29 +29,35 @@ class InsightPerf():
         cmd = ["perf",    # default executable name
                 "record", # default action of perf
                 "-g",
-                "--call-graph dwarf"]
+                "--call-graph",
+                "dwarf"]
         try:
             # user defined path of perf
             cmd[0] = self.perf_options["perf_exec"]
         except (KeyError, TypeError):
             pass
 
+        cmd.append("-F")
         try:
-            cmd.append("-F %d", self.perf_options["perf_freq"])
+            cmd.append("%d", self.perf_options["perf_freq"])
         except (KeyError, TypeError):
-            cmd.append("-F 120") # default to 120Hz
+            cmd.append("120") # default to 120Hz
 
         if pid != None:
-            cmd.append("-p %d" % pid)
+            cmd.append("-p")
+            cmd.append("%d" % pid)
         else:
             cmd.append("-a") # default to whole system
-        if outfile != None:
-            cmd.append("-o %s.data", outfile)
 
+        if outfile != None:
+            cmd.append("-o")
+            cmd.append("%s.data" % outfile)
+
+        cmd.append("sleep")
         try:
-            cmd.append("sleep %d", self.perf_options["perf_time"])
+            cmd.append("%d", self.perf_options["perf_time"])
         except (KeyError, TypeError):
-            cmd.append("sleep 10") # default to 10s
+            cmd.append("10") # default to 10s
 
         return cmd
 
@@ -67,8 +72,9 @@ class InsightPerf():
         else:
             # relative dir
             outputdir = util.CheckDir(path.join(util.cwd(), self.data_dir))
+
         if outputdir == None:
-            # something went wrong when setting output dir
+            # something went wrong when setting output dir, exit without perfing
             # TODO: unified output: "Error when setting up output dir of perf data"
             return
 
@@ -76,7 +82,8 @@ class InsightPerf():
             # perf on given process(es)
             for pid, pname in self.process_info.items():
                 cmd = self.build_cmd(pid, pname)
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                print(cmd)
+                p = Popen(cmd, stdout=PIPE, stderr=PIPE)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = p.communicate()
                 util.WriteFile(path.join(outputdir, "%s.stdout" % pname), stdout)
@@ -85,7 +92,7 @@ class InsightPerf():
         else:
             # perf the entire system
             cmd = self.build_cmd()
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
             # TODO: unified output: "Now perf recording..."
             stdout, stderr = p.communicate()
             util.WriteFile(path.join(outputdir, "perf.stdout"), stdout)
@@ -95,5 +102,5 @@ class InsightPerf():
 def format_proc_info(proc_stats):
     result = {}
     for proc in proc_stats:
-        result[proc.pid] = proc.name
+        result[proc["pid"]] = proc["name"]
     return result

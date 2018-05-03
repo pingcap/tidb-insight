@@ -29,6 +29,10 @@ from measurement import util
 class Insight():
     # data output dir
     outdir = "data"
+    full_outdir = ""
+
+    def __init__(self, outdir=None):
+        self.full_outdir = util.CheckDir(self.outdir)
 
     # data collected by `collector`
     collector_data = {}
@@ -48,8 +52,7 @@ class Insight():
         except json.JSONDecodeError:
             # TODO: unified output: "Error collecting system info.\n%s" % stderr
             return
-        full_outdir = util.CheckDir(self.outdir)
-        util.WriteFile(os.path.join(full_outdir, "collector.json"),
+        util.WriteFile(os.path.join(self.full_outdir, "collector.json"),
                         json.dumps(self.collector_data, indent=2))
     
     def run_perf(self):
@@ -87,12 +90,11 @@ if __name__ == "__main__":
 
     # WIP: add params to set output dir / overwriting on non-empty target dir
     args = parse_opts()
-    print(args)
     if args.output:
         insight.outdir = args.output
 
     insight.collector()
     # WIP: call scripts that collect metrics of the node
     perf_proc = perf.format_proc_info(insight.collector_data["proc_stats"])
-    insight_perf = perf.InsightPerf(args, perf_proc)
+    insight_perf = perf.InsightPerf(perf_proc, args)
     insight_perf.run()
