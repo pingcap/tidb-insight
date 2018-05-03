@@ -25,7 +25,7 @@ class InsightPerf():
         self.perf_options = options
 
     # set params of perf
-    def build_cmd(self, pid=None, outfile=None):
+    def build_cmd(self, pid=None, outfile=None, outdir=None):
         cmd = ["perf",    # default executable name
                 "record", # default action of perf
                 "-g",
@@ -51,7 +51,10 @@ class InsightPerf():
 
         if outfile != None:
             cmd.append("-o")
-            cmd.append("%s.data" % outfile)
+            cmd.append("%s/%s.data" % (outdir, outfile))
+        elif outfile == None and pid != None:
+            cmd.append("-o")
+            cmd.append("%s/%d.data" % (outidr, pid))
 
         cmd.append("sleep")
         try:
@@ -81,8 +84,7 @@ class InsightPerf():
         if len(self.process_info) > 0:
             # perf on given process(es)
             for pid, pname in self.process_info.items():
-                cmd = self.build_cmd(pid, pname)
-                print(cmd)
+                cmd = self.build_cmd(pid, pname, outputdir)
                 p = Popen(cmd, stdout=PIPE, stderr=PIPE)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = p.communicate()

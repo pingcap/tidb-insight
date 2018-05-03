@@ -55,9 +55,25 @@ class Insight():
         util.WriteFile(os.path.join(self.full_outdir, "collector.json"),
                         json.dumps(self.collector_data, indent=2))
     
-    def run_perf(self):
-        return
+    def run_perf(self, args):
+        if not args.perf:
+            return
 
+        # "--tidb-proc" has the highest priority
+        if args.tidb_proc:
+            perf_proc = perf.format_proc_info(self.collector_data["proc_stats"])
+            insight_perf = perf.InsightPerf(perf_proc, args)
+            insight_perf.run()
+        # parse pid list
+        elif len(args.pid) > 0:
+            perf_proc = {}
+            for _pid in args.pid:
+                perf_proc[_pid] = None
+            insight_perf = perf.InsightPerf(perf_proc, args)
+            insight_perf.run()
+        else:
+            insight_perf = perf.InsightPerf(options=args)
+            insight_perf.run()
 
 def parse_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
@@ -95,6 +111,4 @@ if __name__ == "__main__":
 
     insight.collector()
     # WIP: call scripts that collect metrics of the node
-    perf_proc = perf.format_proc_info(insight.collector_data["proc_stats"])
-    insight_perf = perf.InsightPerf(perf_proc, args)
-    insight_perf.run()
+    insight.run_perf(args)
