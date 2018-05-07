@@ -19,6 +19,7 @@ type BlockDev struct {
 	Partition bool       `json:"partition,omitempty"`
 	Mount     MountInfo  `json:"mount,omitempty"`
 	UUID      string     `json:"uuid,omitempty"`
+	Sectors   uint64     `json:"sectors,omitempty"`
 	Size      uint64     `json:"size,omitempty"`
 	SubDev    []BlockDev `json:"subdev,omitempty"`
 	Holder    []string   `json:"holder_of,omitempty"`
@@ -115,9 +116,10 @@ func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool
 	}
 
 	blkDev.Name = blk.Name()
-	blkSize, err := strconv.Atoi(si.SlurpFile(path.Join(fullpath, "size")))
+	blkSec, err := strconv.Atoi(si.SlurpFile(path.Join(fullpath, "size")))
 	if err == nil {
-		blkDev.Size = uint64(blkSize)
+		blkDev.Sectors = uint64(blkSec)
+		blkDev.Size = blkDev.Sectors << 9
 	}
 
 	slaves, holders := listDeps(blk.Name())
