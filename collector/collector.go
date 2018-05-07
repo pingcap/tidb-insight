@@ -16,6 +16,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"runtime"
 	"time"
 
@@ -43,18 +44,21 @@ type metrics struct {
 
 func main() {
 	var metric metrics
+	metric.getMetrics()
 
+	data, err := json.MarshalIndent(&metric, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(data))
+}
+
+func (metric *metrics) getMetrics() {
 	metric.Meta.getMeta()
 	metric.SysInfo.GetSysInfo()
 	metric.Partitions = GetPartitionStats()
 	metric.ProcStats = GetProcStats()
-
-	data, err := json.MarshalIndent(&metric, "", "  ")
-	if err != nil {
-		printErr(err)
-	}
-
-	fmt.Println(string(data))
 }
 
 func (meta *meta) getMeta() {

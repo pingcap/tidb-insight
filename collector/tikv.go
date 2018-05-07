@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -20,14 +21,14 @@ func getTiKVVersion() TiKVMeta {
 	var tikvVer TiKVMeta
 	tikvProc, err := getProcessesByName("tikv-server")
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 	if tikvProc == nil {
 		return tikvVer
 	}
 	file, err := tikvProc.Exe()
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 
 	cmd := exec.Command(file, "-V")
@@ -35,26 +36,26 @@ func getTiKVVersion() TiKVMeta {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 
 	output := strings.Split(out.String(), "\n")
 	for _, line := range output {
-		tmp := strings.Split(line, ":")
-		if len(tmp) <= 1 {
+		info := strings.Split(line, ":")
+		if len(info) <= 1 {
 			continue
 		}
-		switch tmp[0] {
+		switch info[0] {
 		case "Release Version":
-			tikvVer.ReleaseVer = strings.TrimSpace(tmp[1])
+			tikvVer.ReleaseVer = strings.TrimSpace(info[1])
 		case "Git Commit Hash":
-			tikvVer.GitCommit = strings.TrimSpace(tmp[1])
+			tikvVer.GitCommit = strings.TrimSpace(info[1])
 		case "Git Commit Branch":
-			tikvVer.GitBranch = strings.TrimSpace(tmp[1])
+			tikvVer.GitBranch = strings.TrimSpace(info[1])
 		case "UTC Build Time":
-			tikvVer.BuildTime = strings.TrimSpace(strings.Join(tmp[1:], ":"))
+			tikvVer.BuildTime = strings.TrimSpace(strings.Join(info[1:], ":"))
 		case "Rust Version":
-			tikvVer.RustVersion = strings.TrimSpace(tmp[1])
+			tikvVer.RustVersion = strings.TrimSpace(info[1])
 		default:
 			continue
 		}

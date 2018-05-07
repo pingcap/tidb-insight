@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
-
 // Version infomation
 var (
 	// InsightGitBranch is initialized during make
@@ -16,10 +11,3 @@ var (
 	// InsightBuildDate is initialized during make
 	InsightBuildTime = "Not Provided"
 )
-
-func printErr(err error) {
-	if err == nil {
-		return
-	}
-	fmt.Fprintf(os.Stderr, err.Error())
-}

@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -20,14 +21,14 @@ func getTiDBVersion() TiDBMeta {
 	var tidbVer TiDBMeta
 	tidbProc, err := getProcessesByName("tidb-server")
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 	if tidbProc == nil {
 		return tidbVer
 	}
 	file, err := tidbProc.Exe()
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 
 	cmd := exec.Command(file, "-V")
@@ -35,27 +36,27 @@ func getTiDBVersion() TiDBMeta {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 
 	output := strings.Split(out.String(), "\n")
 	for _, line := range output {
-		tmp := strings.Split(line, ":")
-		if len(tmp) <= 1 {
+		info := strings.Split(line, ":")
+		if len(info) <= 1 {
 			continue
 		}
-		switch tmp[0] {
+		switch info[0] {
 		case "Release Version":
-			tidbVer.ReleaseVer = strings.TrimSpace(tmp[1])
+			tidbVer.ReleaseVer = strings.TrimSpace(info[1])
 		case "Git Commit Hash":
-			tidbVer.GitCommit = strings.TrimSpace(tmp[1])
+			tidbVer.GitCommit = strings.TrimSpace(info[1])
 		case "Git Commit Branch":
-			tidbVer.GitBranch = strings.TrimSpace(tmp[1])
+			tidbVer.GitBranch = strings.TrimSpace(info[1])
 		case "UTC Build Time":
-			tidbVer.BuildTime = strings.TrimSpace(strings.Join(tmp[1:], ":"))
+			tidbVer.BuildTime = strings.TrimSpace(strings.Join(info[1:], ":"))
 		case "GoVersion":
-			tmpTrimed := strings.TrimSpace(tmp[1])
-			tidbVer.GoVersion = strings.TrimPrefix(tmpTrimed, "go version ")
+			infoTrimed := strings.TrimSpace(info[1])
+			tidbVer.GoVersion = strings.TrimPrefix(infoTrimed, "go version ")
 		default:
 			continue
 		}
