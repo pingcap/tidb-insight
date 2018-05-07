@@ -44,11 +44,7 @@ type metrics struct {
 
 func main() {
 	var metric metrics
-
-	metric.Meta.getMeta()
-	metric.SysInfo.GetSysInfo()
-	metric.Partitions = GetPartitionStats()
-	metric.ProcStats = GetProcStats()
+	metric.getMetrics()
 
 	data, err := json.MarshalIndent(&metric, "", "  ")
 	if err != nil {
@@ -56,6 +52,13 @@ func main() {
 	}
 
 	fmt.Println(string(data))
+}
+
+func (metric *metrics) getMetrics() {
+	metric.Meta.getMeta()
+	metric.SysInfo.GetSysInfo()
+	metric.Partitions = GetPartitionStats()
+	metric.ProcStats = GetProcStats()
 }
 
 func (meta *meta) getMeta() {

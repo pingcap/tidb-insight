@@ -40,19 +40,19 @@ func getPDVersion() PDMeta {
 
 	output := strings.Split(out.String(), "\n")
 	for _, line := range output {
-		tmp := strings.Split(line, ":")
-		if len(tmp) <= 1 {
+		info := strings.Split(line, ":")
+		if len(info) <= 1 {
 			continue
 		}
-		switch tmp[0] {
+		switch info[0] {
 		case "Release Version":
-			pdVer.ReleaseVer = strings.TrimSpace(tmp[1])
+			pdVer.ReleaseVer = strings.TrimSpace(info[1])
 		case "Git Commit Hash":
-			pdVer.GitCommit = strings.TrimSpace(tmp[1])
+			pdVer.GitCommit = strings.TrimSpace(info[1])
 		case "Git Branch":
-			pdVer.GitBranch = strings.TrimSpace(tmp[1])
+			pdVer.GitBranch = strings.TrimSpace(info[1])
 		case "UTC Build Time":
-			pdVer.BuildTime = strings.TrimSpace(strings.Join(tmp[1:], ":"))
+			pdVer.BuildTime = strings.TrimSpace(strings.Join(info[1:], ":"))
 		default:
 			continue
 		}
