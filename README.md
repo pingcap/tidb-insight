@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/AstroProfundis/tidb-insight.svg?branch=master)](https://travis-ci.org/AstroProfundis/tidb-insight)
 [![Go Report Card](https://goreportcard.com/badge/github.com/AstroProfundis/tidb-insight)](https://goreportcard.com/report/github.com/AstroProfundis/tidb-insight)
 
-This is a set of tools and/or scripts to collect infomation and metrics from all nodes of a TiDB cluster, the data are collected and archived to a tarball, so that one can copy the data to anywhere convenient for futhur invesgating.
+This is a set of tools and/or scripts to collect infomation and metrics from all nodes of a TiDB cluster, the data are collected and archived to a tarball, so that one can copy the data to anywhere convenient for further invesgating.
 
 You may find it useful when you don't have access to the machines running TiDB services, but need to throubleshooting issues related to them.
 

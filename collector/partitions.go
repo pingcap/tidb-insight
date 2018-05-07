@@ -218,8 +218,8 @@ func checkMounts() map[string]MountInfo {
 		if len(devPath) < 1 {
 			continue
 		}
-		_devName := devPath[len(devPath)-1:][0]
-		mountPoints[_devName] = mp
+		devName := devPath[len(devPath)-1:][0]
+		mountPoints[devName] = mp
 	}
 
 	// check for swap partitions
@@ -240,8 +240,8 @@ func checkMounts() map[string]MountInfo {
 			var mp MountInfo
 			mp.MountPoint = "[SWAP]"
 			mp.FSType = "swap"
-			_devName := devPath[len(devPath)-1:][0]
-			mountPoints[_devName] = mp
+			devName := devPath[len(devPath)-1:][0]
+			mountPoints[devName] = mp
 		}
 	}
 
