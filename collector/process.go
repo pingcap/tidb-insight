@@ -2,6 +2,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -35,7 +36,7 @@ func GetProcStats() []ProcessStat {
 		proc, err := getProcessesByName(procName)
 		var stat ProcessStat
 		if err != nil {
-			printErr(err)
+			log.Fatal(err)
 		}
 		if proc == nil {
 			continue
@@ -165,10 +166,7 @@ func getProcessesByName(searchName string) (*process.Process, error) {
 	}
 	for _, proc := range procList {
 		// skip when process no longer exist
-		procName, err := proc.Name()
-		if err != nil {
-			printErr(err)
-		}
+		procName, _ := proc.Name()
 		// TODO: return multiple processes that match the search
 		if strings.Contains(procName, searchName) {
 			return proc, err

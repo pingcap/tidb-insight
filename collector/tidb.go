@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -20,14 +21,14 @@ func getTiDBVersion() TiDBMeta {
 	var tidbVer TiDBMeta
 	tidbProc, err := getProcessesByName("tidb-server")
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 	if tidbProc == nil {
 		return tidbVer
 	}
 	file, err := tidbProc.Exe()
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 
 	cmd := exec.Command(file, "-V")
@@ -35,7 +36,7 @@ func getTiDBVersion() TiDBMeta {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		printErr(err)
+		log.Fatal(err)
 	}
 
 	output := strings.Split(out.String(), "\n")
