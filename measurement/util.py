@@ -44,3 +44,16 @@ def cwd():
 def run_cmd(cmd):
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     return p.communicate()
+
+def ParseCmdLine(cmdline):
+    result = {}
+    cmd = cmdline.split()
+    for arg in cmd:
+        # parse args that start with '--something'
+        if arg.startswith("--"):
+            argkv = arg.split("=")
+            try:
+                result[argkv[0][2:]] = argkv[1]
+            except IndexError:
+                pass
+    return result

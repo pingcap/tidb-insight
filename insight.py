@@ -23,6 +23,7 @@ import json
 import os
 
 from measurement import perf
+from measurement import space
 from measurement import util
 
 class Insight():
@@ -73,6 +74,22 @@ class Insight():
             insight_perf = perf.InsightPerf(options=args)
             insight_perf.run()
 
+    def data_size(self):
+        for proc in self.collector_data["proc_stats"]:
+            args = util.ParseCmdLine(proc["cmd"])
+            try:
+                data_dir = args["data-dir"]
+            except KeyError:
+                continue
+            if os.listdir(data_dir) != []:
+                stdout, stderr = space.du_subfiles(data_dir)
+            else:
+                stdout, stderr = space.du_total(data_dir)
+            util.WriteFile(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
+                            stdout)
+            if stderr is not None and stderr is not "":
+                util.WriteFile(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
+                            stderr)
 
 def parse_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
@@ -111,3 +128,5 @@ if __name__ == "__main__":
     insight.collector()
     # WIP: call scripts that collect metrics of the node
     insight.run_perf(args)
+    # check size of data folder of TiDB processes
+    insight.data_size()
