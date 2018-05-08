@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// PDMeta is the metadata struct of a PD server
 type PDMeta struct {
 	ReleaseVer string `json:"release_version,omitempty"`
 	GitCommit  string `json:"git_commit,omitempty"`
@@ -16,15 +17,15 @@ type PDMeta struct {
 }
 
 func getPDVersion() PDMeta {
-	var pd_ver PDMeta
-	pd_proc, err := getProcessesByName("pd-server")
+	var pdVer PDMeta
+	pdProc, err := getProcessesByName("pd-server")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if pd_proc == nil {
-		return pd_ver
+	if pdProc == nil {
+		return pdVer
 	}
-	file, err := pd_proc.Exe()
+	file, err := pdProc.Exe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,23 +40,23 @@ func getPDVersion() PDMeta {
 
 	output := strings.Split(out.String(), "\n")
 	for _, line := range output {
-		_tmp := strings.Split(line, ":")
-		if len(_tmp) <= 1 {
+		info := strings.Split(line, ":")
+		if len(info) <= 1 {
 			continue
 		}
-		switch _tmp[0] {
+		switch info[0] {
 		case "Release Version":
-			pd_ver.ReleaseVer = strings.TrimSpace(_tmp[1])
+			pdVer.ReleaseVer = strings.TrimSpace(info[1])
 		case "Git Commit Hash":
-			pd_ver.GitCommit = strings.TrimSpace(_tmp[1])
+			pdVer.GitCommit = strings.TrimSpace(info[1])
 		case "Git Branch":
-			pd_ver.GitBranch = strings.TrimSpace(_tmp[1])
+			pdVer.GitBranch = strings.TrimSpace(info[1])
 		case "UTC Build Time":
-			pd_ver.BuildTime = strings.TrimSpace(strings.Join(_tmp[1:], ":"))
+			pdVer.BuildTime = strings.TrimSpace(strings.Join(info[1:], ":"))
 		default:
 			continue
 		}
 	}
 
-	return pd_ver
+	return pdVer
 }
