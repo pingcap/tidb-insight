@@ -3,6 +3,8 @@
 
 import os
 
+from subprocess import Popen, PIPE
+
 def ReadFile(filename):
     data = None
     with open(filename, 'r') as f:
@@ -38,3 +40,7 @@ def pwd():
 # full path of current working directory
 def cwd():
     return os.getcwd()
+
+def run_cmd(cmd):
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    return p.communicate()

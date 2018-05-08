@@ -5,7 +5,6 @@
 #       - set time of perf record, default to 10s
 
 from os import path
-from subprocess import Popen, PIPE
 
 from . import util
 
@@ -85,18 +84,15 @@ class InsightPerf():
             # perf on given process(es)
             for pid, pname in self.process_info.items():
                 cmd = self.build_cmd(pid, pname, outputdir)
-                p = Popen(cmd, stdout=PIPE, stderr=PIPE)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
-                stdout, stderr = p.communicate()
+                stdout, stderr = util.run_cmd(cmd)
                 util.WriteFile(path.join(outputdir, "%s.stdout" % pname), stdout)
                 if stderr != None:
                     util.WriteFile(path.join(outputdir, "%s.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_cmd()
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            # TODO: unified output: "Now perf recording..."
-            stdout, stderr = p.communicate()
+            stdout, stderr = util.run_cmd(cmd)
             util.WriteFile(path.join(outputdir, "perf.stdout"), stdout)
             if stderr != None:
                 util.WriteFile(path.join(outputdir, "perf.stderr"), stderr)

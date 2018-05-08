@@ -21,7 +21,6 @@
 import argparse
 import json
 import os
-import subprocess
 
 from measurement import perf
 from measurement import util
@@ -45,8 +44,7 @@ class Insight():
         base_dir = os.path.join(util.pwd(), "../")
         collector_exec = os.path.join(base_dir, "bin/collector")
 
-        f = subprocess.Popen(collector_exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = f.communicate()
+        stdout, stderr = util.run_cmd(collector_exec)
         try:
             self.collector_data = json.loads(stdout)
         except json.JSONDecodeError:
@@ -74,6 +72,7 @@ class Insight():
         else:
             insight_perf = perf.InsightPerf(options=args)
             insight_perf.run()
+
 
 def parse_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
