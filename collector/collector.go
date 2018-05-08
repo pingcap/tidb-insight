@@ -23,7 +23,7 @@ import (
 	"github.com/AstroProfundis/sysinfo"
 )
 
-type meta struct {
+type Meta struct {
 	Timestamp time.Time `json:"timestamp"`
 	SiVer     string    `json:"sysinfo_ver"`
 	GitBranch string    `json:"git_branch"`
@@ -35,15 +35,15 @@ type meta struct {
 	PDVer     PDMeta    `json:"pd"`
 }
 
-type metrics struct {
-	Meta       meta            `json:"meta"`
+type Metrics struct {
+	Meta       Meta            `json:"meta"`
 	SysInfo    sysinfo.SysInfo `json:"sysinfo"`
 	Partitions []BlockDev      `json:"partitions"`
 	ProcStats  []ProcessStat   `json:"proc_stats"`
 }
 
 func main() {
-	var metric metrics
+	var metric Metrics
 	metric.getMetrics()
 
 	data, err := json.MarshalIndent(&metric, "", "  ")
@@ -54,14 +54,14 @@ func main() {
 	fmt.Println(string(data))
 }
 
-func (metric *metrics) getMetrics() {
+func (metric *Metrics) getMetrics() {
 	metric.Meta.getMeta()
 	metric.SysInfo.GetSysInfo()
 	metric.Partitions = GetPartitionStats()
 	metric.ProcStats = GetProcStats()
 }
 
-func (meta *meta) getMeta() {
+func (meta *Meta) getMeta() {
 	meta.Timestamp = time.Now()
 	meta.SiVer = sysinfo.Version
 	meta.GitBranch = InsightGitBranch
