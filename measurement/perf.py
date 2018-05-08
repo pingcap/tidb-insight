@@ -6,7 +6,7 @@
 
 from os import path
 
-from . import util
+from measurement import util
 
 class InsightPerf():
     # the process name and PID of processes(es) to run perf on,
@@ -66,10 +66,10 @@ class InsightPerf():
     def build_full_output(self, outputdir=None):
         if outputdir == None:
             # default to current working dir
-            return util.CheckDir(self.data_dir)
+            return util.create_dir(self.data_dir)
         else:
             # put to subdirectory
-            return util.CheckDir(path.join(outputdir, self.data_dir))
+            return util.create_dir(path.join(outputdir, self.data_dir))
 
     def run(self, outputdir=None):
         # set output path of perf data
@@ -86,18 +86,18 @@ class InsightPerf():
                 cmd = self.build_cmd(pid, pname, full_outputdir)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
-                if len(stdout) > 0:
-                    util.WriteFile(path.join(full_outputdir, "%s.stdout" % pname), stdout)
-                if len(stderr) > 0:
-                    util.WriteFile(path.join(full_outputdir, "%s.stderr" % pname), stderr)
+                if stdout:
+                    util.write_file(path.join(full_outputdir, "%s.stdout" % pname), stdout)
+                if stderr:
+                    util.write_file(path.join(full_outputdir, "%s.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_cmd()
             stdout, stderr = util.run_cmd(cmd)
-            if len(stdout) > 0:
-                util.WriteFile(path.join(full_outputdir, "perf.stdout"), stdout)
-            if len(stderr) > 0:
-                util.WriteFile(path.join(full_outputdir, "perf.stderr"), stderr)
+            if stdout:
+                util.write_file(path.join(full_outputdir, "perf.stdout"), stdout)
+            if stderr:
+                util.write_file(path.join(full_outputdir, "perf.stderr"), stderr)
 
 def format_proc_info(proc_stats):
     result = {}

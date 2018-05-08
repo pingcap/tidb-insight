@@ -4,7 +4,7 @@
 from glob import glob
 from os import path
 
-from . import util
+from measurement import util
 
 # check total size of filepath with `du`
 def du_total(filepath):

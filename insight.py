@@ -22,9 +22,7 @@ import argparse
 import json
 import os
 
-from measurement import perf
-from measurement import space
-from measurement import util
+from measurement import perf, space, util
 
 class Insight():
     # data output dir
@@ -32,7 +30,7 @@ class Insight():
     full_outdir = ""
 
     def __init__(self, outdir=None):
-        self.full_outdir = util.CheckDir(self.outdir)
+        self.full_outdir = util.create_dir(self.outdir)
 
     # data collected by `collector`
     collector_data = {}
@@ -51,7 +49,7 @@ class Insight():
         except json.JSONDecodeError:
             # TODO: unified output: "Error collecting system info.\n%s" % stderr
             return
-        util.WriteFile(os.path.join(self.full_outdir, "collector.json"),
+        util.write_file(os.path.join(self.full_outdir, "collector.json"),
                         json.dumps(self.collector_data, indent=2))
     
     def run_perf(self, args):
@@ -72,9 +70,9 @@ class Insight():
             insight_perf = perf.InsightPerf(options=args)
         insight_perf.run(self.full_outdir)
 
-    def data_size(self):
+    def get_datadir_size(self):
         for proc in self.collector_data["proc_stats"]:
-            args = util.ParseCmdLine(proc["cmd"])
+            args = util.parse_cmdline(proc["cmd"])
             try:
                 data_dir = args["data-dir"]
             except KeyError:
@@ -83,26 +81,27 @@ class Insight():
                 stdout, stderr = space.du_subfiles(data_dir)
             else:
                 stdout, stderr = space.du_total(data_dir)
-            util.WriteFile(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
+            if stdout:
+                util.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
                             stdout)
-            if len(stderr) > 0:
-                util.WriteFile(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
+            if stderr:
+                util.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
                             stderr)
 
 def parse_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
             epilog="Note that some options would decrease system performance.")
     parser.add_argument("-O", "--output", action="store", default=None,
-                        help='''The dir to store output data of TiDB Insight, any existing file
-                        will be overwritten without futher confirmation.''')
+                        help="""The dir to store output data of TiDB Insight, any existing file
+                        will be overwritten without futher confirmation.""")
 
     parser.add_argument("-p", "--perf", action="store_true", default=False,
                         help="Collect trace info with perf. Default is disabled.")
     parser.add_argument("--pid", type=int, action="append", default=None,
-                        help='''PID of process to run perf on, if '-p/--perf' is not set, this
+                        help="""PID of process to run perf on, if '-p/--perf' is not set, this
                         value will be ignored and would not take any effection.
                         Multiple PIDs can be set by using more than one --pid args.
-                        Default is None and means the whole system.''')
+                        Default is None and means the whole system.""")
     parser.add_argument("--tidb-proc", action="store_true", default=False,
                         help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
     parser.add_argument("--perf-exec", type=int, action="store", default=None,
@@ -115,7 +114,7 @@ def parse_opts():
     return parser.parse_args()
 
 if __name__ == "__main__":
-    util.CheckPrivilege()
+    util.check_privilege()
     insight = Insight()
 
     # WIP: add params to set output dir / overwriting on non-empty target dir
@@ -127,4 +126,4 @@ if __name__ == "__main__":
     # WIP: call scripts that collect metrics of the node
     insight.run_perf(args)
     # check size of data folder of TiDB processes
-    insight.data_size()
+    insight.get_datadir_size()

@@ -5,14 +5,14 @@ import os
 
 from subprocess import Popen, PIPE
 
-def ReadFile(filename):
+def read_file(filename):
     data = None
     with open(filename, 'r') as f:
         data = f.read()
     f.close()
     return data
 
-def WriteFile(filename, data):
+def write_file(filename, data):
     with open(filename, 'w') as f:
         try:
             f.write(str(data, 'utf-8'))
@@ -20,14 +20,14 @@ def WriteFile(filename, data):
             f.write(data)
     f.close()
 
-def CheckPrivilege():
+def check_privilege():
     if os.getuid() != 0:
-        print('''Warning: Running TiDB Insight with non-superuser privilege may result
+        print("""Warning: Running TiDB Insight with non-superuser privilege may result
          in lack of some information or data in the final output, if
          you find certain data missing or empty in result, please try
-         to run this script again with root.''')
+         to run this script again with root.""")
 
-def CheckDir(path):
+def create_dir(path):
     try:
         os.mkdir(path)
         return path
@@ -48,7 +48,7 @@ def run_cmd(cmd):
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     return p.communicate()
 
-def ParseCmdLine(cmdline):
+def parse_cmdline(cmdline):
     result = {}
     cmd = cmdline.split()
     for arg in cmd:
