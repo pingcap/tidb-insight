@@ -17,6 +17,15 @@ The output of `collector` is a JSON to stdout.
 
 WIP: The scripts to call other tools (e.g., collector) and organize their results.
 
+`insight.py` file is the entrance of all scripts, it calls `collector` to collect basic infomation and then trigger other tools to gather more data.
+
+It's recommended to run this script with root priviledge.
+
+Now implemented:
+
+ - Record `perf` data of whole system, or TiDB modules, or specific process. (disabled by default)
+ - Check file size of TiDB modules' data dirs (enabled by default)
+
 ## Insight
 
 TODO: the analyse tool that helps processing dataset.
