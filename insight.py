@@ -41,7 +41,7 @@ class Insight():
         # TODO: check existance of output dir
         # TODO: warn on non-empty output dir
 
-        # WIP: call `collector` and store data to output dir
+        # call `collector` and store data to output dir
         base_dir = os.path.join(util.pwd(), "../")
         collector_exec = os.path.join(base_dir, "bin/collector")
 
@@ -62,17 +62,15 @@ class Insight():
         if args.tidb_proc:
             perf_proc = perf.format_proc_info(self.collector_data["proc_stats"])
             insight_perf = perf.InsightPerf(perf_proc, args)
-            insight_perf.run()
         # parse pid list
         elif len(args.pid) > 0:
             perf_proc = {}
             for _pid in args.pid:
                 perf_proc[_pid] = None
             insight_perf = perf.InsightPerf(perf_proc, args)
-            insight_perf.run()
         else:
             insight_perf = perf.InsightPerf(options=args)
-            insight_perf.run()
+        insight_perf.run(self.full_outdir)
 
     def data_size(self):
         for proc in self.collector_data["proc_stats"]:

@@ -63,19 +63,19 @@ class InsightPerf():
 
         return cmd
 
-    def run(self, outputdir=None):
-        # set output path of perf data
+    def build_full_output(self, outputdir=None):
         if outputdir == None:
             # default to current working dir
-            outputdir = util.CheckDir(self.data_dir)
-        elif outputdir[0] == '/':
-            # absolute dir
-            outputdir = util.CheckDir(path.join(outputdir, self.data_dir))
+            return util.CheckDir(self.data_dir)
         else:
-            # relative dir
-            outputdir = util.CheckDir(path.join(util.cwd(), self.data_dir))
+            # put to subdirectory
+            return util.CheckDir(path.join(outputdir, self.data_dir))
 
-        if outputdir == None:
+    def run(self, outputdir=None):
+        # set output path of perf data
+        full_outputdir = self.build_full_output(outputdir=outputdir)
+
+        if full_outputdir == None:
             # something went wrong when setting output dir, exit without perfing
             # TODO: unified output: "Error when setting up output dir of perf data"
             return
@@ -83,19 +83,19 @@ class InsightPerf():
         if len(self.process_info) > 0:
             # perf on given process(es)
             for pid, pname in self.process_info.items():
-                cmd = self.build_cmd(pid, pname, outputdir)
+                cmd = self.build_cmd(pid, pname, full_outputdir)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
-                util.WriteFile(path.join(outputdir, "%s.stdout" % pname), stdout)
+                util.WriteFile(path.join(full_outputdir, "%s.stdout" % pname), stdout)
                 if stderr != None:
-                    util.WriteFile(path.join(outputdir, "%s.stderr" % pname), stderr)
+                    util.WriteFile(path.join(full_outputdir, "%s.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_cmd()
             stdout, stderr = util.run_cmd(cmd)
-            util.WriteFile(path.join(outputdir, "perf.stdout"), stdout)
+            util.WriteFile(path.join(full_outputdir, "perf.stdout"), stdout)
             if stderr != None:
-                util.WriteFile(path.join(outputdir, "perf.stderr"), stderr)
+                util.WriteFile(path.join(full_outputdir, "perf.stderr"), stderr)
 
 def format_proc_info(proc_stats):
     result = {}
