@@ -85,7 +85,7 @@ class Insight():
                 stdout, stderr = space.du_total(data_dir)
             util.WriteFile(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
                             stdout)
-            if stderr is not None and stderr is not "":
+            if len(stderr) > 0:
                 util.WriteFile(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
                             stderr)
 

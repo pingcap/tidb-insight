@@ -13,8 +13,11 @@ def ReadFile(filename):
     return data
 
 def WriteFile(filename, data):
-    with open(filename, 'w+') as f:
-        f.write(str(data))
+    with open(filename, 'w') as f:
+        try:
+            f.write(str(data, 'utf-8'))
+        except TypeError:
+            f.write(data)
     f.close()
 
 def CheckPrivilege():

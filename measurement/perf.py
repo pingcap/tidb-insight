@@ -86,15 +86,17 @@ class InsightPerf():
                 cmd = self.build_cmd(pid, pname, full_outputdir)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
-                util.WriteFile(path.join(full_outputdir, "%s.stdout" % pname), stdout)
-                if stderr != None:
+                if len(stdout) > 0:
+                    util.WriteFile(path.join(full_outputdir, "%s.stdout" % pname), stdout)
+                if len(stderr) > 0:
                     util.WriteFile(path.join(full_outputdir, "%s.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_cmd()
             stdout, stderr = util.run_cmd(cmd)
-            util.WriteFile(path.join(full_outputdir, "perf.stdout"), stdout)
-            if stderr != None:
+            if len(stdout) > 0:
+                util.WriteFile(path.join(full_outputdir, "perf.stdout"), stdout)
+            if len(stderr) > 0:
                 util.WriteFile(path.join(full_outputdir, "perf.stderr"), stderr)
 
 def format_proc_info(proc_stats):
