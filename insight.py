@@ -35,6 +35,8 @@ class Insight():
     outdir = "data"
     full_outdir = ""
 
+    insight_perf = None
+
     def __init__(self, outdir=None):
         self.full_outdir = fileutils.create_dir(self.outdir)
 
@@ -73,16 +75,16 @@ class Insight():
         if args.tidb_proc:
             perf_proc = perf.format_proc_info(
                 self.collector_data["proc_stats"])
-            insight_perf = perf.InsightPerf(perf_proc, args)
+            self.insight_perf = perf.InsightPerf(perf_proc, args)
         # parse pid list
         elif len(args.pid) > 0:
             perf_proc = {}
             for _pid in args.pid:
                 perf_proc[_pid] = None
-            insight_perf = perf.InsightPerf(perf_proc, args)
+            self.insight_perf = perf.InsightPerf(perf_proc, args)
         else:
-            insight_perf = perf.InsightPerf(options=args)
-        insight_perf.run(self.full_outdir)
+            self.insight_perf = perf.InsightPerf(options=args)
+        self.insight_perf.run(self.full_outdir)
 
     def get_datadir_size(self):
         # du requires root priviledge to check data-dir
