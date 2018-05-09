@@ -89,10 +89,10 @@ class Insight():
 
 if __name__ == "__main__":
     util.check_privilege()
-    insight = Insight()
 
     # WIP: add params to set output dir / overwriting on non-empty target dir
     args = util.parse_insight_opts()
+    insight = Insight()
     if args.output:
         insight.outdir = args.output
 
