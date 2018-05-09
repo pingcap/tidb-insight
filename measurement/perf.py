@@ -7,7 +7,6 @@
 from os import path
 
 from measurement import util
-
 from measurement.files import fileutils
 
 

@@ -26,7 +26,6 @@ from measurement import lsof
 from measurement import perf
 from measurement import space
 from measurement import util
-
 from measurement.files import fileutils
 from measurement.files import logfiles
 
