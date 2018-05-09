@@ -8,6 +8,7 @@ from os import path
 
 from measurement import util
 
+
 class InsightPerf():
     # the process name and PID of processes(es) to run perf on,
     # perf entire system if empty, in format of {"PID": "name"}
@@ -26,10 +27,10 @@ class InsightPerf():
     # set params of perf
     def build_cmd(self, pid=None, outfile=None, outdir=None):
         cmd = ["perf",    # default executable name
-                "record", # default action of perf
-                "-g",
-                "--call-graph",
-                "dwarf"]
+               "record",  # default action of perf
+               "-g",
+               "--call-graph",
+               "dwarf"]
         try:
             # user defined path of perf
             cmd[0] = self.perf_options["perf_exec"]
@@ -40,13 +41,13 @@ class InsightPerf():
         try:
             cmd.append("%d", self.perf_options["perf_freq"])
         except (KeyError, TypeError):
-            cmd.append("120") # default to 120Hz
+            cmd.append("120")  # default to 120Hz
 
         if pid is not None:
             cmd.append("-p")
             cmd.append("%d" % pid)
         else:
-            cmd.append("-a") # default to whole system
+            cmd.append("-a")  # default to whole system
 
         # default will be perf.data if nothing specified
         if outfile is not None:
@@ -60,12 +61,12 @@ class InsightPerf():
         try:
             cmd.append("%d", self.perf_options["perf_time"])
         except (KeyError, TypeError):
-            cmd.append("10") # default to 10s
+            cmd.append("10")  # default to 10s
 
         return cmd
 
-    def build_full_output(self, outputdir=None):
-        if outputdir == None:
+    def build_full_output_dir(self, outputdir=None):
+        if outputdir is None:
             # default to current working dir
             return util.create_dir(self.data_dir)
         else:
@@ -74,9 +75,9 @@ class InsightPerf():
 
     def run(self, outputdir=None):
         # set output path of perf data
-        full_outputdir = self.build_full_output(outputdir=outputdir)
+        full_outputdir = self.build_full_output_dir(outputdir=outputdir)
 
-        if full_outputdir == None:
+        if full_outputdir is None:
             # something went wrong when setting output dir, exit without perfing
             # TODO: unified output: "Error when setting up output dir of perf data"
             return
@@ -88,17 +89,22 @@ class InsightPerf():
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
                 if stdout:
-                    util.write_file(path.join(full_outputdir, "%s.stdout" % pname), stdout)
+                    util.write_file(
+                        path.join(full_outputdir, "%s.stdout" % pname), stdout)
                 if stderr:
-                    util.write_file(path.join(full_outputdir, "%s.stderr" % pname), stderr)
+                    util.write_file(
+                        path.join(full_outputdir, "%s.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_cmd()
             stdout, stderr = util.run_cmd(cmd)
             if stdout:
-                util.write_file(path.join(full_outputdir, "perf.stdout"), stdout)
+                util.write_file(
+                    path.join(full_outputdir, "perf.stdout"), stdout)
             if stderr:
-                util.write_file(path.join(full_outputdir, "perf.stderr"), stderr)
+                util.write_file(
+                    path.join(full_outputdir, "perf.stderr"), stderr)
+
 
 def format_proc_info(proc_stats):
     result = {}

@@ -27,6 +27,7 @@ from measurement import perf
 from measurement import space
 from measurement import util
 
+
 class Insight():
     # data output dir
     outdir = "data"
@@ -38,6 +39,7 @@ class Insight():
     # data collected by `collector`
     collector_data = {}
     # collect data with `collector` and store it to disk
+
     def collector(self):
         # TODO: check existance of output dir
         # TODO: warn on non-empty output dir
@@ -56,14 +58,15 @@ class Insight():
             return
         util.write_file(os.path.join(self.full_outdir, "collector.json"),
                         json.dumps(self.collector_data, indent=2))
-    
+
     def run_perf(self, args):
         if not args.perf:
             return
 
         # "--tidb-proc" has the highest priority
         if args.tidb_proc:
-            perf_proc = perf.format_proc_info(self.collector_data["proc_stats"])
+            perf_proc = perf.format_proc_info(
+                self.collector_data["proc_stats"])
             insight_perf = perf.InsightPerf(perf_proc, args)
         # parse pid list
         elif len(args.pid) > 0:
@@ -88,10 +91,10 @@ class Insight():
                 stdout, stderr = space.du_total(data_dir)
             if stdout:
                 util.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
-                            stdout)
+                                stdout)
             if stderr:
                 util.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
-                            stderr)
+                                stderr)
 
     def get_lsof_tidb(self):
         for proc in self.collector_data["proc_stats"]:
@@ -102,6 +105,7 @@ class Insight():
             if stderr:
                 util.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
                                 stderr)
+
 
 if __name__ == "__main__":
     util.check_privilege()
