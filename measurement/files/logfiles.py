@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Base class for logfile related stuff
 
+import os
+import shutil
+
 from measurement import util
 
 from measurement.files import fileutils
@@ -25,14 +28,19 @@ class InsightLogFiles():
             return None
 
     def save_logfile_to_dir(self, logfile=None, savename=None, outputdir=None):
+        if not logfile:
+            return
         # set full output path for log files
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.log_dir)
-        return
+        if not savename:
+            shutil.copy(logfile, full_outputdir)
+        else:
+            shutil.copyfile(logfile, os.path.join(full_outputdir, savename))
 
     def save_logfiles(self, proc_cmdline=None, outputdir=None):
         # save log files of TiDB modules
-        for pid, cmdline in proc_cmdline:
+        for pid, cmdline in proc_cmdline.items():
             proc_logfile = self.find_tidb_logfiles(cmdline=cmdline)
             self.save_logfile_to_dir(logfile=proc_logfile,
                                      savename="log-%s.log" % pid,
