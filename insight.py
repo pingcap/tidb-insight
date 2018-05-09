@@ -150,3 +150,5 @@ if __name__ == "__main__":
     insight.get_datadir_size()
     # list files opened by TiDB processes
     insight.get_lsof_tidb()
+    # save log files
+    insight.save_logfiles(args)
