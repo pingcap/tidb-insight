@@ -27,6 +27,8 @@ from measurement import perf
 from measurement import space
 from measurement import util
 
+from measurement.files import fileutils
+
 
 class Insight():
     # data output dir
@@ -34,7 +36,7 @@ class Insight():
     full_outdir = ""
 
     def __init__(self, outdir=None):
-        self.full_outdir = util.create_dir(self.outdir)
+        self.full_outdir = fileutils.create_dir(self.outdir)
 
     # data collected by `collector`
     collector_data = {}
@@ -56,8 +58,8 @@ class Insight():
         except json.JSONDecodeError:
             # TODO: unified output: "Error collecting system info.\n%s" % stderr
             return
-        util.write_file(os.path.join(self.full_outdir, "collector.json"),
-                        json.dumps(self.collector_data, indent=2))
+        fileutils.write_file(os.path.join(self.full_outdir, "collector.json"),
+                             json.dumps(self.collector_data, indent=2))
 
     def run_perf(self, args):
         if not args.perf:
@@ -100,11 +102,11 @@ class Insight():
             else:
                 stdout, stderr = space.du_total(data_dir)
             if stdout:
-                util.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
-                                stdout)
+                fileutils.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
+                                     stdout)
             if stderr:
-                util.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
-                                stderr)
+                fileutils.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
+                                     stderr)
 
     def get_lsof_tidb(self):
         # lsof requires root priviledge
@@ -115,11 +117,11 @@ class Insight():
         for proc in self.collector_data["proc_stats"]:
             stdout, stderr = lsof.lsof(proc["pid"])
             if stdout:
-                util.write_file(os.path.join(self.full_outdir, "lsof-%s") % proc["pid"],
-                                stdout)
+                fileutils.write_file(os.path.join(self.full_outdir, "lsof-%s") % proc["pid"],
+                                     stdout)
             if stderr:
-                util.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
-                                stderr)
+                fileutils.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
+                                     stderr)
 
 
 if __name__ == "__main__":
