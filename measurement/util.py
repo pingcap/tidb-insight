@@ -106,3 +106,12 @@ def parse_insight_opts():
                         help="Enable to include system log in output, will be ignored if -l/--log is not set.")
 
     return parser.parse_args()
+
+
+def get_init_type():
+    try:
+        init_exec = os.readlink("/proc/1/exe")
+    except OSError:
+        logging.warning("Unable to detect init type, am I running with root?")
+        return None
+    return init_exec.split("/")[-1]

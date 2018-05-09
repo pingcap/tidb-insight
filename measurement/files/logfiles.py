@@ -4,8 +4,9 @@
 import os
 import shutil
 
-from measurement import util
+from glob import glob
 
+from measurement import util
 from measurement.files import fileutils
 
 
@@ -38,10 +39,27 @@ class InsightLogFiles():
         else:
             shutil.copyfile(logfile, os.path.join(full_outputdir, savename))
 
+    def save_journal_log(self, outputdir=None):
+        journal_path = "/var/log/journal/*/*@*.journal"
+        for logfile in glob(journal_path):
+            self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
+        return
+
+    def save_syslog(self, outputdir=None):
+        return
+
     def save_logfiles(self, proc_cmdline=None, outputdir=None):
         # save log files of TiDB modules
         for pid, cmdline in proc_cmdline.items():
             proc_logfile = self.find_tidb_logfiles(cmdline=cmdline)
             self.save_logfile_to_dir(logfile=proc_logfile,
-                                     savename="log-%s.log" % pid,
+                                     savename="%s.log" % pid,
                                      outputdir=outputdir)
+
+        # save system logs
+        if self.log_options.syslog:
+            _init = util.get_init_type()
+            if _init == "systemd":
+                self.save_journal_log(outputdir=outputdir)
+            else:
+                self.save_syslog(outputdir=outputdir)
