@@ -7,39 +7,12 @@ import os
 from subprocess import Popen, PIPE
 
 
-def read_file(filename):
-    data = None
-    with open(filename, 'r') as f:
-        data = f.read()
-    f.close()
-    return data
-
-
-def write_file(filename, data):
-    with open(filename, 'w') as f:
-        try:
-            f.write(str(data, 'utf-8'))
-        except TypeError:
-            f.write(data)
-    f.close()
-
-
 def check_privilege():
     if os.getuid() != 0:
         print("""Warning: Running TiDB Insight with non-superuser privilege may result
          in lack of some information or data in the final output, if
          you find certain data missing or empty in result, please try
          to run this script again with root.""")
-
-
-def create_dir(path):
-    try:
-        os.mkdir(path)
-        return path
-    except OSError:
-        if os.path.isdir(path):
-            return path
-    return None
 
 
 # full directory path of this script
