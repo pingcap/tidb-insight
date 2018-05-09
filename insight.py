@@ -21,7 +21,10 @@
 import json
 import os
 
-from measurement import perf, space, util
+from measurement import lsof
+from measurement import perf
+from measurement import space
+from measurement import util
 
 class Insight():
     # data output dir
@@ -87,6 +90,16 @@ class Insight():
                 util.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
                             stderr)
 
+    def get_lsof_tidb(self):
+        for proc in self.collector_data["proc_stats"]:
+            stdout, stderr = lsof.lsof(proc["pid"])
+            if stdout:
+                util.write_file(os.path.join(self.full_outdir, "lsof-%s") % proc["pid"],
+                                stdout)
+            if stderr:
+                util.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
+                                stderr)
+
 if __name__ == "__main__":
     util.check_privilege()
 
@@ -101,3 +114,5 @@ if __name__ == "__main__":
     insight.run_perf(args)
     # check size of data folder of TiDB processes
     insight.get_datadir_size()
+    # list files opened by TiDB processes
+    insight.get_lsof_tidb()
