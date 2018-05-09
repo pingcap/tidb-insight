@@ -18,7 +18,6 @@
 # above, although Python 2 with version 2.7 and above may also work in
 # most circumstances, please use latest Python 3 when possible.
 
-import argparse
 import json
 import os
 
@@ -88,37 +87,12 @@ class Insight():
                 util.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
                             stderr)
 
-def parse_opts():
-    parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
-            epilog="Note that some options would decrease system performance.")
-    parser.add_argument("-O", "--output", action="store", default=None,
-                        help="""The dir to store output data of TiDB Insight, any existing file
-                        will be overwritten without futher confirmation.""")
-
-    parser.add_argument("-p", "--perf", action="store_true", default=False,
-                        help="Collect trace info with perf. Default is disabled.")
-    parser.add_argument("--pid", type=int, action="append", default=None,
-                        help="""PID of process to run perf on, if '-p/--perf' is not set, this
-                        value will be ignored and would not take any effection.
-                        Multiple PIDs can be set by using more than one --pid args.
-                        Default is None and means the whole system.""")
-    parser.add_argument("--tidb-proc", action="store_true", default=False,
-                        help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
-    parser.add_argument("--perf-exec", type=int, action="store", default=None,
-                        help="Custom path of perf executable file.")
-    parser.add_argument("--perf-freq", type=int, action="store", default=None,
-                        help="Event sampling frequency of perf-record, in Hz.")
-    parser.add_argument("--perf-time", type=int, action="store", default=None,
-                        help="Time period of perf recording, in seconds.")
-    
-    return parser.parse_args()
-
 if __name__ == "__main__":
     util.check_privilege()
     insight = Insight()
 
     # WIP: add params to set output dir / overwriting on non-empty target dir
-    args = parse_opts()
+    args = util.parse_insight_opts()
     if args.output:
         insight.outdir = args.output
 
