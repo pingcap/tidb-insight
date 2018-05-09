@@ -19,6 +19,7 @@
 # most circumstances, please use latest Python 3 when possible.
 
 import json
+import logging
 import os
 
 from measurement import lsof
@@ -46,6 +47,8 @@ class Insight():
         collector_exec = os.path.join(base_dir, "bin/collector")
 
         stdout, stderr = util.run_cmd(collector_exec)
+        if stderr:
+            logging.warning(str(stderr))
         try:
             self.collector_data = json.loads(stdout)
         except json.JSONDecodeError:
