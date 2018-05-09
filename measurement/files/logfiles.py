@@ -43,10 +43,12 @@ class InsightLogFiles():
         journal_path = "/var/log/journal/*/*@*.journal"
         for logfile in glob(journal_path):
             self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
-        return
 
     def save_syslog(self, outputdir=None):
-        return
+        syslog_path = "/var/log/message*"
+        dmesg_path = "/var/log/dmesg*"
+        for logfile in glob(syslog_path) + glob(dmesg_path):
+            self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
 
     def save_logfiles(self, proc_cmdline=None, outputdir=None):
         # save log files of TiDB modules
