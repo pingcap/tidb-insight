@@ -63,7 +63,10 @@ def run_cmd(cmd):
 
 def parse_cmdline(cmdline):
     result = {}
-    cmd = cmdline.split()
+    try:
+        cmd = cmdline.split()
+    except TypeError:
+        return None
     for arg in cmd:
         # parse args that start with '--something'
         if arg.startswith("--"):
@@ -97,5 +100,9 @@ def parse_insight_opts():
                         help="Event sampling frequency of perf-record, in Hz.")
     parser.add_argument("--perf-time", type=int, action="store", default=None,
                         help="Time period of perf recording, in seconds.")
+    parser.add_argument("-l", "--log", action="store_true", default=False,
+                        help="Enable to include log files in output, PD/TiDB/TiKV logs are included by default.")
+    parser.add_argument("--syslog", action="store_true", default=False,
+                        help="Enable to include system log in output, will be ignored if -l/--log is not set.")
 
     return parser.parse_args()

@@ -28,6 +28,7 @@ from measurement import space
 from measurement import util
 
 from measurement.files import fileutils
+from measurement.files import logfiles
 
 
 class Insight():
@@ -36,14 +37,27 @@ class Insight():
     full_outdir = ""
 
     insight_perf = None
+    insight_logfiles = None
 
     def __init__(self, outdir=None):
         self.full_outdir = fileutils.create_dir(self.outdir)
 
     # data collected by `collector`
     collector_data = {}
-    # collect data with `collector` and store it to disk
 
+    # parse process info in collector_data and build required dict
+    def format_proc_info(self, keyname=None):
+        if not keyname:
+            return None
+        result = {}
+        for proc in self.collector_data["proc_stats"]:
+            try:
+                result[proc["pid"]] = proc[keyname]
+            except KeyError:
+                continue
+        return result
+
+    # collect data with `collector` and store it to disk
     def collector(self):
         # TODO: check existance of output dir
         # TODO: warn on non-empty output dir
@@ -73,8 +87,8 @@ class Insight():
 
         # "--tidb-proc" has the highest priority
         if args.tidb_proc:
-            perf_proc = perf.format_proc_info(
-                self.collector_data["proc_stats"])
+            # build dict of pid to process name
+            perf_proc = self.format_proc_info("name")
             self.insight_perf = perf.InsightPerf(perf_proc, args)
         # parse pid list
         elif len(args.pid) > 0:
@@ -124,6 +138,15 @@ class Insight():
             if stderr:
                 fileutils.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
                                      stderr)
+
+    def save_logfiles(self, args):
+        if not args.log:
+            return
+
+        self.insight_logfiles = logfiles.InsightLogFiles(options=args)
+        proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
+        self.insight_logfiles.save_logfiles(
+            proc_cmdline=proc_cmdline, outputdir=self.outdir)
 
 
 if __name__ == "__main__":
