@@ -3,6 +3,8 @@
 
 import os
 
+from measurement import util
+
 
 # read data from file
 def read_file(filename):
@@ -32,3 +34,16 @@ def create_dir(path):
         if os.path.isdir(path):
             return path
     return None
+
+
+def build_full_output_dir(basedir=None, subdir=None):
+    if basedir is None and subdir is None:
+        # default to current working directory
+        return util.cwd()
+
+    if basedir is None:
+        # if no basedir set, use subdir at cwd
+        return create_dir(subdir)
+    else:
+        # full path of basedir/subdir
+        return create_dir(os.path.join(basedir, subdir))
