@@ -2,7 +2,6 @@
 # Check file space usage with `du`
 
 from glob import glob
-from os import path
 
 from measurement import util
 
