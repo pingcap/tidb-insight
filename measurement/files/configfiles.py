@@ -20,12 +20,20 @@ class InsightConfigFiles():
     def __init__(self, options={}):
         self.config_options = options
 
-    def save_sysctl(self, outputdir=None):
+    def save_sysconf(self, outputdir=None):
         cmd = ["sysctl", "-a"]
+        path_limit_file = "/etc/security/limits.conf"
+
+        # save output of `sysctl -l`
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.config_dir)
         stdout, stderr = util.run_cmd(cmd)
         if stdout:
-            fileutils.write_file(os.path.join(full_outputdir, "sysctl.conf"), stdout)
+            fileutils.write_file(os.path.join(
+                full_outputdir, "sysctl.conf"), stdout)
         if stderr:
-            fileutils.write_file(os.path.join(full_outputdir, "sysctl.err"), stderr)
+            fileutils.write_file(os.path.join(
+                full_outputdir, "sysctl.err"), stderr)
+
+        # save system limits.conf
+        shutil.copy(path_limit_file, full_outputdir)
