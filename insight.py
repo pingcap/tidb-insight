@@ -158,7 +158,7 @@ class Insight():
             return
 
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
-        self.insight_configfiles.save_sysctl(outputdir=self.outdir)
+        self.insight_configfiles.save_sysconf(outputdir=self.outdir)
 
 
 if __name__ == "__main__":
