@@ -60,8 +60,7 @@ class InsightLogFiles():
 
         # save system logs
         if self.log_options.syslog:
-            _init = util.get_init_type()
-            if _init == "systemd":
+            if util.get_init_type() == "systemd":
                 self.save_journal_log(outputdir=outputdir)
             else:
                 self.save_syslog(outputdir=outputdir)
