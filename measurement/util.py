@@ -25,12 +25,8 @@ def write_file(filename, data):
     f.close()
 
 
-def check_privilege():
-    if os.getuid() != 0:
-        logging.warning("""Running TiDB Insight with non-superuser privilege may result
-        in lack of some information or data in the final output, if
-        you find certain data missing or empty in result, please try
-        to run this script again with root.""")
+def is_root_privilege():
+    return os.getuid() == 0
 
 
 def create_dir(path):
