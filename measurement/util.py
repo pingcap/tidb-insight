@@ -8,42 +8,8 @@ import os
 from subprocess import Popen, PIPE
 
 
-def read_file(filename):
-    data = None
-    with open(filename, 'r') as f:
-        data = f.read()
-    f.close()
-    return data
-
-
-def write_file(filename, data):
-    with open(filename, 'w') as f:
-        try:
-            f.write(str(data, 'utf-8'))
-        except TypeError:
-            f.write(data)
-    f.close()
-
-
 def is_root_privilege():
     return os.getuid() == 0
-
-
-def create_dir(path):
-    try:
-        os.mkdir(path)
-        return path
-    except OSError as e:
-        # There is FileExistsError (devided from OSError) in Python 3.3+,
-        # but only OSError in Python 2, so we use errno to check if target
-        # dir already exists.
-        import errno
-        if e.errno == errno.EEXIST and os.path.isdir(path):
-            return path
-        else:
-            logging.fatal("Can not prepare output dir, error is: %s" % str(e))
-            exit(e.errno)
-    return None
 
 
 # full directory path of this script

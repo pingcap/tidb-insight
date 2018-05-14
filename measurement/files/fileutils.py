@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # simple file related utilities
 
+import logging
 import os
 
 from measurement import util
@@ -30,9 +31,16 @@ def create_dir(path):
     try:
         os.mkdir(path)
         return path
-    except OSError:
-        if os.path.isdir(path):
+    except OSError as e:
+        # There is FileExistsError (devided from OSError) in Python 3.3+,
+        # but only OSError in Python 2, so we use errno to check if target
+        # dir already exists.
+        import errno
+        if e.errno == errno.EEXIST and os.path.isdir(path):
             return path
+        else:
+            logging.fatal("Can not prepare output dir, error is: %s" % str(e))
+            exit(e.errno)
     return None
 
 
