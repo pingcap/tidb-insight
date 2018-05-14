@@ -2,6 +2,7 @@
 # simple utilities
 
 import argparse
+import logging
 import os
 
 from subprocess import Popen, PIPE
@@ -26,19 +27,25 @@ def write_file(filename, data):
 
 def check_privilege():
     if os.getuid() != 0:
-        print("""Warning: Running TiDB Insight with non-superuser privilege may result
-         in lack of some information or data in the final output, if
-         you find certain data missing or empty in result, please try
-         to run this script again with root.""")
+        logging.warning("""Running TiDB Insight with non-superuser privilege may result
+        in lack of some information or data in the final output, if
+        you find certain data missing or empty in result, please try
+        to run this script again with root.""")
 
 
 def create_dir(path):
     try:
         os.mkdir(path)
         return path
-    except OSError:
-        if os.path.isdir(path):
+    except Exception as e:
+        # There is FileExistsError in Python 3.3+, but only OSError in Python 2, so
+        # we use errno to check is target dir already exist.
+        import errno
+        if e.errno == errno.EEXIST and os.path.isdir(path):
             return path
+        else:
+            logging.fatal("Can not prepare output dir, error is: %s" % str(e))
+            exit(e.errno)
     return None
 
 
