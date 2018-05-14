@@ -37,9 +37,10 @@ def create_dir(path):
     try:
         os.mkdir(path)
         return path
-    except Exception as e:
-        # There is FileExistsError in Python 3.3+, but only OSError in Python 2, so
-        # we use errno to check is target dir already exist.
+    except OSError as e:
+        # There is FileExistsError (devided from OSError) in Python 3.3+,
+        # but only OSError in Python 2, so we use errno to check if target
+        # dir already exists.
         import errno
         if e.errno == errno.EEXIST and os.path.isdir(path):
             return path
