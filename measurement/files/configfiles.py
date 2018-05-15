@@ -37,3 +37,22 @@ class InsightConfigFiles():
 
         # save system limits.conf
         shutil.copy(path_limit_file, full_outputdir)
+
+    def find_tidb_configfiles(self, cmdline=""):
+        cmd_opts = util.parse_cmdline(cmdline)
+        # TODO: support relative path, this require `collector` to output cwd of process
+        try:
+            return cmd_opts["config"]
+        except KeyError:
+            return None
+        return
+
+    def save_tidb_configs(self, proc_cmdline=None, outputdir=None):
+        full_outputdir = fileutils.build_full_output_dir(
+            basedir=outputdir, subdir=self.config_dir)
+        for pid, cmdline in proc_cmdline.items():
+            proc_configfile = self.find_tidb_configfiles(cmdline)
+            if not proc_configfile:
+                continue
+            shutil.copyfile(proc_configfile, os.path.join(
+                full_outputdir, "%s.conf" % pid))

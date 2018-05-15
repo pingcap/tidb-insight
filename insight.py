@@ -159,6 +159,10 @@ class Insight():
 
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
         self.insight_configfiles.save_sysconf(outputdir=self.outdir)
+        # collect TiDB configs
+        proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
+        self.insight_configfiles.save_tidb_configs(
+            proc_cmdline=proc_cmdline, outputdir=self.outdir)
 
 
 if __name__ == "__main__":
