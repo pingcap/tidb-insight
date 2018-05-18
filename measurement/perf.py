@@ -7,6 +7,7 @@
 from os import path
 
 from measurement import util
+from measurement.files import fileutils
 
 
 class InsightPerf():
@@ -65,17 +66,10 @@ class InsightPerf():
 
         return cmd
 
-    def build_full_output_dir(self, outputdir=None):
-        if outputdir is None:
-            # default to current working dir
-            return util.create_dir(self.data_dir)
-        else:
-            # put to subdirectory
-            return util.create_dir(path.join(outputdir, self.data_dir))
-
     def run(self, outputdir=None):
         # set output path of perf data
-        full_outputdir = self.build_full_output_dir(outputdir=outputdir)
+        full_outputdir = fileutils.build_full_output_dir(
+            basedir=outputdir, subdir=self.data_dir)
 
         if full_outputdir is None:
             # something went wrong when setting output dir, exit without perfing
@@ -89,25 +83,18 @@ class InsightPerf():
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
                 if stdout:
-                    util.write_file(
+                    fileutils.write_file(
                         path.join(full_outputdir, "%s.stdout" % pname), stdout)
                 if stderr:
-                    util.write_file(
+                    fileutils.write_file(
                         path.join(full_outputdir, "%s.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_cmd()
             stdout, stderr = util.run_cmd(cmd)
             if stdout:
-                util.write_file(
+                fileutils.write_file(
                     path.join(full_outputdir, "perf.stdout"), stdout)
             if stderr:
-                util.write_file(
+                fileutils.write_file(
                     path.join(full_outputdir, "perf.stderr"), stderr)
-
-
-def format_proc_info(proc_stats):
-    result = {}
-    for proc in proc_stats:
-        result[proc["pid"]] = proc["name"]
-    return result

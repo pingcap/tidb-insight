@@ -8,42 +8,8 @@ import os
 from subprocess import Popen, PIPE
 
 
-def read_file(filename):
-    data = None
-    with open(filename, 'r') as f:
-        data = f.read()
-    f.close()
-    return data
-
-
-def write_file(filename, data):
-    with open(filename, 'w') as f:
-        try:
-            f.write(str(data, 'utf-8'))
-        except TypeError:
-            f.write(data)
-    f.close()
-
-
 def is_root_privilege():
     return os.getuid() == 0
-
-
-def create_dir(path):
-    try:
-        os.mkdir(path)
-        return path
-    except OSError as e:
-        # There is FileExistsError (devided from OSError) in Python 3.3+,
-        # but only OSError in Python 2, so we use errno to check if target
-        # dir already exists.
-        import errno
-        if e.errno == errno.EEXIST and os.path.isdir(path):
-            return path
-        else:
-            logging.fatal("Can not prepare output dir, error is: %s" % str(e))
-            exit(e.errno)
-    return None
 
 
 # full directory path of this script
@@ -63,7 +29,10 @@ def run_cmd(cmd):
 
 def parse_cmdline(cmdline):
     result = {}
-    cmd = cmdline.split()
+    try:
+        cmd = cmdline.split()
+    except TypeError:
+        return None
     for arg in cmd:
         # parse args that start with '--something'
         if arg.startswith("--"):
@@ -97,5 +66,18 @@ def parse_insight_opts():
                         help="Event sampling frequency of perf-record, in Hz.")
     parser.add_argument("--perf-time", type=int, action="store", default=None,
                         help="Time period of perf recording, in seconds.")
+    parser.add_argument("-l", "--log", action="store_true", default=False,
+                        help="Enable to include log files in output, PD/TiDB/TiKV logs are included by default.")
+    parser.add_argument("--syslog", action="store_true", default=False,
+                        help="Enable to include system log in output, will be ignored if -l/--log is not set. This may significantly increase output size.")
 
     return parser.parse_args()
+
+
+def get_init_type():
+    try:
+        init_exec = os.readlink("/proc/1/exe")
+    except OSError:
+        logging.warning("Unable to detect init type, am I running with root?")
+        return None
+    return init_exec.split("/")[-1]
