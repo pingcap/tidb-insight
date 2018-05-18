@@ -6,6 +6,14 @@ import logging
 import os
 
 from subprocess import Popen, PIPE
+try:
+    # For Python 2
+    import urllib2 as urlreq
+    from urllib2 import HTTPError, URLError
+except ImportError:
+    # For Python 3
+    import urllib.request as urlreq
+    from urllib.error import HTTPError, URLError
 
 
 def is_root_privilege():
@@ -83,3 +91,17 @@ def get_init_type():
         logging.warning("Unable to detect init type, am I running with root?")
         return None
     return init_exec.split("/")[-1]
+
+
+def read_url(url, data=None):
+    if not url or url == "":
+        return None
+
+    try:
+        response = urlreq.urlopen(url, data)
+        return response.read()
+    except HTTPError as e:
+        return e.read()
+    except URLError as e:
+        logging.critical("Reading URL %s error: %s" % (url, e))
+        return None
