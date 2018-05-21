@@ -24,7 +24,7 @@ class InsightConfigFiles():
         cmd = ["sysctl", "-a"]
         path_limit_file = "/etc/security/limits.conf"
 
-        # save output of `sysctl -l`
+        # save output of `sysctl -a`
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.config_dir)
         stdout, stderr = util.run_cmd(cmd)
