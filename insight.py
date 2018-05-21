@@ -26,6 +26,7 @@ from measurement import lsof
 from measurement import perf
 from measurement import space
 from measurement import util
+from measurement.files import configfiles
 from measurement.files import fileutils
 from measurement.files import logfiles
 
@@ -37,6 +38,7 @@ class Insight():
 
     insight_perf = None
     insight_logfiles = None
+    insight_configfiles = None
 
     def __init__(self, outdir=None):
         self.full_outdir = fileutils.create_dir(self.outdir)
@@ -151,6 +153,17 @@ class Insight():
         self.insight_logfiles.save_logfiles(
             proc_cmdline=proc_cmdline, outputdir=self.outdir)
 
+    def save_configs(self, args):
+        if not args.config_file:
+            return
+
+        self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
+        self.insight_configfiles.save_sysconf(outputdir=self.outdir)
+        # collect TiDB configs
+        proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
+        self.insight_configfiles.save_tidb_configs(
+            proc_cmdline=proc_cmdline, outputdir=self.outdir)
+
 
 if __name__ == "__main__":
     if not util.is_root_privilege():
@@ -174,3 +187,5 @@ if __name__ == "__main__":
     insight.get_lsof_tidb()
     # save log files
     insight.save_logfiles(args)
+    # save config files
+    insight.save_configs(args)

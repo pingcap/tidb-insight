@@ -70,6 +70,8 @@ def parse_insight_opts():
                         help="Enable to include log files in output, PD/TiDB/TiKV logs are included by default.")
     parser.add_argument("--syslog", action="store_true", default=False,
                         help="Enable to include system log in output, will be ignored if -l/--log is not set. This may significantly increase output size.")
+    parser.add_argument("--config-file", action="store_true", default=False,
+                        help="Enable to include various config files in output, disabled by default.")
 
     return parser.parse_args()
 
