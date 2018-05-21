@@ -3,8 +3,6 @@
 
 import os
 
-from glob import glob
-
 from measurement import util
 from measurement.files import fileutils
 
