@@ -29,6 +29,7 @@ from measurement import util
 from measurement.files import configfiles
 from measurement.files import fileutils
 from measurement.files import logfiles
+from measurement.tidb import pdctl
 
 
 class Insight():
@@ -39,6 +40,7 @@ class Insight():
     insight_perf = None
     insight_logfiles = None
     insight_configfiles = None
+    insight_pdctl = None
 
     def __init__(self, outdir=None):
         self.full_outdir = fileutils.create_dir(self.outdir)
@@ -164,6 +166,10 @@ class Insight():
         self.insight_configfiles.save_tidb_configs(
             proc_cmdline=proc_cmdline, outputdir=self.outdir)
 
+    def read_pdctl(self, args):
+        self.insight_pdctl = pdctl.PDCtl(host=args.pd_host, port=args.pd_port)
+        self.insight_pdctl.save_info(self.full_outdir)
+
 
 if __name__ == "__main__":
     if not util.is_root_privilege():
@@ -189,3 +195,5 @@ if __name__ == "__main__":
     insight.save_logfiles(args)
     # save config files
     insight.save_configs(args)
+    # read and save `pd-ctl` info
+    insight.read_pdctl(args)
