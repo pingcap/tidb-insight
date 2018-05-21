@@ -80,6 +80,10 @@ def parse_insight_opts():
                         help="Enable to include system log in output, will be ignored if -l/--log is not set. This may significantly increase output size.")
     parser.add_argument("--config-file", action="store_true", default=False,
                         help="Enable to include various config files in output, disabled by default.")
+    parser.add_argument("--pd-host", action="store", default=None,
+                        help="The host of PD server. Default to localhost.")
+    parser.add_argument("--pd-port", type=int, action="store", default=None,
+                        help="The port of PD API service, default to 2379.")
 
     return parser.parse_args()
 
