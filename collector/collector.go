@@ -38,6 +38,7 @@ type Meta struct {
 type Metrics struct {
 	Meta       Meta            `json:"meta"`
 	SysInfo    sysinfo.SysInfo `json:"sysinfo"`
+	NTP        TimeStat        `json:"ntp"`
 	Partitions []BlockDev      `json:"partitions"`
 	ProcStats  []ProcessStat   `json:"proc_stats"`
 }
@@ -57,6 +58,7 @@ func main() {
 func (metric *Metrics) getMetrics() {
 	metric.Meta.getMeta()
 	metric.SysInfo.GetSysInfo()
+	metric.NTP.getNTPInfo()
 	metric.Partitions = GetPartitionStats()
 	metric.ProcStats = GetProcStats()
 }

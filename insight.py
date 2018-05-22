@@ -62,12 +62,13 @@ class Insight():
 
     # collect data with `collector` and store it to disk
     def collector(self):
-        # TODO: check existance of output dir
         # TODO: warn on non-empty output dir
 
         # call `collector` and store data to output dir
         base_dir = os.path.join(util.pwd(), "../")
         collector_exec = os.path.join(base_dir, "bin/collector")
+        collector_outdir = fileutils.create_dir(
+            os.path.join(self.full_outdir, "collector"))
 
         stdout, stderr = util.run_cmd(collector_exec)
         if stderr:
@@ -77,8 +78,11 @@ class Insight():
         except json.JSONDecodeError:
             # TODO: unified output: "Error collecting system info.\n%s" % stderr
             return
-        fileutils.write_file(os.path.join(self.full_outdir, "collector.json"),
-                             json.dumps(self.collector_data, indent=2))
+
+        # save various info to seperate .json files
+        for k, v in self.collector_data.items():
+            fileutils.write_file(os.path.join(collector_outdir, "%s.json" % k),
+                                 json.dumps(v, indent=2))
 
     def run_perf(self, args):
         if not args.perf:
