@@ -74,11 +74,17 @@ class PDCtl():
     def save_info(self, basedir=None):
         full_outputdir = fileutils.build_full_output_dir(
             basedir=basedir, subdir=self.pdctl_dir)
-        fileutils.write_file(os.path.join(
-            full_outputdir, "%s-health.json" % self.pd_host), self.read_health())
-        fileutils.write_file(os.path.join(
-            full_outputdir, "%s-diagnose.json" % self.pd_host), self.read_diagnose())
+        pd_health = self.read_health()
+        if pd_health:
+            fileutils.write_file(os.path.join(
+                full_outputdir, "%s-health.json" % self.pd_host), pd_health)
+        pd_diagnose = self.read_diagnose()
+        if pd_diagnose:
+            fileutils.write_file(os.path.join(
+                full_outputdir, "%s-diagnose.json" % self.pd_host), pd_diagnose)
 
         for key, info in self.read_runtime_info().items():
+            if not info:
+                continue
             fileutils.write_file(os.path.join(
                 full_outputdir, "%s-%s.json" % (self.pd_host, key)), info)
