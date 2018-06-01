@@ -108,3 +108,9 @@ def read_url(url, data=None):
     except URLError as e:
         logging.warning("Reading URL %s error: %s" % (url, e))
         return None
+
+
+def get_hostname():
+    # This function is merely used, so only import socket package when necessary
+    import socket
+    return socket.gethostname()

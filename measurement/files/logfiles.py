@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Base class for logfile related stuff
 
+import datetime
 import logging
 import os
 import shutil
+import time
 
 from glob import glob
 
@@ -18,8 +20,12 @@ class InsightLogFiles():
     # output dir
     log_dir = "logs"
 
+    # time when the object is created, used as a basement time point
+    init_timepoint = None
+
     def __init__(self, options={}):
         self.log_options = options
+        self.init_timepoint = time.time()
 
     def find_tidb_logfiles(self, cmdline=""):
         cmd_opts = util.parse_cmdline(cmdline)
@@ -28,6 +34,19 @@ class InsightLogFiles():
             return cmd_opts["log-file"]
         except KeyError:
             return None
+
+    # check_time_range() checks if the comp_time is within a given range of time period
+    # before base_time, it is used to filter only recent timepoints.
+    def check_time_range(self, base_time=None, comp_time=None, valid_range=0):
+        # Ingore time check if given valid_range is non-positive
+        if valid_range <= 0:
+            return True
+        if not base_time:
+            base_time = self.init_timepoint
+        threhold = datetime.timedelta(0, 0, 0, 0, 0, valid_range)  # hour
+        # we're checking for timepoints *before* base_time, so base_time's timestamp is greater.
+        delta_secs = base_time - comp_time
+        return datetime.timedelta(0, delta_secs) <= threhold
 
     def save_logfile_to_dir(self, logfile=None, savename=None, outputdir=None):
         if not logfile:
