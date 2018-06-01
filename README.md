@@ -75,19 +75,21 @@ If calling `insight.py` with no argument provided, following information are col
  - `collector`, providing system information, program versions, NTP status, partition statics and process statics of TiDB modules (if present), placed under `collector` sub-directory.
  - PD API output of `config`, `diagnose`, `health`, `hotspot`, `labels`, `members`, `operators`, `regions`, `regionstats`, `schedulers` and `status`, placed under `pdctl` sub-directory in JSON format.
 
+Using `-o` can set another location to store output data other than the default `data`.
+
 ### Examples
 
 A common combination of params that could be useful is: `insight.py -l --config-file`, with which the basic system information, TiDB modules' log files and several config files are collected.
 
 If you want to collect runtime information of a TiDB cluster from PD on a remote host (instead of running the scripts on that server), set `--pd-host` to the IP address or a resolvable hostname of that host. Additionally, if PD is listening on non-default port, use `--pd-port` to set it.
 
-System log is not collectd by default, even if `-l` is set. If it's needed, use `-l --syslog` to enable it. Both `syslog` and `systemd-journald` log are supported, note that there is no content filter available for log files, thus enabling log file collection may leads to very large output size.
+System log is not collectd by default, even if `-l` is set. If needed, use `-l --syslog` to enable it. Both `syslog` and `systemd-journald` log are supported and automatically detected, note that there is no content filter available for log files, thus enabling log file collecting may leads to very large output size.
 
 ## Intergration with Ansible
 
 The tidb-insight project is designed to intergrate with [tidb-ansible](https://github.com/pingcap/tidb-ansible) playbooks.
 
-TO DO: Documents / Links to Documents of using tidb-insight with tidb-ansible.
+TO DO: Add documents / links to documents of using tidb-insight with tidb-ansible.
 
 ## Insight
 
