@@ -89,6 +89,8 @@ System log is not collectd by default, even if `-l` is set. If needed, use `-l -
 
 The tidb-insight project is designed to intergrate with [tidb-ansible](https://github.com/pingcap/tidb-ansible) playbooks.
 
+> All collecting features will be disabled by default after the development of intergration is finished, so it's highly recommended to specify all the args needed when using tidb-insight now, even if the feature is currently enabled by default.
+
 TO DO: Add documents / links to documents of using tidb-insight with tidb-ansible.
 
 ## Insight
