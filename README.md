@@ -31,6 +31,8 @@ The following features have been implemented:
 
 ### Usage
 
+For a full list of arguments, you may refer to the output of `insight.py -h`:
+
     usage: insight.py [-h] [-o OUTPUT] [-p] [--pid PID] [--tidb-proc]
                     [--perf-exec PERF_EXEC] [--perf-freq PERF_FREQ]
                     [--perf-time PERF_TIME] [-l] [--syslog] [--config-file]
@@ -68,7 +70,7 @@ The following features have been implemented:
     --pd-host PD_HOST     The host of PD server. Default to localhost.
     --pd-port PD_PORT     The port of PD API service, default to 2379.
 
-    Note that some options would decrease system performance.
+    Note that some arguments would decrease system performance.
 
 If calling `insight.py` with no argument provided, following information are collected and saved to `data` directory of current working directory:
 

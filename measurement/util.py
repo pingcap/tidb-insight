@@ -54,7 +54,7 @@ def parse_cmdline(cmdline):
 
 def parse_insight_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
-                                     epilog="Note that some options would decrease system performance.")
+                                     epilog="Note that some arguments would decrease system performance.")
     parser.add_argument("-o", "--output", action="store", default=None,
                         help="""The dir to store output data of TiDB Insight, any existing file
                         will be overwritten without futher confirmation.""")
