@@ -33,44 +33,46 @@ The following features have been implemented:
 
 For a full list of arguments, you may refer to the output of `insight.py -h`:
 
-    usage: insight.py [-h] [-o OUTPUT] [-p] [--pid PID] [--tidb-proc]
-                    [--perf-exec PERF_EXEC] [--perf-freq PERF_FREQ]
-                    [--perf-time PERF_TIME] [-l] [--syslog] [--config-file]
-                    [--pd-host PD_HOST] [--pd-port PD_PORT]
+```
+usage: insight.py [-h] [-o OUTPUT] [-p] [--pid PID] [--tidb-proc]
+                  [--perf-exec PERF_EXEC] [--perf-freq PERF_FREQ]
+                  [--perf-time PERF_TIME] [-l] [--syslog] [--config-file]
+                  [--pd-host PD_HOST] [--pd-port PD_PORT]
 
-    TiDB Insight Scripts
+TiDB Insight Scripts
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    -o OUTPUT, --output OUTPUT
-                            The dir to store output data of TiDB Insight, any
-                            existing file will be overwritten without futher
-                            confirmation.
-    -p, --perf            Collect trace info with perf. Default is disabled.
-    --pid PID             PID of process to run perf on, if '-p/--perf' is not
-                            set, this value will be ignored and would not take any
-                            effection. Multiple PIDs can be set by using more than
-                            one --pid args. Default is None and means the whole
-                            system.
-    --tidb-proc           Collect perf data for PD/TiDB/TiKV processes instead
-                            of the whole system.
-    --perf-exec PERF_EXEC
-                            Custom path of perf executable file.
-    --perf-freq PERF_FREQ
-                            Event sampling frequency of perf-record, in Hz.
-    --perf-time PERF_TIME
-                            Time period of perf recording, in seconds.
-    -l, --log             Enable to include log files in output, PD/TiDB/TiKV
-                            logs are included by default.
-    --syslog              Enable to include system log in output, will be
-                            ignored if -l/--log is not set. This may significantly
-                            increase output size.
-    --config-file         Enable to include various config files in output,
-                            disabled by default.
-    --pd-host PD_HOST     The host of PD server. Default to localhost.
-    --pd-port PD_PORT     The port of PD API service, default to 2379.
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        The dir to store output data of TiDB Insight, any
+                        existing file will be overwritten without futher
+                        confirmation.
+  -p, --perf            Collect trace info with perf. Default is disabled.
+  --pid PID             PID of process to run perf on, if '-p/--perf' is not
+                        set, this value will be ignored and would not take any
+                        effection. Multiple PIDs can be set by using more than
+                        one --pid args. Default is None and means the whole
+                        system.
+  --tidb-proc           Collect perf data for PD/TiDB/TiKV processes instead
+                        of the whole system.
+  --perf-exec PERF_EXEC
+                        Custom path of perf executable file.
+  --perf-freq PERF_FREQ
+                        Event sampling frequency of perf-record, in Hz.
+  --perf-time PERF_TIME
+                        Time period of perf recording, in seconds.
+  -l, --log             Enable to include log files in output, PD/TiDB/TiKV
+                        logs are included by default.
+  --syslog              Enable to include system log in output, will be
+                        ignored if -l/--log is not set. This may significantly
+                        increase output size.
+  --config-file         Enable to include various config files in output,
+                        disabled by default.
+  --pd-host PD_HOST     The host of PD server. Default to localhost.
+  --pd-port PD_PORT     The port of PD API service, default to 2379.
 
-    Note that some arguments would decrease system performance.
+Note that some arguments would decrease system performance.
+```
 
 If calling `insight.py` with no argument provided, following information are collected and saved to `data` directory of current working directory:
 
