@@ -84,6 +84,8 @@ def parse_insight_opts():
                         help="The host of PD server. Default to localhost.")
     parser.add_argument("--pd-port", type=int, action="store", default=None,
                         help="The port of PD API service, default to 2379.")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
+                        help="Print verbose output.")
 
     return parser.parse_args()
 
@@ -102,10 +104,12 @@ def read_url(url, data=None):
         return None
 
     try:
+        logging.debug("Requesting URL: %s" % url)
         response = urlreq.urlopen(url, data)
         return response.read()
     except HTTPError as e:
+        logging.debug("HTTP Error: %s" % e.read())
         return e.read()
     except URLError as e:
-        logging.critical("Reading URL %s error: %s" % (url, e))
+        logging.warning("Reading URL %s error: %s" % (url, e))
         return None

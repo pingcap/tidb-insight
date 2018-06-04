@@ -37,6 +37,7 @@ def create_dir(path):
         # dir already exists.
         import errno
         if e.errno == errno.EEXIST and os.path.isdir(path):
+            logging.info("Target path \"%s\" already exists." % path)
             return path
         else:
             logging.fatal("Can not prepare output dir, error is: %s" % str(e))
