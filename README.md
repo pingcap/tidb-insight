@@ -26,7 +26,7 @@ The following features have been implemented:
  - Record `perf` data of the whole system, TiDB modules, or specific process. (disabled by default)
  - Check the file size of TiDB modules' data directories. (enabled by default)
  - Collect and save log files of TiDB modules or system. (disabled by default)
- - Collect ans save various configuration files of system. (disabled by default)
+ - Collect and save various configuration files of system. (disabled by default)
  - Query PD API to collect runtime information of the TiDB cluster. (enabled by default)
 
 ### Usage
@@ -44,13 +44,13 @@ TiDB Insight Scripts
 optional arguments:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
-                        The directory to store output data of TiDB Insight,
-                        any existing file will be overwritten without futher
+                        The directory to store output data of TiDB Insight.
+                        Any existing file will be overwritten without futher
                         confirmation.
   -p, --perf            Collect trace info using perf. Disabled by default.
-  --pid PID             PID of process to run perf on, if `-p/--perf` is not
+  --pid PID             PID of process to run perf on. If `-p`/`--perf` is not
                         set, this value will not take effect. Multiple PIDs
-                        can be set by using more than one --pid argument.
+                        can be set by using more than one `--pid` argument.
                         `None` by default which means the whole system.
   --tidb-proc           Collect perf data for PD/TiDB/TiKV processes instead
                         of the whole system.
@@ -70,12 +70,12 @@ optional arguments:
   --pd-host PD_HOST     The host of the PD server. `localhost` by default.
   --pd-port PD_PORT     The port of PD API service, `2379` by default.
 
-Note that some arguments would decrease system performance.
+Note that some arguments may decrease system performance.
 ```
 
 If `insight.py` is called with no argument provided, the following information is collected and saved to `data` directory in the current working directory:
 
- - `collector`, which provids the system information, program versions, NTP status, partition statistics and process statistics of TiDB modules (if present), placed in the `collector` sub-directory.
+ - `collector`, which provides the system information, program versions, NTP status, partition statistics and process statistics of TiDB modules (if present), placed in the `collector` sub-directory.
  - PD API output of `config`, `diagnose`, `health`, `hotspot`, `labels`, `members`, `operators`, `regions`, `regionstats`, `schedulers` and `status`, placed in the `pdctl` sub-directory in JSON format.
 
 Using `-o` can set another location to store output data except the default `data`.

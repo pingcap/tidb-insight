@@ -56,11 +56,11 @@ def parse_insight_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
                                      epilog="Note that some arguments may decrease system performance.")
     parser.add_argument("-o", "--output", action="store", default=None,
-                        help="""The directory to store output data of TiDB Insight, any existing file will be overwritten without futher confirmation.""")
+                        help="""The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.""")
     parser.add_argument("-p", "--perf", action="store_true", default=False,
                         help="Collect trace info using perf. Disabled by default.")
     parser.add_argument("--pid", type=int, action="append", default=None,
-                        help="""PID of process to run perf on, if `-p/--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one --pid argument. `None` by default which means the whole system.""")
+                        help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
     parser.add_argument("--tidb-proc", action="store_true", default=False,
                         help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
     parser.add_argument("--perf-exec", type=int, action="store", default=None,
