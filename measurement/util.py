@@ -73,6 +73,8 @@ def parse_insight_opts():
                         help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
     parser.add_argument("--syslog", action="store_true", default=False,
                         help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
+    parser.add_argument("--log-auto", action="store_true", default=False,
+                        help="Automatically detect and save log files of running PD/TiDB/TiKV process.")
     parser.add_argument("--config-file", action="store_true", default=False,
                         help="Collect various configuration files in output, disabled by default.")
     parser.add_argument("--pd-host", action="store", default=None,

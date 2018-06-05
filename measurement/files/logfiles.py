@@ -70,7 +70,7 @@ class InsightLogFiles():
         for logfile in glob(syslog_path) + glob(dmesg_path):
             self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
 
-    def save_logfiles(self, proc_cmdline=None, outputdir=None):
+    def save_logfiles_auto(self, proc_cmdline=None, outputdir=None):
         # save log files of TiDB modules
         for pid, cmdline in proc_cmdline.items():
             proc_logfile = self.find_tidb_logfiles(cmdline=cmdline)
@@ -78,6 +78,7 @@ class InsightLogFiles():
                                      savename="%s.log" % pid,
                                      outputdir=outputdir)
 
+    def save_system_log(self, outputdir=None):
         # save system logs
         if self.log_options.syslog:
             if util.get_init_type() == "systemd":

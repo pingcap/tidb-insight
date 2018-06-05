@@ -162,8 +162,10 @@ class Insight():
 
         self.insight_logfiles = logfiles.InsightLogFiles(options=args)
         proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
-        self.insight_logfiles.save_logfiles(
-            proc_cmdline=proc_cmdline, outputdir=self.outdir)
+        if args.log_auto:
+            self.insight_logfiles.save_logfiles_auto(
+                proc_cmdline=proc_cmdline, outputdir=self.outdir)
+        self.insight_logfiles.save_system_log(outputdir=self.outdir)
 
     def save_configs(self, args):
         if not args.config_file:
