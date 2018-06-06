@@ -36,16 +36,21 @@ class Insight():
     # data output dir
     outdir = "data"
     full_outdir = ""
+    alias = ""
 
     insight_perf = None
     insight_logfiles = None
     insight_configfiles = None
     insight_pdctl = None
 
-    def __init__(self, outdir=None):
-        if outdir:
-            self.outdir = outdir
-        self.full_outdir = fileutils.create_dir(self.outdir)
+    def __init__(self, args):
+        if args.output:
+            self.outdir = args.output
+        if not args.alias:
+            self.alias = util.get_hostname()
+        self.full_outdir = fileutils.create_dir(
+            os.path.join(self.outdir, self.alias))
+        logging.debug("Output directory is: %s" % self.full_outdir)
 
     # data collected by `collector`
     collector_data = {}
@@ -165,6 +170,8 @@ class Insight():
         if args.log_auto:
             self.insight_logfiles.save_logfiles_auto(
                 proc_cmdline=proc_cmdline, outputdir=self.outdir)
+        else:
+            self.insight_logfiles.save_tidb_logfiles(outputdir=self.outdir)
         self.insight_logfiles.save_system_log(outputdir=self.outdir)
 
     def save_configs(self, args):
@@ -197,8 +204,7 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Debug logging enabled.")
 
-    insight = Insight(args.output)
-    logging.debug("Output directory is: %s" % insight.full_outdir)
+    insight = Insight(args)
 
     insight.collector()
     # WIP: call scripts that collect metrics of the node

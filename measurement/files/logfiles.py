@@ -48,6 +48,20 @@ class InsightLogFiles():
         delta_secs = base_time - comp_time
         return datetime.timedelta(0, delta_secs) <= threhold
 
+    def get_filelist_in_time(self, base_dir, prefix, curr_time, retention_hour):
+        valid_file_list = []
+        for file in os.listdir(base_dir):
+            fullpath = os.path.join(base_dir, file)
+            if os.path.isdir(fullpath):
+                # check for all sub-directories
+                for f in self.get_filelist_in_time(fullpath, prefix, curr_time, retention_hour):
+                    valid_file_list.append(f)
+            if not self.check_time_range(curr_time, os.path.getmtime(fullpath), retention_hour):
+                continue
+            if file.startswith(prefix):
+                valid_file_list.append(fullpath)
+        return valid_file_list
+
     def save_logfile_to_dir(self, logfile=None, savename=None, outputdir=None):
         if not logfile:
             return
@@ -87,3 +101,35 @@ class InsightLogFiles():
             else:
                 logging.info("systemd not detected, assuming syslog.")
                 self.save_syslog(outputdir=outputdir)
+
+    def save_tidb_logfiles(self, outputdir=None):
+        # init values of args
+        source_dir = self.log_options.log_dir
+        if not os.path.isdir(source_dir):
+            logging.fatal("Source log path is not a directory.")
+            return
+        output_base = outputdir
+        if not output_base:
+            output_base = source_dir
+        file_prefix = self.log_options.log_prefix
+        retention_hour = self.log_options.log_retention
+
+        # prepare output directory
+        if not fileutils.create_dir(outputdir):
+            logging.fatal("Failed to preopare output dir")
+            return
+
+        # the output tarball name
+        output_name = "%s_%s" % (file_prefix, self.log_options.alias)
+        # the full path of output directory
+        output_dir = os.path.join(output_base, output_name)
+
+        # copy valid log files to output directory
+        file_list = self.get_filelist_in_time(source_dir, file_prefix,
+                                              time.time(), retention_hour)
+        for file in file_list:
+            if output_name in file:
+                # Skip output files if source and output are the same directory
+                continue
+            shutil.copy(file, output_dir)
+            logging.info("Logfile saved: %s", file)
