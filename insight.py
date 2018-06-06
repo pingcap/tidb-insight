@@ -43,6 +43,8 @@ class Insight():
     insight_pdctl = None
 
     def __init__(self, outdir=None):
+        if outdir:
+            self.outdir = outdir
         self.full_outdir = fileutils.create_dir(self.outdir)
 
     # data collected by `collector`
@@ -72,11 +74,11 @@ class Insight():
 
         stdout, stderr = util.run_cmd(collector_exec)
         if stderr:
-            logging.warning(str(stderr))
+            logging.info("collector output:" % str(stderr))
         try:
             self.collector_data = json.loads(stdout)
         except json.JSONDecodeError:
-            # TODO: unified output: "Error collecting system info.\n%s" % stderr
+            logging.critical("Error collecting system info:\n%s" % stderr)
             return
 
         # save various info to seperate .json files
@@ -86,6 +88,7 @@ class Insight():
 
     def run_perf(self, args):
         if not args.perf:
+            logging.debug("Ignoring collecting of perf data.")
             return
         # perf requires root priviledge
         if not util.is_root_privilege():
@@ -119,6 +122,8 @@ class Insight():
             try:
                 data_dir = args["data-dir"]
             except KeyError:
+                logging.debug(
+                    "'data-dir' is not set in cmdline args: %s" % args)
                 continue
             if os.listdir(data_dir) != []:
                 stdout, stderr = space.du_subfiles(data_dir)
@@ -148,6 +153,7 @@ class Insight():
 
     def save_logfiles(self, args):
         if not args.log:
+            logging.debug("Ignoring collecting of log files.")
             return
         # reading logs requires root priviledge
         if not util.is_root_privilege():
@@ -161,6 +167,7 @@ class Insight():
 
     def save_configs(self, args):
         if not args.config_file:
+            logging.debug("Ignoring collecting of config files.")
             return
 
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
@@ -184,9 +191,12 @@ if __name__ == "__main__":
 
     # WIP: add params to set output dir / overwriting on non-empty target dir
     args = util.parse_insight_opts()
-    insight = Insight()
-    if args.output:
-        insight.outdir = args.output
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        logging.debug("Debug logging enabled.")
+
+    insight = Insight(args.output)
+    logging.debug("Output directory is: %s" % insight.full_outdir)
 
     insight.collector()
     # WIP: call scripts that collect metrics of the node

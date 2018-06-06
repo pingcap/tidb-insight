@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Base class for logfile related stuff
 
+import logging
 import os
 import shutil
 
@@ -61,6 +62,8 @@ class InsightLogFiles():
         # save system logs
         if self.log_options.syslog:
             if util.get_init_type() == "systemd":
+                logging.info("systemd-journald detected.")
                 self.save_journal_log(outputdir=outputdir)
             else:
+                logging.info("systemd not detected, assuming syslog.")
                 self.save_syslog(outputdir=outputdir)
