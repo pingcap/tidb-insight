@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Base class for logfile related stuff
 
+import datetime
 import logging
 import os
 import shutil
+import time
 
 from glob import glob
 
@@ -18,8 +20,12 @@ class InsightLogFiles():
     # output dir
     log_dir = "logs"
 
+    # time when the object is created, used as a basement time point
+    init_timepoint = None
+
     def __init__(self, options={}):
         self.log_options = options
+        self.init_timepoint = time.time()
 
     def find_tidb_logfiles(self, cmdline=""):
         cmd_opts = util.parse_cmdline(cmdline)
@@ -28,6 +34,33 @@ class InsightLogFiles():
             return cmd_opts["log-file"]
         except KeyError:
             return None
+
+    # check_time_range() checks if the comp_time is within a given range of time period
+    # before base_time, it is used to filter only recent timepoints.
+    def check_time_range(self, base_time=None, comp_time=None, valid_range=0):
+        # Ingore time check if given valid_range is non-positive
+        if valid_range <= 0:
+            return True
+        if not base_time:
+            base_time = self.init_timepoint
+        threhold = datetime.timedelta(0, 0, 0, 0, 0, valid_range)  # hour
+        # we're checking for timepoints *before* base_time, so base_time's timestamp is greater.
+        delta_secs = base_time - comp_time
+        return datetime.timedelta(0, delta_secs) <= threhold
+
+    def get_filelist_in_time(self, base_dir, prefix, curr_time, retention_hour):
+        valid_file_list = []
+        for file in os.listdir(base_dir):
+            fullpath = os.path.join(base_dir, file)
+            if os.path.isdir(fullpath):
+                # check for all sub-directories
+                for f in self.get_filelist_in_time(fullpath, prefix, curr_time, retention_hour):
+                    valid_file_list.append(f)
+            if not self.check_time_range(curr_time, os.path.getmtime(fullpath), retention_hour):
+                continue
+            if file.startswith(prefix):
+                valid_file_list.append(fullpath)
+        return valid_file_list
 
     def save_logfile_to_dir(self, logfile=None, savename=None, outputdir=None):
         if not logfile:
@@ -51,7 +84,7 @@ class InsightLogFiles():
         for logfile in glob(syslog_path) + glob(dmesg_path):
             self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
 
-    def save_logfiles(self, proc_cmdline=None, outputdir=None):
+    def save_logfiles_auto(self, proc_cmdline=None, outputdir=None):
         # save log files of TiDB modules
         for pid, cmdline in proc_cmdline.items():
             proc_logfile = self.find_tidb_logfiles(cmdline=cmdline)
@@ -59,6 +92,7 @@ class InsightLogFiles():
                                      savename="%s.log" % pid,
                                      outputdir=outputdir)
 
+    def save_system_log(self, outputdir=None):
         # save system logs
         if self.log_options.syslog:
             if util.get_init_type() == "systemd":
@@ -67,3 +101,35 @@ class InsightLogFiles():
             else:
                 logging.info("systemd not detected, assuming syslog.")
                 self.save_syslog(outputdir=outputdir)
+
+    def save_tidb_logfiles(self, outputdir=None):
+        # init values of args
+        source_dir = self.log_options.log_dir
+        if not os.path.isdir(source_dir):
+            logging.fatal("Source log path is not a directory.")
+            return
+        output_base = outputdir
+        if not output_base:
+            output_base = source_dir
+        file_prefix = self.log_options.log_prefix
+        retention_hour = self.log_options.log_retention
+
+        # prepare output directory
+        if not fileutils.create_dir(outputdir):
+            logging.fatal("Failed to preopare output dir")
+            return
+
+        # the output tarball name
+        output_name = "%s_%s" % (file_prefix, self.log_options.alias)
+        # the full path of output directory
+        output_dir = os.path.join(output_base, output_name)
+
+        # copy valid log files to output directory
+        file_list = self.get_filelist_in_time(source_dir, file_prefix,
+                                              time.time(), retention_hour)
+        for file in file_list:
+            if output_name in file:
+                # Skip output files if source and output are the same directory
+                continue
+            shutil.copy(file, output_dir)
+            logging.info("Logfile saved: %s", file)

@@ -57,6 +57,9 @@ def parse_insight_opts():
                                      epilog="Note that some arguments may decrease system performance.")
     parser.add_argument("-o", "--output", action="store", default=None,
                         help="""The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.""")
+    parser.add_argument("--alias", action="store", default=None,
+                        help="The alias of this instance. This value be part of the name of output tarball.")
+
     parser.add_argument("-p", "--perf", action="store_true", default=False,
                         help="Collect trace info using perf. Disabled by default.")
     parser.add_argument("--pid", type=int, action="append", default=None,
@@ -73,6 +76,15 @@ def parse_insight_opts():
                         help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
     parser.add_argument("--syslog", action="store_true", default=False,
                         help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
+    parser.add_argument("--log-auto", action="store_true", default=False,
+                        help="Automatically detect and save log files of running PD/TiDB/TiKV process.")
+    parser.add_argument("--log-dir", action="store", default=None,
+                        help="Location of log files. If `--log-auto` is set, this value will be ignored.")
+    parser.add_argument("--log-prefix", action="store", default=None,
+                        help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
+    parser.add_argument("--log-retention", action="store", type=int, default=0,
+                        help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time check.")
+
     parser.add_argument("--config-file", action="store_true", default=False,
                         help="Collect various configuration files in output, disabled by default.")
     parser.add_argument("--pd-host", action="store", default=None,
@@ -108,3 +120,9 @@ def read_url(url, data=None):
     except URLError as e:
         logging.warning("Reading URL %s error: %s" % (url, e))
         return None
+
+
+def get_hostname():
+    # This function is merely used, so only import socket package when necessary
+    import socket
+    return socket.gethostname()
