@@ -72,12 +72,13 @@ def parse_insight_opts():
                         help="Event sampling frequency of perf-record, in Hz.")
     parser.add_argument("--perf-time", type=int, action="store", default=None,
                         help="Time period of perf recording, in seconds.")
+
     parser.add_argument("-l", "--log", action="store_true", default=False,
                         help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
     parser.add_argument("--syslog", action="store_true", default=False,
                         help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
     parser.add_argument("--log-auto", action="store_true", default=False,
-                        help="Automatically detect and save log files of running PD/TiDB/TiKV process.")
+                        help="Automatically detect and save log files of running PD/TiDB/TiKV processes.")
     parser.add_argument("--log-dir", action="store", default=None,
                         help="Location of log files. If `--log-auto` is set, this value will be ignored.")
     parser.add_argument("--log-prefix", action="store", default=None,
@@ -87,6 +88,8 @@ def parse_insight_opts():
 
     parser.add_argument("--config-file", action="store_true", default=False,
                         help="Collect various configuration files in output, disabled by default.")
+    parser.add_argument("--config-auto", action="store_true", default=False,
+                        help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
     parser.add_argument("--pd-host", action="store", default=None,
                         help="The host of the PD server. `localhost` by default.")
     parser.add_argument("--pd-port", type=int, action="store", default=None,
