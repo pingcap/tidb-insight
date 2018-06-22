@@ -22,7 +22,7 @@ def find_process_by_port(port=None):
                         _fd_target = os.readlink(_fd.path)
                         if not str.startswith(_fd_target, "socket"):
                             continue
-                        _socket = _fd_target.split(":[")[:-2]
+                        _socket = _fd_target.split(":[")[-1][:-1]
                         try:
                             result[_socket].append(entry.name)
                         except KeyError:
@@ -34,15 +34,25 @@ def find_process_by_port(port=None):
 
     def find_inode_by_port(port):
         result = set()
-        listen_list = fileutils.read_file("/proc/net/tcp").split("\n")
-            + fileutils.read_file("/proc/net/udp").split("\n")
+        netstat_files = ["/proc/net/tcp",
+                         "/proc/net/tcp6",
+                         "/proc/net/udp",
+                         "/proc/net/udp6"
+                         ]
+        listen_list = []
+        for netstat_file in netstat_files:
+            listen_list += fileutils.read_file(netstat_file).split("\n")
         for line in listen_list:
-            if not line:
+            if not line or "local_address" in line:
                 continue
             _parts = line.split()
             _local_addr = _parts[1]
+            _socket_st = _parts[3]
             _inode_addr = _parts[9]
             _local_port = int(_local_addr.split(":")[1], 16)
+            # st of '0A' is TCP_LISTEN, and '07' is for UDP
+            if _socket_st != '0A' and _socket_st != '07':
+                continue
             if int(port) != _local_port:
                 continue
             result.add(_inode_addr)
@@ -50,6 +60,9 @@ def find_process_by_port(port=None):
 
     inode_process = build_inode_to_pid_map()
     for inode in find_inode_by_port(port):
-        process_list.append(inode_process[inode])
+        try:
+            process_list += inode_process[inode]
+        except KeyError:
+            pass
 
     return process_list

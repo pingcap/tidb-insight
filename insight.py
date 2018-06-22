@@ -29,6 +29,7 @@ from measurement import util
 from measurement.files import configfiles
 from measurement.files import fileutils
 from measurement.files import logfiles
+from measurement.process import meta as proc_meta
 from measurement.tidb import pdctl
 
 
