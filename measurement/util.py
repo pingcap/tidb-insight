@@ -59,6 +59,8 @@ def parse_insight_opts():
                         help="""The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.""")
     parser.add_argument("--alias", action="store", default=None,
                         help="The alias of this instance. This value be part of the name of output tarball.")
+    parser.add_argument("-c", "--compress", action="store_true", default=False,
+                        help="Compress all output files to a tarball, disabled by default.")
 
     parser.add_argument("-p", "--perf", action="store_true", default=False,
                         help="Collect trace info using perf. Disabled by default.")

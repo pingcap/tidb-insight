@@ -65,4 +65,4 @@ def find_process_by_port(port=None):
         except KeyError:
             pass
 
-    return set(process_list) # de-duplicate
+    return set(process_list)  # de-duplicate

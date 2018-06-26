@@ -224,3 +224,7 @@ if __name__ == "__main__":
     insight.save_configs(args)
     # read and save `pd-ctl` info
     insight.read_pdctl(args)
+
+    # compress all output to tarball
+    if args.compress:
+        fileutils.compress_tarball(insight.full_outdir, insight.alias)
