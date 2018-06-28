@@ -56,7 +56,7 @@ def parse_insight_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
                                      epilog="Note that some arguments may decrease system performance.")
     parser.add_argument("-o", "--output", action="store", default=None,
-                        help="""The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.""")
+                        help="The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.")
     parser.add_argument("--alias", action="store", default=None,
                         help="The alias of this instance. This value be part of the name of output tarball.")
 

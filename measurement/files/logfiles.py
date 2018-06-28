@@ -115,8 +115,8 @@ class InsightLogFiles():
         retention_hour = self.log_options.log_retention
 
         # prepare output directory
-        if not fileutils.create_dir(outputdir):
-            logging.fatal("Failed to preopare output dir")
+        if not fileutils.create_dir(output_base):
+            logging.fatal("Failed to prepare output dir")
             return
 
         # the output tarball name
