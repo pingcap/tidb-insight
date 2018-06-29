@@ -51,7 +51,8 @@ def find_process_by_port(port=None, protocol="tcp"):
             _socket_st = _parts[3]
             _inode_addr = _parts[9]
             _local_port = int(_local_addr.split(":")[1], 16)
-            # st of '0A' is TCP_LISTEN, and '07' is for UDP
+            # st of '0A' is TCP_LISTEN, and '07' is for UDP (TCP_CLOSE)
+            # see linux/include/net/tcp_states.h for difinitions of other states
             if _socket_st != '0A' and _socket_st != '07':
                 continue
             if int(port) != _local_port:
