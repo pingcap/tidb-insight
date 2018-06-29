@@ -72,8 +72,9 @@ class InsightConfigFiles():
             return file_list
 
         source_dir = self.config_options.config_dir
-        if not os.path.isdir(source_dir):
-            logging.fatal("Source config path is not a directory.")
+        if not source_dir or not os.path.isdir(source_dir):
+            logging.fatal(
+                "Source config path is not a directory. Did you set correct `--config-dir`?")
             return
         output_base = outputdir
         if not output_base:
