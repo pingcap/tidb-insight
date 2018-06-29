@@ -105,6 +105,8 @@ def parse_insight_opts():
     parser.add_argument("--config-prefix", action="store", default=None,
                         help="The prefix of config files, will be directory name of all config files, will be in the name of output tarball. If `--config-auto` is set, the value will be ignored.")
 
+    parser.add_argument("--pdctl", action="store_true", default=False,
+                        help="Enable collecting data from PD API. Disabled by default.")
     parser.add_argument("--pd-host", action="store", default=None,
                         help="The host of the PD server. `localhost` by default.")
     parser.add_argument("--pd-port", type=int, action="store", default=None,

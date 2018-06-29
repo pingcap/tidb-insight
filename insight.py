@@ -223,19 +223,24 @@ if __name__ == "__main__":
 
     insight = Insight(args)
 
-    insight.collector()
+    if (not args.pid and not args.proc_listen_port
+        and not args.log_auto and not args.config_auto
+        ):
+        insight.collector()
+        # check size of data folder of TiDB processes
+        insight.get_datadir_size()
+        # list files opened by TiDB processes
+        insight.get_lsof_tidb()
     # WIP: call scripts that collect metrics of the node
     insight.run_perf(args)
-    # check size of data folder of TiDB processes
-    insight.get_datadir_size()
-    # list files opened by TiDB processes
-    insight.get_lsof_tidb()
     # save log files
     insight.save_logfiles(args)
     # save config files
     insight.save_configs(args)
-    # read and save `pd-ctl` info
-    insight.read_pdctl(args)
+
+    if args.pdctl:
+        # read and save `pd-ctl` info
+        insight.read_pdctl(args)
 
     # compress all output to tarball
     if args.compress:
