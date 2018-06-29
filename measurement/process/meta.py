@@ -27,8 +27,7 @@ def find_process_by_port(port=None, protocol=None):
                         import errno
                         if e.errno == errno.ENOENT:
                             pass
-                        else:
-                            raise e
+                        raise e
                     if not str.startswith(_fd_target, "socket"):
                         continue
                     _socket = _fd_target.split(":[")[-1][:-1]
