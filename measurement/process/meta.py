@@ -5,7 +5,7 @@ import os
 from measurement.files import fileutils
 
 
-def find_process_by_port(port=None):
+def find_process_by_port(port=None, protocol="tcp"):
     process_list = []
     if not port:
         logging.fatal("No process listening port specified.")
@@ -32,15 +32,16 @@ def find_process_by_port(port=None):
                         "Permission Denied reading /proc/%s/fd" % entry.name)
         return result
 
-    def find_inode_by_port(port):
+    def find_inode_by_port(port, protocol):
         result = set()
-        netstat_files = ["/proc/net/tcp",
-                         "/proc/net/tcp6",
-                         "/proc/net/udp",
-                         "/proc/net/udp6"
-                         ]
+        netstat_files = {
+            "tcp": ["/proc/net/tcp",
+                    "/proc/net/tcp6"],
+            "udp": ["/proc/net/udp",
+                    "/proc/net/udp6"]
+        }
         listen_list = []
-        for netstat_file in netstat_files:
+        for netstat_file in netstat_files[protocol]:
             listen_list += fileutils.read_file(netstat_file).split("\n")
         for line in listen_list:
             if not line or "local_address" in line:
@@ -59,7 +60,7 @@ def find_process_by_port(port=None):
         return result
 
     inode_process = build_inode_to_pid_map()
-    for inode in find_inode_by_port(port):
+    for inode in find_inode_by_port(port, protocol):
         try:
             process_list += inode_process[inode]
         except KeyError:
