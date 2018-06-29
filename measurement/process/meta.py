@@ -5,7 +5,9 @@ import os
 from measurement.files import fileutils
 
 
-def find_process_by_port(port=None, protocol="tcp"):
+def find_process_by_port(port=None, protocol=None):
+    if not protocol:
+        protocol = "tcp"
     process_list = []
     if not port:
         logging.fatal("No process listening port specified.")
@@ -24,9 +26,9 @@ def find_process_by_port(port=None, protocol="tcp"):
                             continue
                         _socket = _fd_target.split(":[")[-1][:-1]
                         try:
-                            result[_socket].append(entry.name)
+                            result[_socket].append(int(entry.name))
                         except KeyError:
-                            result[_socket] = [entry.name]
+                            result[_socket] = [int(entry.name)]
                 except PermissionError:
                     logging.warn(
                         "Permission Denied reading /proc/%s/fd" % entry.name)

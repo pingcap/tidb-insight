@@ -107,9 +107,19 @@ class Insight():
             perf_proc = self.format_proc_info("name")
             self.insight_perf = perf.InsightPerf(perf_proc, args)
         # parse pid list
-        elif len(args.pid) > 0:
+        elif args.pid:
             perf_proc = {}
             for _pid in args.pid:
+                perf_proc[_pid] = None
+            self.insight_perf = perf.InsightPerf(perf_proc, args)
+        # find process by port
+        elif args.proc_listen_port:
+            perf_proc = {}
+            pid_list = proc_meta.find_process_by_port(
+                args.proc_listen_port, args.proc_port_proto)
+            if not pid_list or len(pid_list) < 1:
+                return
+            for _pid in pid_list:
                 perf_proc[_pid] = None
             self.insight_perf = perf.InsightPerf(perf_proc, args)
         else:

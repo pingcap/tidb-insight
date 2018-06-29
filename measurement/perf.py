@@ -44,17 +44,17 @@ class InsightPerf():
         except (KeyError, TypeError):
             cmd.append("120")  # default to 120Hz
 
-        if pid is not None:
+        if pid:
             cmd.append("-p")
             cmd.append("%d" % pid)
         else:
             cmd.append("-a")  # default to whole system
 
         # default will be perf.data if nothing specified
-        if outfile is not None:
+        if outfile:
             cmd.append("-o")
             cmd.append("%s/%s.data" % (outdir, outfile))
-        elif outfile is None and pid is not None:
+        elif not outfile and pid:
             cmd.append("-o")
             cmd.append("%s/%d.data" % (outdir, pid))
 
