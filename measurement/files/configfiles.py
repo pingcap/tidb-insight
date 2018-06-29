@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Get various config files
 
+import logging
 import os
 import shutil
 
@@ -47,7 +48,7 @@ class InsightConfigFiles():
             return None
         return
 
-    def save_tidb_configs(self, proc_cmdline=None, outputdir=None):
+    def save_configs_auto(self, proc_cmdline=None, outputdir=None):
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.config_dir)
         for pid, cmdline in proc_cmdline.items():
@@ -56,3 +57,42 @@ class InsightConfigFiles():
                 continue
             shutil.copyfile(proc_configfile, os.path.join(
                 full_outputdir, "%s.conf" % pid))
+
+    def save_tidb_configs(self, outputdir=None):
+        def list_config_files(base_dir, prefix):
+            file_list = []
+            for file in os.listdir(base_dir):
+                fullpath = os.path.join(base_dir, file)
+                if os.path.isdir(fullpath):
+                    # check for all sub-directories
+                    for f in list_config_files(fullpath, prefix):
+                        file_list.append(f)
+                if file.startswith(prefix):
+                    file_list.append(fullpath)
+            return file_list
+
+        source_dir = self.config_options.config_dir
+        if not os.path.isdir(source_dir):
+            logging.fatal("Source config path is not a directory.")
+            return
+        output_base = outputdir
+        if not output_base:
+            output_base = source_dir
+        file_prefix = self.config_options.config_prefix
+
+        # prepare output directory
+        if not fileutils.create_dir(output_base):
+            logging.fatal("Failed to prepare output dir.")
+            return
+
+        # the full path of output directory
+        output_name = "%s_%s" % (file_prefix, self.config_options.alias)
+        output_dir = os.path.join(output_base, output_name)
+
+        file_list = list_config_files(source_dir, file_prefix)
+        for file in file_list:
+            if output_name in file:
+                # Skip output files if source and output are the same directory
+                continue
+            shutil.copy(file, output_dir)
+            logging.info("Config file saved: %s" % file)

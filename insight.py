@@ -29,6 +29,7 @@ from measurement import util
 from measurement.files import configfiles
 from measurement.files import fileutils
 from measurement.files import logfiles
+from measurement.process import meta as proc_meta
 from measurement.tidb import pdctl
 
 
@@ -180,11 +181,15 @@ class Insight():
             return
 
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
-        self.insight_configfiles.save_sysconf(outputdir=self.outdir)
+        if args.config_sysctl:
+            self.insight_configfiles.save_sysconf(outputdir=self.outdir)
         # collect TiDB configs
-        proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
-        self.insight_configfiles.save_tidb_configs(
-            proc_cmdline=proc_cmdline, outputdir=self.outdir)
+        if args.config_auto:
+            proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
+            self.insight_configfiles.save_configs_auto(
+                proc_cmdline=proc_cmdline, outputdir=self.outdir)
+        else:
+            self.insight_configfiles.save_tidb_configs(outputdir=self.outdir)
 
     def read_pdctl(self, args):
         self.insight_pdctl = pdctl.PDCtl(host=args.pd_host, port=args.pd_port)
@@ -219,3 +224,7 @@ if __name__ == "__main__":
     insight.save_configs(args)
     # read and save `pd-ctl` info
     insight.read_pdctl(args)
+
+    # compress all output to tarball
+    if args.compress:
+        fileutils.compress_tarball(insight.full_outdir, insight.alias)
