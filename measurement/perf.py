@@ -26,7 +26,7 @@ class InsightPerf():
         self.perf_options = options
 
     # set params of perf
-    def build_cmd(self, pid=None, outfile=None, outdir=None):
+    def build_record_cmd(self, pid=None, outfile=None, outdir=None):
         cmd = ["perf",    # default executable name
                "record",  # default action of perf
                "-g",
@@ -66,6 +66,20 @@ class InsightPerf():
 
         return cmd
 
+    def build_archive_cmd(self, pid=None, outfile=None, outdir=None):
+        cmd = ["perf",
+               "archive"]
+
+        # default will be perf.data if nothing specified
+        if outfile:
+            cmd.append("%s/%s.data" % (outdir, outfile))
+        elif not outfile and pid:
+            cmd.append("%s/%d.data" % (outdir, pid))
+        else:
+            cmd.append("%s/perf.data" % outdir)
+
+        return cmd
+
     def run(self, outputdir=None):
         # set output path of perf data
         full_outputdir = fileutils.build_full_output_dir(
@@ -79,7 +93,7 @@ class InsightPerf():
         if len(self.process_info) > 0:
             # perf on given process(es)
             for pid, pname in self.process_info.items():
-                cmd = self.build_cmd(pid, pname, full_outputdir)
+                cmd = self.build_record_cmd(pid, pname, full_outputdir)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
                 if stdout:
@@ -88,9 +102,15 @@ class InsightPerf():
                 if stderr:
                     fileutils.write_file(
                         path.join(full_outputdir, "%s.stderr" % pname), stderr)
+                if self.perf_options.perf_archive:
+                    cmd = self.build_archive_cmd(pid, pname, full_outputdir)
+                    stdout, stderr = util.run_cmd(cmd)
+                    if stderr:
+                        fileutils.write_file(
+                            path.join(full_outputdir, "%s.archive.stderr" % pname), stderr)
         else:
             # perf the entire system
-            cmd = self.build_cmd()
+            cmd = self.build_record_cmd()
             stdout, stderr = util.run_cmd(cmd)
             if stdout:
                 fileutils.write_file(
@@ -98,3 +118,9 @@ class InsightPerf():
             if stderr:
                 fileutils.write_file(
                     path.join(full_outputdir, "perf.stderr"), stderr)
+            if self.perf_options.perf_archive:
+                cmd = self.build_archive_cmd()
+                stdout, stderr = util.run_cmd(cmd)
+                if stderr:
+                    fileutils.write_file(
+                        path.join(full_outputdir, "perf.archive.stderr"), stderr)

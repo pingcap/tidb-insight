@@ -78,6 +78,8 @@ def parse_insight_opts():
                         help="Event sampling frequency of perf-record, in Hz.")
     parser.add_argument("--perf-time", type=int, action="store", default=None,
                         help="Time period of perf recording, in seconds.")
+    parser.add_argument("--perf-archive", action="store_true", default=False,
+                        help="Run `perf archive` after collecting data, useful when reading data on another machine. Disabled by default.")
 
     parser.add_argument("-l", "--log", action="store_true", default=False,
                         help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
