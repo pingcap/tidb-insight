@@ -16,22 +16,26 @@ def find_process_by_port(port=None, protocol=None):
     # iterate over all file descriptors and build a socket address -> pid map
     def build_inode_to_pid_map():
         result = {}
-        for entry in os.scandir("/proc"):
+        for entry in fileutils.list_dir("/proc"):
             # find all PIDs
-            if str.isdigit(entry.name):
-                try:
-                    for _fd in os.scandir("/proc/%s/fd" % entry.name):
-                        _fd_target = os.readlink(_fd.path)
-                        if not str.startswith(_fd_target, "socket"):
-                            continue
-                        _socket = _fd_target.split(":[")[-1][:-1]
-                        try:
-                            result[_socket].append(int(entry.name))
-                        except KeyError:
-                            result[_socket] = [int(entry.name)]
-                except PermissionError:
-                    logging.warn(
-                        "Permission Denied reading /proc/%s/fd" % entry.name)
+            fname = entry.split('/')[-1]
+            if str.isdigit(fname):
+                for _fd in fileutils.list_dir("/proc/%s/fd" % fname):
+                    try:
+                        _fd_target = os.readlink(_fd)
+                    except OSError as e:
+                        import errno
+                        if e.errno == errno.ENOENT:
+                            pass
+                        else:
+                            raise e
+                    if not str.startswith(_fd_target, "socket"):
+                        continue
+                    _socket = _fd_target.split(":[")[-1][:-1]
+                    try:
+                        result[_socket].append(int(fname))
+                    except KeyError:
+                        result[_socket] = [int(fname)]
         return result
 
     def find_inode_by_port(port, protocol):
