@@ -11,7 +11,7 @@ def find_process_by_port(port=None):
         logging.fatal("No process listening port specified.")
         return
 
-    # literate over all file descriptors and build a socket address -> pid map
+    # iterate over all file descriptors and build a socket address -> pid map
     def build_inode_to_pid_map():
         result = {}
         for entry in os.scandir("/proc"):
