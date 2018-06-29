@@ -94,8 +94,6 @@ def parse_insight_opts():
                         help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
     parser.add_argument("--config-sysctl", action="store_true", default=False,
                         help="Save kernel config by collecting output of `sysctl -a`.")
-    parser.add_argument("--config-auto", action="store_true", default=False,
-                        help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
     parser.add_argument("--config-dir", action="store", default=None,
                         help="Location of config files. If `--config-auto` is set, this value will be ingored.")
     parser.add_argument("--config-prefix", action="store", default=None,
