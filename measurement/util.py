@@ -68,7 +68,7 @@ def parse_insight_opts():
                         help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
     parser.add_argument("--proc-listen-port", action="store", type=int, default=None,
                         help="Collect perf data of process that listen on given port. This value will be ignored if `--pid` is set.")
-    parser.add_argument("--proc-port-proto", action="store", default=None,
+    parser.add_argument("--proc-listen-proto", action="store", default=None,
                         help="Protocol type of listen port, available values are: tcp/udp. If not set, only TCP listening ports are checked.")
     parser.add_argument("--tidb-proc", action="store_true", default=False,
                         help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")

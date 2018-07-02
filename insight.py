@@ -116,7 +116,7 @@ class Insight():
         elif args.proc_listen_port:
             perf_proc = {}
             pid_list = proc_meta.find_process_by_port(
-                args.proc_listen_port, args.proc_port_proto)
+                args.proc_listen_port, args.proc_listen_proto)
             if not pid_list or len(pid_list) < 1:
                 return
             for _pid in pid_list:
