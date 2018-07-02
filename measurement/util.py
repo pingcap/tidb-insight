@@ -30,9 +30,9 @@ def cwd():
     return os.getcwd()
 
 
-def run_cmd(cmd):
+def run_cmd(cmd, timeout = None):
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    return p.communicate()
+    return p.communicate(timeout)
 
 
 def parse_cmdline(cmdline):
@@ -113,6 +113,11 @@ def parse_insight_opts():
                         help="The port of PD API service, `2379` by default.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
+
+    parser.add_argument("-f", "--ftrace", action="store_true", default=False,
+                        help="Collect trace info using ftrace. Disabled by default.")
+    parser.add_argument("--ftracepoint",  action="store", default=None,
+                        help="Tracepoint to be traced")
 
     return parser.parse_args()
 
