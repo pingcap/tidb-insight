@@ -2,6 +2,7 @@
 # Collect stack trace with `ftrace`
 
 from measurement.ftrace import mem
+from measurement.files import fileutils
 
 
 class InsightFtrace():

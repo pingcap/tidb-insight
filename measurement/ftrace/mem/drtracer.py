@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Trace direct reclaim latency.
 
+from measurement.files import fileutils
+
+
 class DirectReclaimTracer():
     # options about tracer
     ftrace_options = {}
