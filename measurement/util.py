@@ -66,6 +66,10 @@ def parse_insight_opts():
                         help="Collect trace info using perf. Disabled by default.")
     parser.add_argument("--pid", type=int, action="append", default=None,
                         help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
+    parser.add_argument("--proc-listen-port", action="store", type=int, default=None,
+                        help="Collect perf data of process that listen on given port. This value will be ignored if `--pid` is set.")
+    parser.add_argument("--proc-listen-proto", action="store", default=None,
+                        help="Protocol type of listen port, available values are: tcp/udp. If not set, only TCP listening ports are checked.")
     parser.add_argument("--tidb-proc", action="store_true", default=False,
                         help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
     parser.add_argument("--perf-exec", type=int, action="store", default=None,
@@ -74,6 +78,8 @@ def parse_insight_opts():
                         help="Event sampling frequency of perf-record, in Hz.")
     parser.add_argument("--perf-time", type=int, action="store", default=None,
                         help="Time period of perf recording, in seconds.")
+    parser.add_argument("--perf-archive", action="store_true", default=False,
+                        help="Run `perf archive` after collecting data, useful when reading data on another machine. Disabled by default.")
 
     parser.add_argument("-l", "--log", action="store_true", default=False,
                         help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
@@ -99,6 +105,8 @@ def parse_insight_opts():
     parser.add_argument("--config-prefix", action="store", default=None,
                         help="The prefix of config files, will be directory name of all config files, will be in the name of output tarball. If `--config-auto` is set, the value will be ignored.")
 
+    parser.add_argument("--pdctl", action="store_true", default=False,
+                        help="Enable collecting data from PD API. Disabled by default.")
     parser.add_argument("--pd-host", action="store", default=None,
                         help="The host of the PD server. `localhost` by default.")
     parser.add_argument("--pd-port", type=int, action="store", default=None,

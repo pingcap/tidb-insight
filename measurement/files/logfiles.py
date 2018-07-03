@@ -105,8 +105,9 @@ class InsightLogFiles():
     def save_tidb_logfiles(self, outputdir=None):
         # init values of args
         source_dir = self.log_options.log_dir
-        if not os.path.isdir(source_dir):
-            logging.fatal("Source log path is not a directory.")
+        if not source_dir or not os.path.isdir(source_dir):
+            logging.fatal(
+                "Source log path is not a directory. Did you set correct `--log-dir`?")
             return
         output_base = outputdir
         if not output_base:

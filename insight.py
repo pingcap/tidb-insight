@@ -107,9 +107,19 @@ class Insight():
             perf_proc = self.format_proc_info("name")
             self.insight_perf = perf.InsightPerf(perf_proc, args)
         # parse pid list
-        elif len(args.pid) > 0:
+        elif args.pid:
             perf_proc = {}
             for _pid in args.pid:
+                perf_proc[_pid] = None
+            self.insight_perf = perf.InsightPerf(perf_proc, args)
+        # find process by port
+        elif args.proc_listen_port:
+            perf_proc = {}
+            pid_list = proc_meta.find_process_by_port(
+                args.proc_listen_port, args.proc_listen_proto)
+            if not pid_list or len(pid_list) < 1:
+                return
+            for _pid in pid_list:
                 perf_proc[_pid] = None
             self.insight_perf = perf.InsightPerf(perf_proc, args)
         else:
@@ -170,10 +180,11 @@ class Insight():
         proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
         if args.log_auto:
             self.insight_logfiles.save_logfiles_auto(
-                proc_cmdline=proc_cmdline, outputdir=self.outdir)
+                proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
         else:
-            self.insight_logfiles.save_tidb_logfiles(outputdir=self.outdir)
-        self.insight_logfiles.save_system_log(outputdir=self.outdir)
+            self.insight_logfiles.save_tidb_logfiles(
+                outputdir=self.full_outdir)
+        self.insight_logfiles.save_system_log(outputdir=self.full_outdir)
 
     def save_configs(self, args):
         if not args.config_file:
@@ -182,14 +193,15 @@ class Insight():
 
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
         if args.config_sysctl:
-            self.insight_configfiles.save_sysconf(outputdir=self.outdir)
+            self.insight_configfiles.save_sysconf(outputdir=self.full_outdir)
         # collect TiDB configs
         if args.config_auto:
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
             self.insight_configfiles.save_configs_auto(
-                proc_cmdline=proc_cmdline, outputdir=self.outdir)
+                proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
         else:
-            self.insight_configfiles.save_tidb_configs(outputdir=self.outdir)
+            self.insight_configfiles.save_tidb_configs(
+                outputdir=self.full_outdir)
 
     def read_pdctl(self, args):
         self.insight_pdctl = pdctl.PDCtl(host=args.pd_host, port=args.pd_port)
@@ -211,19 +223,24 @@ if __name__ == "__main__":
 
     insight = Insight(args)
 
-    insight.collector()
+    if (not args.pid and not args.proc_listen_port
+        and not args.log_auto and not args.config_auto
+        ):
+        insight.collector()
+        # check size of data folder of TiDB processes
+        insight.get_datadir_size()
+        # list files opened by TiDB processes
+        insight.get_lsof_tidb()
     # WIP: call scripts that collect metrics of the node
     insight.run_perf(args)
-    # check size of data folder of TiDB processes
-    insight.get_datadir_size()
-    # list files opened by TiDB processes
-    insight.get_lsof_tidb()
     # save log files
     insight.save_logfiles(args)
     # save config files
     insight.save_configs(args)
-    # read and save `pd-ctl` info
-    insight.read_pdctl(args)
+
+    if args.pdctl:
+        # read and save `pd-ctl` info
+        insight.read_pdctl(args)
 
     # compress all output to tarball
     if args.compress:
