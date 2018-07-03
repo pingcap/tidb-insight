@@ -30,9 +30,9 @@ def cwd():
     return os.getcwd()
 
 
-def run_cmd(cmd, timeout = None):
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    return p.communicate(timeout)
+def run_cmd(cmd, shell=False, timeout=None):
+    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+    return p.communicate(timeout=timeout)
 
 
 def parse_cmdline(cmdline):

@@ -4,6 +4,8 @@
 import os
 import logging
 
+from subprocess import TimeoutExpired
+
 from measurement import util
 from measurement.files import fileutils
 
@@ -33,21 +35,21 @@ class DirectReclaimTracer():
         os.chdir(self.tracefs)
 
         # setup trace, set opt
-        _, stderr = util.run_cmd(["echo", "nop", ">", "current_tracer"])
+        _, stderr = util.run_cmd(["echo nop > current_tracer"], shell=True)
         if stderr:
             logging.fatal("ERROR: reset current_tracer failed")
             return
 
         bufsize_kb = self.ftrace_options["ftrace_bufsize_kb"] if "ftrace_bufsize_kb" in \
             self.ftrace_options and self.ftrace_options["ftrace_bufsize_kb"] else "4096"
-        _, stderr = util.run_cmd(["echo", bufsize_kb, ">", "buffer_size_kb"])
+        _, stderr = util.run_cmd(["echo %s > buffer_size_kb" % bufsize_kb], shell=True)
         if stderr:
             logging.fatal("ERROR: set bufsize_kb failed")
             return
 
         # begin tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
-            _, stderr = util.run_cmd(["echo", "1", ">", event])
+            _, stderr = util.run_cmd(["echo 1 > %s" % event], shell=True)
             if stderr:
                 logging.fatal("ERROR: enable %s tracepoint failed" % event)
                 return
@@ -67,7 +69,7 @@ class DirectReclaimTracer():
 
         # end tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
-            _, stderr = util.run_cmd(["echo", "0", ">", event])
+            _, stderr = util.run_cmd(["echo 0 > %s" % event], shell=True)
             if stderr:
                 logging.fatal("ERROR: disable %s tracepoint failed" % event)
                 return
