@@ -32,24 +32,15 @@ def cwd():
 
 
 def run_cmd(cmd, shell=False, timeout=None):
-    if python_version >= 3.5:
+    if python_version() >= 3.5:
         p = Popen(cmd, shell=shell, timeout=timeout, stdout=PIPE, stderr=PIPE)
         return p.communicate()
     elif not timeout:
         p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
         return p.communicate()
 
-    import subprocess
-    import time
-    delay = 1.0
-    timeout = int(time / delay)
-    p = subprocess.Popen(cmd)
-
-    #while the process is still executing and we haven't timed-out yet
-    while p.poll() is None and timeout > 0:
-        #do other things too if necessary e.g. print, check resources, etc.
-        time.sleep(delay)
-        timeout -= delay
+    p = Popen(cmd, shell=shell)
+    time.sleep(timeout)
     return _, _
 
 

@@ -38,8 +38,8 @@ class DirectReclaimTracer():
             logging.fatal("ERROR: reset current_tracer failed")
             return
 
-        bufsize_kb = self.ftrace_options["ftrace_bufsize_kb"] if "ftrace_bufsize_kb" in \
-            self.ftrace_options and self.ftrace_options["ftrace_bufsize_kb"] else "4096"
+        bufsize_kb = self.ftrace_options["ftrace_bufsize"] if "ftrace_bufsize" in \
+            self.ftrace_options and self.ftrace_options["ftrace_bufsize"] else "4096"
         _, stderr = util.run_cmd(["echo %s > buffer_size_kb" % bufsize_kb], shell=True)
         if stderr:
             logging.fatal("ERROR: set bufsize_kb failed")
@@ -58,7 +58,7 @@ class DirectReclaimTracer():
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
         try:
-            _, stderr = util.run_cmd(["cat", "trace_pipe", ">", full_outputdir], time)
+            _, stderr = util.run_cmd(["cat", "trace_pipe", ">", full_outputdir], timeout=time)
             if stderr:
                 logging.fatal("ERROR: redirect trace_pipe failed")
                 return
