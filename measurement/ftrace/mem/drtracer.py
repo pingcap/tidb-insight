@@ -30,12 +30,14 @@ class DirectReclaimTracer():
             debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)""")
             return
 
+        orginalwd = os.getcwd()
         os.chdir(self.tracefs)
 
         # setup trace, set opt
         _, stderr = util.run_cmd(["echo nop > current_tracer"], shell=True)
         if stderr:
             logging.fatal("ERROR: reset current_tracer failed")
+            os.chdir(originalwd)
             return
 
         bufsize_kb = self.ftrace_options["ftrace_bufsize"] if "ftrace_bufsize" in \
@@ -43,6 +45,7 @@ class DirectReclaimTracer():
         _, stderr = util.run_cmd(["echo %s > buffer_size_kb" % bufsize_kb], shell=True)
         if stderr:
             logging.fatal("ERROR: set bufsize_kb failed")
+            os.chdir(originalwd)
             return
 
         # begin tracing
@@ -50,6 +53,7 @@ class DirectReclaimTracer():
             _, stderr = util.run_cmd(["echo 1 > %s" % event], shell=True)
             if stderr:
                 logging.fatal("ERROR: enable %s tracepoint failed" % event)
+                os.chdir(originalwd)
                 return
 
         # collect trace
@@ -61,6 +65,7 @@ class DirectReclaimTracer():
             _, stderr = util.run_cmd(["cat", "trace_pipe", ">", full_outputdir], timeout=time)
             if stderr:
                 logging.fatal("ERROR: redirect trace_pipe failed")
+                os.chdir(originalwd)
                 return
         except:
             pass
@@ -70,4 +75,7 @@ class DirectReclaimTracer():
             _, stderr = util.run_cmd(["echo 0 > %s" % event], shell=True)
             if stderr:
                 logging.fatal("ERROR: disable %s tracepoint failed" % event)
+                os.chdir(originalwd)
                 return
+
+        os.chdir(originalwd)
