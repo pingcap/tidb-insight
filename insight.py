@@ -137,7 +137,7 @@ class Insight():
             return
 
         if args.ftracepoint:
-            self.insight_ftrace = ftrace.InsightFtrace(args)
+            self.insight_ftrace = ftrace.InsightFtrace(vars(args))
             self.insight_ftrace.run(self.full_outdir)
         else:
             logging.debug("Ignoring collecting of ftrace data, no tracepoint is chose.")

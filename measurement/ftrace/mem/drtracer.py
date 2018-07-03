@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Trace direct reclaim latency.
 
+import logging
+
+from measurement import util
 from measurement.files import fileutils
 
 
@@ -20,7 +23,7 @@ class DirectReclaimTracer():
         self.ftrace_options = options
 
     def save_trace(self, outputdir=None):
-        _, stderr = util.run_cmd(["cd", tracefs])
+        _, stderr = util.run_cmd(["cd", self.tracefs])
         if stderr:
             logging.fatal("""ERROR: accessing tracing. Root user? Kernel has FTRACE?
             debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)""")
@@ -40,7 +43,7 @@ class DirectReclaimTracer():
             return
 
         # begin tracing
-        for event in [direct_reclaim_begin, direct_reclaim_end]:
+        for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
             _, stderr = util.run_cmd(["echo", "1", ">", event])
             if stderr != "":
                 logging.fatal("ERROR: enable %s tracepoint failed" % event)
@@ -57,7 +60,7 @@ class DirectReclaimTracer():
             return
 
         # end tracing
-        for event in [direct_reclaim_begin, direct_reclaim_end]:
+        for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
             _, stderr = util.run_cmd(["echo", "0", ">", event])
             if stderr != "":
                 logging.fatal("ERROR: disable %s tracepoint failed" % event)

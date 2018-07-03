@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Collect stack trace with `ftrace`
 
-from measurement.ftrace import mem
+from measurement.ftrace.mem import drtracer
 from measurement.files import fileutils
 
 
@@ -24,7 +24,7 @@ class InsightFtrace():
 
         tracepoint = self.ftrace_options["ftracepoint"]
         if tracepoint == "dr":
-            tracer = mem.DirectReclaimTracer(self.ftrace_options)
+            tracer = drtracer.DirectReclaimTracer(self.ftrace_options)
             tracer.save_trace(ftrace_outputdir)
         else:
             logging.debug("Tracepiont %s is not supported." % tracepoint)
