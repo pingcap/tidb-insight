@@ -36,7 +36,7 @@ class DirectReclaimTracer():
             return
 
         bufsize_kb = self.ftrace_options["ftrace_bufsize_kb"] if "ftrace_bufsize_kb" in \
-            self.ftrace_options and self.ftrace_options["ftrace_bufsize_kb"] else 4096
+            self.ftrace_options and self.ftrace_options["ftrace_bufsize_kb"] else "4096"
         _, stderr = util.run_cmd(["echo", bufsize_kb, ">", "buffer_size_kb"])
         if stderr:
             logging.fatal("ERROR: set bufsize_kb failed")

@@ -120,7 +120,7 @@ def parse_insight_opts():
                         help="Tracepoint to be traced")
     parser.add_argument("--ftrace-time", type=int, action="store", default=None,
                         help="Time period of ftrace recording, in seconds (default 60s).")
-    parser.add_argument("--ftrace-bufsize", type=int, action="store", default=None,
+    parser.add_argument("--ftrace-bufsize", action="store", default=None,
                         help="Ftrace ring buffer size in kb (default 4096 kb).")
 
     return parser.parse_args()
