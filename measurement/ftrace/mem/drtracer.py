@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Trace direct reclaim latency.
 
+import os
 import logging
 
 from measurement import util
@@ -29,6 +30,8 @@ class DirectReclaimTracer():
             debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)""")
             return
 
+        os.chdir(self.tracefs)
+
         # setup trace, set opt
         _, stderr = util.run_cmd(["echo", "nop", ">", "current_tracer"])
         if stderr:
@@ -45,7 +48,7 @@ class DirectReclaimTracer():
         # begin tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
             _, stderr = util.run_cmd(["echo", "1", ">", event])
-            if stderr != "":
+            if stderr:
                 logging.fatal("ERROR: enable %s tracepoint failed" % event)
                 return
 
@@ -54,14 +57,17 @@ class DirectReclaimTracer():
             self.ftrace_options and self.ftrace_options["ftrace_time"] else 60
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
-        _, stderr = util.run_cmd(["cat", "trace_pipe", ">", full_outputdir], time)
-        if stderr:
-            logging.fatal("ERROR: set bufsize_kb failed")
-            return
+        try:
+            _, stderr = util.run_cmd(["cat", "trace_pipe", ">", full_outputdir], time)
+            if stderr:
+                logging.fatal("ERROR: redirect trace_pipe failed")
+                return
+        except TimeoutExpired:
+            pass
 
         # end tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
             _, stderr = util.run_cmd(["echo", "0", ">", event])
-            if stderr != "":
+            if stderr:
                 logging.fatal("ERROR: disable %s tracepoint failed" % event)
                 return

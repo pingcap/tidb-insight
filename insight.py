@@ -35,7 +35,7 @@ from measurement.ftrace import ftrace
 
 class Insight():
     # data output dir
-    outdir = "data"
+    outdir = "%s/data" % os.getcwd()
     full_outdir = ""
     alias = ""
 
