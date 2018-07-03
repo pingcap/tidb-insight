@@ -4,6 +4,7 @@
 import argparse
 import logging
 import os
+import sys
 
 from subprocess import Popen, PIPE
 try:
@@ -31,8 +32,25 @@ def cwd():
 
 
 def run_cmd(cmd, shell=False, timeout=None):
-    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
-    return p.communicate(timeout=timeout)
+    if python_version >= 3.5:
+        p = Popen(cmd, shell=shell, timeout=timeout, stdout=PIPE, stderr=PIPE)
+        return p.communicate()
+    elif not timeout:
+        p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+        return p.communicate()
+
+    import subprocess
+    import time
+    delay = 1.0
+    timeout = int(time / delay)
+    p = subprocess.Popen(cmd)
+
+    #while the process is still executing and we haven't timed-out yet
+    while p.poll() is None and timeout > 0:
+        #do other things too if necessary e.g. print, check resources, etc.
+        time.sleep(delay)
+        timeout -= delay
+    return _, _
 
 
 def parse_cmdline(cmdline):
@@ -155,3 +173,7 @@ def get_hostname():
     # This function is merely used, so only import socket package when necessary
     import socket
     return socket.gethostname()
+
+def python_version():
+    # get a numeric Python version
+    return sys.version_info[0] + sys.version_info[1] / 10

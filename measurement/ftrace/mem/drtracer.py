@@ -4,8 +4,6 @@
 import os
 import logging
 
-from subprocess import TimeoutExpired
-
 from measurement import util
 from measurement.files import fileutils
 
@@ -64,10 +62,10 @@ class DirectReclaimTracer():
             if stderr:
                 logging.fatal("ERROR: redirect trace_pipe failed")
                 return
-        except TimeoutExpired:
+        except:
             pass
 
-        # end tracing
+        # End tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
             _, stderr = util.run_cmd(["echo 0 > %s" % event], shell=True)
             if stderr:
