@@ -32,8 +32,8 @@ def cwd():
     return os.getcwd()
 
 
-def chdir():
-    return os.chdir()
+def chdir(nwd):
+    return os.chdir(nwd)
 
 
 def run_cmd(cmd, shell=False):

@@ -13,7 +13,7 @@ class InsightFtrace():
     # output dir
     data_dir = "ftracedata"
 
-    def __init__(self, cwd, options={}):
+    def __init__(self, cwd, options):
         self.cwd = cwd
         self.ftrace_options = vars(options)
 

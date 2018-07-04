@@ -13,7 +13,7 @@ class DirectReclaimTracer():
     ftrace_options = {}
 
     # output dir
-    data_dir = "mem/drtrace"
+    data_file = "mem/drtrace"
 
     # tracefs mount point
     tracefs = "/sys/kernel/debug/tracing"
@@ -23,7 +23,7 @@ class DirectReclaimTracer():
     def __init__(self, options={}):
         self.ftrace_options = options
 
-    def save_trace(self, cwd, outputdir=None):
+    def save_trace(self, cwd, outputdir):
         _, stderr = util.run_cmd(["cd", self.tracefs])
         if stderr:
             logging.fatal("""ERROR: accessing tracing. Root user? Kernel has FTRACE?
@@ -31,12 +31,6 @@ class DirectReclaimTracer():
             return
 
         util.chdir(self.tracefs)
-
-        full_outputdir = fileutils.build_full_output_dir(
-            basedir=outputdir, subdir=self.data_dir)
-        if not full_outputdir:
-            logging.fatal("ERROR: create outputdir failed")
-            return
 
         # setup trace, set opt
         _, stderr = util.run_cmd(["echo nop > current_tracer"], shell=True)
@@ -64,7 +58,7 @@ class DirectReclaimTracer():
         # collect trace
         time = self.ftrace_options["ftrace_time"] if "ftrace_time" in \
             self.ftrace_options and self.ftrace_options["ftrace_time"] else 60
-        util.run_cmd_for_a_while(["cat", "trace_pipe", ">", full_outputdir], time)
+        util.run_cmd_for_a_while(["cat trace_pipe > %s/%s" %(outputdir, data_file)], time, shell=True)
 
         # End tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
