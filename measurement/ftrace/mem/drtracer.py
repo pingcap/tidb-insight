@@ -23,11 +23,15 @@ class DirectReclaimTracer():
     def __init__(self, options={}):
         self.ftrace_options = options
 
-    def save_trace(self, cwd, outputdir):
+    def save_trace(self, cwd, outputdir=None):
         _, stderr = util.run_cmd(["cd", self.tracefs])
         if stderr:
             logging.fatal("""ERROR: accessing tracing. Root user? Kernel has FTRACE?
             debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)""")
+            return
+
+        if not outputdir:
+            logging.fatal("ERROR: please give a dir to save trace data")
             return
 
         util.chdir(self.tracefs)

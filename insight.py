@@ -48,12 +48,15 @@ class Insight():
     insight_trace = None
 
     def __init__(self, args):
-        if args.output:
-            self.outdir = args.output
         if not args.alias:
             self.alias = util.get_hostname()
-        self.full_outdir = fileutils.create_dir(
-            os.path.join(self.cwd, self.outdir, self.alias))
+        if args.output:
+            self.outdir = args.output
+            self.full_outdir = fileutils.create_dir(
+                os.path.join(self.outdir, self.alias))
+        else:
+            self.full_outdir = fileutils.create_dir(
+                os.path.join(self.cwd, self.outdir, self.alias))
         logging.debug("Output directory is: %s" % self.full_outdir)
 
     # data collected by `collector`
