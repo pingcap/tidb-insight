@@ -4,6 +4,8 @@
 import argparse
 import logging
 import os
+import sys
+import time
 
 from subprocess import Popen, PIPE
 try:
@@ -30,9 +32,22 @@ def cwd():
     return os.getcwd()
 
 
-def run_cmd(cmd):
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+def chdir(nwd):
+    return os.chdir(nwd)
+
+
+def is_abs_path(path):
+    return os.path.isabs(path)
+
+def run_cmd(cmd, shell=False):
+    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     return p.communicate()
+
+
+def run_cmd_for_a_while(cmd, duration, shell=False):
+    p = Popen(cmd, shell=shell)
+    time.sleep(duration)
+    p.kill()
 
 
 def parse_cmdline(cmdline):
@@ -114,6 +129,15 @@ def parse_insight_opts():
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
 
+    parser.add_argument("-f", "--ftrace", action="store_true", default=False,
+                        help="Collect trace info using ftrace. Disabled by default.")
+    parser.add_argument("--ftracepoint",  action="store", default=None,
+                        help="Tracepoint to be traced (only support to trace direct reclaim latency).")
+    parser.add_argument("--ftrace-time", type=int, action="store", default=None,
+                        help="Time period of ftrace recording, in seconds (default 60s).")
+    parser.add_argument("--ftrace-bufsize", action="store", default=None,
+                        help="Ftrace ring buffer size in kb (default 4096 kb).")
+
     return parser.parse_args()
 
 
@@ -146,3 +170,7 @@ def get_hostname():
     # This function is merely used, so only import socket package when necessary
     import socket
     return socket.gethostname()
+
+def python_version():
+    # get a numeric Python version
+    return sys.version_info[0] + sys.version_info[1] * 0.1

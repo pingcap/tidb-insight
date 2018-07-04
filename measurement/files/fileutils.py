@@ -3,13 +3,8 @@
 
 import logging
 import os
-import sys
 
 from measurement import util
-
-# get a numeric Python version
-python_version = sys.version_info[0] + sys.version_info[1] / 10
-
 
 # read data from file
 def read_file(filename):
@@ -54,7 +49,7 @@ def create_dir(path):
 def list_dir(path):
     file_list = []
     try:
-        if python_version >= 3.5:
+        if util.python_version() >= 3.5:
             for entry in os.scandir(path):
                 file_list.append("%s/%s" % (path, entry.name))
         else:
