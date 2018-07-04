@@ -33,6 +33,12 @@ class DirectReclaimTracer():
         orginalwd = os.getcwd()
         os.chdir(self.tracefs)
 
+        full_outputdir = fileutils.build_full_output_dir(
+            basedir=outputdir, subdir=self.data_dir)
+        if not full_outputdir:
+            logging.fatal("ERROR: create outputdir failed")
+            return
+
         # setup trace, set opt
         _, stderr = util.run_cmd(["echo nop > current_tracer"], shell=True)
         if stderr:
@@ -59,16 +65,10 @@ class DirectReclaimTracer():
         # collect trace
         time = self.ftrace_options["ftrace_time"] if "ftrace_time" in \
             self.ftrace_options and self.ftrace_options["ftrace_time"] else 60
-        full_outputdir = fileutils.build_full_output_dir(
-            basedir=outputdir, subdir=self.data_dir)
-        try:
-            _, stderr = util.run_cmd(["cat", "trace_pipe", ">", full_outputdir], timeout=time)
-            if stderr:
-                logging.fatal("ERROR: redirect trace_pipe failed")
-                os.chdir(originalwd)
-                return
-        except:
-            pass
+        p = Popen(["cat", "trace_pipe", ">", full_outputdir])
+        # wait to exit
+        time.Sleep(time)
+        p.kill()
 
         # End tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:

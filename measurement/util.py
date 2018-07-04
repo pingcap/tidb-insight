@@ -31,17 +31,9 @@ def cwd():
     return os.getcwd()
 
 
-def run_cmd(cmd, shell=False, timeout=None):
-    if python_version() >= 3.5:
-        p = Popen(cmd, shell=shell, timeout=timeout, stdout=PIPE, stderr=PIPE)
-        return p.communicate()
-    elif not timeout:
-        p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
-        return p.communicate()
-
-    p = Popen(cmd, shell=shell)
-    time.sleep(timeout)
-    return _, _
+def run_cmd(cmd, shell=False):
+    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+    return p.communicate()
 
 
 def parse_cmdline(cmdline):
@@ -126,7 +118,7 @@ def parse_insight_opts():
     parser.add_argument("-f", "--ftrace", action="store_true", default=False,
                         help="Collect trace info using ftrace. Disabled by default.")
     parser.add_argument("--ftracepoint",  action="store", default=None,
-                        help="Tracepoint to be traced")
+                        help="Tracepoint to be traced (only support to trace direct reclaim latency).")
     parser.add_argument("--ftrace-time", type=int, action="store", default=None,
                         help="Time period of ftrace recording, in seconds (default 60s).")
     parser.add_argument("--ftrace-bufsize", action="store", default=None,
@@ -167,4 +159,4 @@ def get_hostname():
 
 def python_version():
     # get a numeric Python version
-    return sys.version_info[0] + sys.version_info[1] / 10
+    return sys.version_info[0] + sys.version_info[1] * 0.1
