@@ -50,7 +50,7 @@ class Insight():
     def __init__(self, args):
         if not args.alias:
             self.alias = util.get_hostname()
-        if args.output:
+        if args.output and util.is_abs_path(args.output):
             self.outdir = args.output
             self.full_outdir = fileutils.create_dir(
                 os.path.join(self.outdir, self.alias))

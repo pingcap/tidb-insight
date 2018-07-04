@@ -36,6 +36,9 @@ def chdir(nwd):
     return os.chdir(nwd)
 
 
+def is_abs_path(path):
+    return os.path.isabs(path)
+
 def run_cmd(cmd, shell=False):
     p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     return p.communicate()
