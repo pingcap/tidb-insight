@@ -30,6 +30,8 @@ def pwd():
 def cwd():
     return os.getcwd()
 
+def chdir():
+    return os.chdir()
 
 def run_cmd(cmd, shell=False):
     p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)

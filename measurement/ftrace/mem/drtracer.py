@@ -2,6 +2,7 @@
 # Trace direct reclaim latency.
 
 import os
+import time
 import logging
 
 from measurement import util
@@ -30,8 +31,8 @@ class DirectReclaimTracer():
             debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)""")
             return
 
-        orginalwd = os.getcwd()
-        os.chdir(self.tracefs)
+        orginalwd = util.cwd()
+        util.chdir(self.tracefs)
 
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)

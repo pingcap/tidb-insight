@@ -19,7 +19,7 @@ class InsightFtrace():
         ftrace_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
 
-        if ftrace_outputdir is None:
+        if not ftrace_outputdir:
             return
 
         tracepoint = self.ftrace_options["ftracepoint"]
