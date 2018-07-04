@@ -3,6 +3,10 @@ data/
 
 .vscode/
 
+*.tar
+*.gz
+*.xz
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
