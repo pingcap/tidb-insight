@@ -47,7 +47,9 @@ class Insight():
     def __init__(self, args):
         if args.output:
             self.outdir = args.output
-        if not args.alias:
+        if args.alias:
+            self.alias = args.alias
+        else:
             self.alias = util.get_hostname()
         self.full_outdir = fileutils.create_dir(
             os.path.join(self.outdir, self.alias))
@@ -223,9 +225,7 @@ if __name__ == "__main__":
 
     insight = Insight(args)
 
-    if (not args.pid and not args.proc_listen_port
-        and not args.log_auto and not args.config_auto
-        ):
+    if (args.log_auto or args.config_auto):
         insight.collector()
         # check size of data folder of TiDB processes
         insight.get_datadir_size()
@@ -244,4 +244,4 @@ if __name__ == "__main__":
 
     # compress all output to tarball
     if args.compress:
-        fileutils.compress_tarball(insight.full_outdir, insight.alias)
+        fileutils.compress_tarball(insight.outdir, insight.alias)
