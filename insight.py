@@ -175,12 +175,12 @@ class Insight():
             return
         # reading logs requires root priviledge
         if not util.is_root_privilege():
-            logging.fatal("It's required to read logs with root priviledge.")
-            return
+            logging.warn("It's required to read logs with root priviledge.")
+            #return
 
         self.insight_logfiles = logfiles.InsightLogFiles(options=args)
-        proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
         if args.log_auto:
+            proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
             self.insight_logfiles.save_logfiles_auto(
                 proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
         else:
