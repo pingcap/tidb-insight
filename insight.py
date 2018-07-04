@@ -31,9 +31,11 @@ from measurement.files import fileutils
 from measurement.files import logfiles
 from measurement.process import meta as proc_meta
 from measurement.tidb import pdctl
+from measurement.ftrace import ftrace
 
 
 class Insight():
+    cwd = util.cwd()
     # data output dir
     outdir = "data"
     full_outdir = ""
@@ -43,14 +45,18 @@ class Insight():
     insight_logfiles = None
     insight_configfiles = None
     insight_pdctl = None
+    insight_trace = None
 
     def __init__(self, args):
-        if args.output:
-            self.outdir = args.output
         if not args.alias:
             self.alias = util.get_hostname()
-        self.full_outdir = fileutils.create_dir(
-            os.path.join(self.outdir, self.alias))
+        if args.output and util.is_abs_path(args.output):
+            self.outdir = args.output
+            self.full_outdir = fileutils.create_dir(
+                os.path.join(self.outdir, self.alias))
+        else:
+            self.full_outdir = fileutils.create_dir(
+                os.path.join(self.cwd, self.outdir, self.alias))
         logging.debug("Output directory is: %s" % self.full_outdir)
 
     # data collected by `collector`
@@ -125,6 +131,22 @@ class Insight():
         else:
             self.insight_perf = perf.InsightPerf(options=args)
         self.insight_perf.run(self.full_outdir)
+
+    def run_ftrace(self, args):
+        if not args.ftrace:
+            logging.debug("Ignoring collecting of ftrace data.")
+            return
+        # perf requires root priviledge
+        if not util.is_root_privilege():
+            logging.fatal("It's required to run ftrace with root priviledge.")
+            return
+
+        if args.ftracepoint:
+            self.insight_ftrace = ftrace.InsightFtrace(self.cwd, args)
+            self.insight_ftrace.run(self.full_outdir)
+        else:
+            logging.debug("Ignoring collecting of ftrace data, no tracepoint is chose.")
+
 
     def get_datadir_size(self):
         # du requires root priviledge to check data-dir
@@ -241,6 +263,9 @@ if __name__ == "__main__":
     if args.pdctl:
         # read and save `pd-ctl` info
         insight.read_pdctl(args)
+
+    # save ftrace data
+    insight.run_ftrace(args)
 
     # compress all output to tarball
     if args.compress:
