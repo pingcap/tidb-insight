@@ -33,9 +33,11 @@ from measurement.process import meta as proc_meta
 from measurement.tidb import pdctl
 from measurement.ftrace import ftrace
 
+
 class Insight():
+    cwd = util.cwd()
     # data output dir
-    outdir = "%s/data" % util.cwd()
+    outdir = "data"
     full_outdir = ""
     alias = ""
 
@@ -51,7 +53,7 @@ class Insight():
         if not args.alias:
             self.alias = util.get_hostname()
         self.full_outdir = fileutils.create_dir(
-            os.path.join(self.outdir, self.alias))
+            os.path.join(self.cwd, self.outdir, self.alias))
         logging.debug("Output directory is: %s" % self.full_outdir)
 
     # data collected by `collector`
@@ -137,7 +139,7 @@ class Insight():
             return
 
         if args.ftracepoint:
-            self.insight_ftrace = ftrace.InsightFtrace(args)
+            self.insight_ftrace = ftrace.InsightFtrace(args, self.cwd)
             self.insight_ftrace.run(self.full_outdir)
         else:
             logging.debug("Ignoring collecting of ftrace data, no tracepoint is chose.")

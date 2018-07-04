@@ -2,7 +2,6 @@
 # Trace direct reclaim latency.
 
 import os
-import time
 import logging
 
 from measurement import util
@@ -24,14 +23,13 @@ class DirectReclaimTracer():
     def __init__(self, options={}):
         self.ftrace_options = options
 
-    def save_trace(self, outputdir=None):
+    def save_trace(self, cwd, outputdir=None):
         _, stderr = util.run_cmd(["cd", self.tracefs])
         if stderr:
             logging.fatal("""ERROR: accessing tracing. Root user? Kernel has FTRACE?
             debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)""")
             return
 
-        orginalwd = util.cwd()
         util.chdir(self.tracefs)
 
         full_outputdir = fileutils.build_full_output_dir(
@@ -44,7 +42,7 @@ class DirectReclaimTracer():
         _, stderr = util.run_cmd(["echo nop > current_tracer"], shell=True)
         if stderr:
             logging.fatal("ERROR: reset current_tracer failed")
-            os.chdir(originalwd)
+            os.chdir(cwd)
             return
 
         bufsize_kb = self.ftrace_options["ftrace_bufsize"] if "ftrace_bufsize" in \
@@ -52,7 +50,7 @@ class DirectReclaimTracer():
         _, stderr = util.run_cmd(["echo %s > buffer_size_kb" % bufsize_kb], shell=True)
         if stderr:
             logging.fatal("ERROR: set bufsize_kb failed")
-            os.chdir(originalwd)
+            os.chdir(cwd)
             return
 
         # begin tracing
@@ -60,23 +58,20 @@ class DirectReclaimTracer():
             _, stderr = util.run_cmd(["echo 1 > %s" % event], shell=True)
             if stderr:
                 logging.fatal("ERROR: enable %s tracepoint failed" % event)
-                os.chdir(originalwd)
+                os.chdir(cwd)
                 return
 
         # collect trace
         time = self.ftrace_options["ftrace_time"] if "ftrace_time" in \
             self.ftrace_options and self.ftrace_options["ftrace_time"] else 60
-        p = Popen(["cat", "trace_pipe", ">", full_outputdir])
-        # wait to exit
-        time.Sleep(time)
-        p.kill()
+        util.run_cmd_for_a_while(["cat", "trace_pipe", ">", full_outputdir], time)
 
         # End tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
             _, stderr = util.run_cmd(["echo 0 > %s" % event], shell=True)
             if stderr:
                 logging.fatal("ERROR: disable %s tracepoint failed" % event)
-                os.chdir(originalwd)
+                os.chdir(cwd)
                 return
 
-        os.chdir(originalwd)
+        os.chdir(cwd)

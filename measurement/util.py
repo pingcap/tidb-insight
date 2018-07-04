@@ -5,6 +5,7 @@ import argparse
 import logging
 import os
 import sys
+import time
 
 from subprocess import Popen, PIPE
 try:
@@ -30,12 +31,20 @@ def pwd():
 def cwd():
     return os.getcwd()
 
+
 def chdir():
     return os.chdir()
+
 
 def run_cmd(cmd, shell=False):
     p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     return p.communicate()
+
+
+def run_cmd_for_a_while(cmd, duration, shell=False):
+    p = Popen(cmd, shell=shell)
+    time.sleep(duration)
+    p.kill()
 
 
 def parse_cmdline(cmdline):

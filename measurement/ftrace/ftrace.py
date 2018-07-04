@@ -8,11 +8,13 @@ from measurement.files import fileutils
 class InsightFtrace():
     # options about tracer
     ftrace_options = {}
+    cwd = ""
 
     # output dir
     data_dir = "ftracedata"
 
-    def __init__(self, options={}):
+    def __init__(self, cwd, options={}):
+        self.cwd = cwd
         self.ftrace_options = vars(options)
 
     def run(self, outputdir=None):
@@ -25,6 +27,6 @@ class InsightFtrace():
         tracepoint = self.ftrace_options["ftracepoint"]
         if tracepoint == "dr":
             tracer = drtracer.DirectReclaimTracer(self.ftrace_options)
-            tracer.save_trace(ftrace_outputdir)
+            tracer.save_trace(self.cwd, ftrace_outputdir)
         else:
             logging.debug("Tracepiont %s is not supported." % tracepoint)
