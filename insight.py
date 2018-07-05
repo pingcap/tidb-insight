@@ -116,13 +116,36 @@ class Insight():
         if not vmtouch_outdir:
             return
 
-        stdout, stderr = util.run_cmd([vmtouch_exec, "-v", args.vmtouch_target])
+        stdout, stderr = util.run_cmd(
+            [vmtouch_exec, "-v", args.vmtouch_target])
         if stderr:
             logging.info("vmtouch output:" % str(stderr))
+            return
         fileutils.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" %
                                           (args.vmtouch_target.replace("/", "_"),
                                            (time.time() * 1000))),
-                             stdout)
+                             str(stdout))
+
+    def run_blktrace(self, args):
+        if not args.blktrace:
+            logging.debug("Ingoring collecting of blktrace data.")
+            return
+        if not args.blktrace_target:
+            return
+
+        blktrace_outdir = fileutils.create_dir(
+            os.path.join(self.full_outdir, "blktrace"))
+        if not blktrace_outdir:
+            return
+
+        time = 60
+        if not args.blktrace_time:
+            time = args.blktrace_time
+        _, stderr = util.run_cmd_for_a_while(
+            ["blktrace", "-d", args.blktrace_target, "-D", blktrace_outdir], time)
+        if stderr:
+            logging.info("blktrace output:" % str(stderr))
+            return
 
     def run_perf(self, args):
         if not args.perf:
@@ -171,8 +194,8 @@ class Insight():
             self.insight_ftrace = ftrace.InsightFtrace(self.cwd, args)
             self.insight_ftrace.run(self.full_outdir)
         else:
-            logging.debug("Ignoring collecting of ftrace data, no tracepoint is chose.")
-
+            logging.debug(
+                "Ignoring collecting of ftrace data, no tracepoint is chose.")
 
     def get_datadir_size(self):
         # du requires root priviledge to check data-dir
@@ -222,7 +245,7 @@ class Insight():
         # reading logs requires root priviledge
         if not util.is_root_privilege():
             logging.warn("It's required to read logs with root priviledge.")
-            #return
+            # return
 
         self.insight_logfiles = logfiles.InsightLogFiles(options=args)
         if args.log_auto:
@@ -292,7 +315,8 @@ if __name__ == "__main__":
     insight.run_ftrace(args)
     # save vmtouch data
     insight.run_vmtouch(args)
-
+    # save blktrace data
+    insight.run_blktrace(args)
 
     # compress all output to tarball
     if args.compress:
