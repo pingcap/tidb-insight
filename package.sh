@@ -2,6 +2,7 @@
 
 # make a release tarball
 
+git submodule update --init --recursive
 if [ -z $1 ]; then
   RELVER=`git describe --tags`
 else
@@ -26,7 +27,7 @@ export GOROOT GOPATH
 
 # clean exist binaries
 rm -rf ${BUILD_ROOT}/tidb-insight-*
-mkdir -p ${BUILD_ROOT}/${RELPATH}/
+mkdir -p ${BUILD_ROOT}/${RELPATH}/bin
 cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${RELPATH}/
 
 cd ${BUILD_ROOT}/${RELPATH}/collector/
@@ -34,11 +35,15 @@ cd ${BUILD_ROOT}/${RELPATH}/collector/
 # prepare dependencies
 GOBIN=${GOROOT}/bin/go make deps
 # compile a static binary
-GOBIN=${GOROOT}/bin/go make static
+GOBIN=${GOROOT}/bin/go make static || exit 1
+
+cd ${BUILD_ROOT}/${RELPATH}/tools/vmtouch
+LDFLAGS="-static" make || exit 1
+install -Dsm755 vmtouch ${BUILD_ROOT}/${RELPATH}/bin
 
 # clean unecessary files
 cd ${BUILD_ROOT}/${RELPATH}
-rm -rf collector docs tests Makefile package.sh *.log
+rm -rf collector tools docs tests Makefile package.sh *.log
 find ${BUILD_ROOT}/${RELPATH} -name "*.pyc" | xargs rm
 
 # make tarball archive

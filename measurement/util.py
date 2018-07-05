@@ -138,6 +138,11 @@ def parse_insight_opts():
     parser.add_argument("--ftrace-bufsize", action="store", default=None,
                         help="Ftrace ring buffer size in kb (default 4096 kb).")
 
+    parser.add_argument("--vmtouch", action="store_true", default=False,
+                        help="Collect page cache info using vmtouch. Disabled by default.")
+    parser.add_argument("--vmtouch-target", action="store", default=None,
+                        help="File or dir to be diagnosed.")
+
     return parser.parse_args()
 
 

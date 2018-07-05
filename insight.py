@@ -21,6 +21,7 @@
 import json
 import logging
 import os
+import time
 
 from measurement import lsof
 from measurement import perf
@@ -100,6 +101,28 @@ class Insight():
         for k, v in self.collector_data.items():
             fileutils.write_file(os.path.join(collector_outdir, "%s.json" % k),
                                  json.dumps(v, indent=2))
+
+    def run_vmtouch(self, args):
+        if not args.vmtouch:
+            logging.debug("Ingoring collecting of vmtouch data.")
+            return
+        if not args.vmtouch_target:
+            return
+
+        base_dir = os.path.join(util.pwd(), "../")
+        vmtouch_exec = os.path.join(base_dir, "bin/vmtouch")
+        vmtouch_outdir = fileutils.create_dir(
+            os.path.join(self.full_outdir, "vmtouch"))
+        if not vmtouch_outdir:
+            return
+
+        stdout, stderr = util.run_cmd([vmtouch_exec, "-v", args.vmtouch_target])
+        if stderr:
+            logging.info("vmtouch output:" % str(stderr))
+        fileutils.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" %
+                                          (args.vmtouch_target.replace("/", "_"),
+                                           (time.time() * 1000))),
+                             stdout)
 
     def run_perf(self, args):
         if not args.perf:
@@ -267,6 +290,9 @@ if __name__ == "__main__":
 
     # save ftrace data
     insight.run_ftrace(args)
+    # save vmtouch data
+    insight.run_vmtouch(args)
+
 
     # compress all output to tarball
     if args.compress:

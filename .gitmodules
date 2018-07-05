@@ -1,0 +1,3 @@
+[submodule "tools/vmtouch"]
+	path = tools/vmtouch
+	url = https://github.com/hoytech/vmtouch
