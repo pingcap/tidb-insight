@@ -119,8 +119,9 @@ class Insight():
         stdout, stderr = util.run_cmd([vmtouch_exec, "-v", args.vmtouch_target])
         if stderr:
             logging.info("vmtouch output:" % str(stderr))
-        fileutils.write_file(os.path.join(vmtouch_outdir,
-                                          "%s.txt" % (time.time() * 1000)),
+        fileutils.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" %
+                                          (args.vmtouch_target.replace("/", "_"),
+                                           (time.time() * 1000))),
                              stdout)
 
     def run_perf(self, args):
