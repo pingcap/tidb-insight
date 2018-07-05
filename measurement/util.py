@@ -140,7 +140,7 @@ def parse_insight_opts():
 
     parser.add_argument("--vmtouch", action="store_true", default=False,
                         help="Collect page cache info using vmtouch. Disabled by default.")
-    parser.add_argument("--vmtouch-target", action="append", default=None,
+    parser.add_argument("--vmtouch-target", action="store", default=None,
                         help="File or dir to be diagnosed.")
 
     return parser.parse_args()

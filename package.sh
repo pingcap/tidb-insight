@@ -26,7 +26,7 @@ export GOROOT GOPATH
 
 # clean exist binaries
 rm -rf ${BUILD_ROOT}/tidb-insight-*
-mkdir -p ${BUILD_ROOT}/${RELPATH}/
+mkdir -p ${BUILD_ROOT}/${RELPATH}/bin
 cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${RELPATH}/
 
 cd ${BUILD_ROOT}/${RELPATH}/collector/
@@ -37,7 +37,7 @@ GOBIN=${GOROOT}/bin/go make deps
 GOBIN=${GOROOT}/bin/go make static
 
 cd ${BUILD_ROOT}/${RELPATH}/tools/vmtouch
-make
+make && mv vmtouch ${BUILD_ROOT}/${RELPATH}/bin
 
 # clean unecessary files
 cd ${BUILD_ROOT}/${RELPATH}

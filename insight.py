@@ -101,10 +101,11 @@ class Insight():
             fileutils.write_file(os.path.join(collector_outdir, "%s.json" % k),
                                  json.dumps(v, indent=2))
 
-    def vmtouch(self, args):
+    def run_vmtouch(self, args):
         if not args.vmtouch:
             logging.debug("Ingoring collecting of vmtouch data.")
             return
+
         base_dir = os.path.join(util.pwd(), "../")
         vmtouch_exec = os.path.join(base_dir, "bin/vmtouch")
         vmtouch_outdir = fileutils.create_dir(
@@ -285,6 +286,9 @@ if __name__ == "__main__":
 
     # save ftrace data
     insight.run_ftrace(args)
+    # save vmtouch data
+    insight.run_vmtouch(args)
+
 
     # compress all output to tarball
     if args.compress:
