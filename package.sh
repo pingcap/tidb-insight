@@ -36,6 +36,9 @@ GOBIN=${GOROOT}/bin/go make deps
 # compile a static binary
 GOBIN=${GOROOT}/bin/go make static
 
+cd ${BUILD_ROOT}/${RELPATH}/tools/vmtouch
+make
+
 # clean unecessary files
 cd ${BUILD_ROOT}/${RELPATH}
 rm -rf collector docs tests Makefile package.sh *.log

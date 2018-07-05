@@ -101,6 +101,24 @@ class Insight():
             fileutils.write_file(os.path.join(collector_outdir, "%s.json" % k),
                                  json.dumps(v, indent=2))
 
+    def vmtouch(self, args):
+        if not args.vmtouch:
+            logging.debug("Ingoring collecting of vmtouch data.")
+            return
+        base_dir = os.path.join(util.pwd(), "../")
+        vmtouch_exec = os.path.join(base_dir, "bin/vmtouch")
+        vmtouch_outdir = fileutils.create_dir(
+            os.path.join(self.full_outdir, "vmtouch"))
+
+        if not args.vmtouch_target:
+            return
+        stdout, stderr = util.run_cmd([vmtouch_exec, "-v", args.vmtouch_target])
+        if stderr:
+            logging.info("vmtouch output:" % str(stderr))
+        fileutils.write_file(os.path.join(vmtouch_outdir,
+                                          "%s.txt" % args.vmtouch_target),
+                             stdout)
+
     def run_perf(self, args):
         if not args.perf:
             logging.debug("Ignoring collecting of perf data.")
