@@ -26,26 +26,26 @@ GOPATH="${BUILD_ROOT}/.go"
 export GOROOT GOPATH
 
 # clean exist binaries
-rm -rf ${BUILD_ROOT}/tidb-insight-*
-mkdir -p ${BUILD_ROOT}/${RELPATH}/bin
-cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${RELPATH}/
+rm -rf ${BUILD_ROOT}/tidb-insight ${BUILD_ROOT}/${RELPATH}.tar.gz
+mkdir -p ${BUILD_ROOT}/tidb-insight
+cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/tidb-insight/
 
-cd ${BUILD_ROOT}/${RELPATH}/collector/
+cd ${BUILD_ROOT}/tidb-insight/collector/
 
 # prepare dependencies
 GOBIN=${GOROOT}/bin/go make deps
 # compile a static binary
 GOBIN=${GOROOT}/bin/go make static || exit 1
 
-cd ${BUILD_ROOT}/${RELPATH}/tools/vmtouch
+cd ${BUILD_ROOT}/tidb-insight/tools/vmtouch
 LDFLAGS="-static" make || exit 1
-install -Dsm755 vmtouch ${BUILD_ROOT}/${RELPATH}/bin
+install -Dsm755 vmtouch ${BUILD_ROOT}/tidb-insight/bin/
 
 # clean unecessary files
-cd ${BUILD_ROOT}/${RELPATH}
+cd ${BUILD_ROOT}/tidb-insight/
 rm -rf collector tools docs tests Makefile package.sh *.log
-find ${BUILD_ROOT}/${RELPATH} -name "*.pyc" | xargs rm
+find ${BUILD_ROOT}/tidb-insight/ -name "*.pyc" | xargs rm
 
 # make tarball archive
 cd ${BUILD_ROOT}
-tar zcf ${RELPATH}.tar.gz ${RELPATH}
+tar zcf ${RELPATH}.tar.gz tidb-insight
