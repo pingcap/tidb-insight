@@ -21,6 +21,7 @@
 import json
 import logging
 import os
+import time
 
 from measurement import lsof
 from measurement import perf
@@ -105,19 +106,21 @@ class Insight():
         if not args.vmtouch:
             logging.debug("Ingoring collecting of vmtouch data.")
             return
+        if not args.vmtouch_target:
+            return
 
         base_dir = os.path.join(util.pwd(), "../")
         vmtouch_exec = os.path.join(base_dir, "bin/vmtouch")
         vmtouch_outdir = fileutils.create_dir(
             os.path.join(self.full_outdir, "vmtouch"))
-
-        if not args.vmtouch_target:
+        if not vmtouch_outdir:
             return
+
         stdout, stderr = util.run_cmd([vmtouch_exec, "-v", args.vmtouch_target])
         if stderr:
             logging.info("vmtouch output:" % str(stderr))
         fileutils.write_file(os.path.join(vmtouch_outdir,
-                                          "%s.txt" % args.vmtouch_target),
+                                          "%s.txt" % (time.time() * 1000)),
                              stdout)
 
     def run_perf(self, args):

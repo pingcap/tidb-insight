@@ -2,6 +2,7 @@
 
 # make a release tarball
 
+git submodule update --init --recursive
 if [ -z $1 ]; then
   RELVER=`git describe --tags`
 else
