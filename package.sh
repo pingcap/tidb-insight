@@ -41,7 +41,7 @@ make
 
 # clean unecessary files
 cd ${BUILD_ROOT}/${RELPATH}
-rm -rf collector docs tests Makefile package.sh *.log
+rm -rf collector tools docs tests Makefile package.sh *.log
 find ${BUILD_ROOT}/${RELPATH} -name "*.pyc" | xargs rm
 
 # make tarball archive
