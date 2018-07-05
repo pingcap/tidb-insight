@@ -48,8 +48,11 @@ class Insight():
     insight_trace = None
 
     def __init__(self, args):
-        if not args.alias:
+        if args.alias:
+            self.alias = args.alias
+        else:
             self.alias = util.get_hostname()
+
         if args.output and util.is_abs_path(args.output):
             self.outdir = args.output
             self.full_outdir = fileutils.create_dir(
@@ -195,12 +198,12 @@ class Insight():
             return
         # reading logs requires root priviledge
         if not util.is_root_privilege():
-            logging.fatal("It's required to read logs with root priviledge.")
-            return
+            logging.warn("It's required to read logs with root priviledge.")
+            #return
 
         self.insight_logfiles = logfiles.InsightLogFiles(options=args)
-        proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
         if args.log_auto:
+            proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
             self.insight_logfiles.save_logfiles_auto(
                 proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
         else:
@@ -245,9 +248,7 @@ if __name__ == "__main__":
 
     insight = Insight(args)
 
-    if (not args.pid and not args.proc_listen_port
-        and not args.log_auto and not args.config_auto
-        ):
+    if (args.log_auto or args.config_auto):
         insight.collector()
         # check size of data folder of TiDB processes
         insight.get_datadir_size()
@@ -269,4 +270,4 @@ if __name__ == "__main__":
 
     # compress all output to tarball
     if args.compress:
-        fileutils.compress_tarball(insight.full_outdir, insight.alias)
+        fileutils.compress_tarball(insight.outdir, insight.alias)

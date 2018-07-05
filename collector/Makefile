@@ -5,8 +5,12 @@ ifeq "$(GOPATH)" ""
     $(error Please set the environment variable GOPATH before running `make`)
 endif
 
-GO        := go
-GOBUILD   := GOPATH=$(GOPATH) $(GO) build
+ifeq "$(GOBIN)" ""
+    GO    := GOPATH=$(GOPATH) go
+else
+    GO    := GOPATH=$(GOPATH) $(GOBIN)
+endif
+GOBUILD   := $(GO) build
 
 COMMIT    := $(shell git rev-parse HEAD)
 BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
@@ -26,6 +30,15 @@ debug:
 		-i *.go
 
 release:
+	$(GOBUILD) -ldflags '-w $(LDFLAGS)' \
+		-o ../bin/collector \
+		-i *.go
+
+deps:
+	$(GO) get ./...
+
+static:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
 		-o ../bin/collector \
 		-i *.go
