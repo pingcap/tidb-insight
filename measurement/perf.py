@@ -85,7 +85,7 @@ class InsightPerf():
         full_outputdir = fileutils.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
 
-        if full_outputdir is None:
+        if not full_outputdir:
             # something went wrong when setting output dir, exit without perfing
             # TODO: unified output: "Error when setting up output dir of perf data"
             return

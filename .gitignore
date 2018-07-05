@@ -2,6 +2,9 @@ bin/
 data/
 
 .vscode/
+.build/
+
+*.log
 
 # Binaries for programs and plugins
 *.exe
