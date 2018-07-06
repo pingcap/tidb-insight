@@ -130,7 +130,7 @@ def parse_insight_opts():
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
 
-    parser.add_argument("-f", "--ftrace", action="store_true", default=False,
+    parser.add_argument("--ftrace", action="store_true", default=False,
                         help="Collect trace info using ftrace. Disabled by default.")
     parser.add_argument("--ftracepoint",  action="store", default=None,
                         help="Tracepoint to be traced (only support to trace direct reclaim latency).")
@@ -144,7 +144,7 @@ def parse_insight_opts():
     parser.add_argument("--vmtouch-target", action="store", default=None,
                         help="File or dir to be diagnosed.")
 
-    parser.add_argument("-b", "--blktrace", action="store_true", default=False,
+    parser.add_argument("--blktrace", action="store_true", default=False,
                         help="Collect traces of the i/o traffic on block devices by blktrace. Disabled by default.")
     parser.add_argument("--blktrace-target",  action="store", default=None,
                         help="The device to trace")

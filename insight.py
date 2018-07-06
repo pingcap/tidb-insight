@@ -121,10 +121,8 @@ class Insight():
         if stderr:
             logging.info("vmtouch output:" % str(stderr))
             return
-        fileutils.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" %
-                                          (args.vmtouch_target.replace("/", "_"),
-                                           (time.time() * 1000))),
-                             str(stdout))
+        fileutils.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" % (
+            args.vmtouch_target.replace("/", "_"), (time.time() * 1000))), str(stdout))
 
     def run_blktrace(self, args):
         if not args.blktrace:
@@ -139,7 +137,7 @@ class Insight():
             return
 
         time = 60
-        if not args.blktrace_time:
+        if args.blktrace_time:
             time = args.blktrace_time
         _, stderr = util.run_cmd_for_a_while(
             ["blktrace", "-d", args.blktrace_target, "-D", blktrace_outdir], time)
