@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # make a release tarball
+PKGNAME=tidb-insight
 
 git submodule update --init --recursive
 if [ -z $1 ]; then
@@ -8,7 +9,7 @@ if [ -z $1 ]; then
 else
   RELVER=$1
 fi
-RELPATH=tidb-insight-${RELVER}
+RELPATH=${PKGNAME}-${RELVER}
 
 GO_RELEASE_BIN=go1.10.3.linux-amd64
 
@@ -21,31 +22,33 @@ if [ ! -f ${GO_RELEASE_BIN}.tar.gz ]; then
   tar zxf ${GO_RELEASE_BIN}.tar.gz
 fi
 
-GOROOT="${BUILD_ROOT}/go"
-GOPATH="${BUILD_ROOT}/.go"
-export GOROOT GOPATH
-
 # clean exist binaries
-rm -rf ${BUILD_ROOT}/tidb-insight ${BUILD_ROOT}/${RELPATH}.tar.gz
-mkdir -p ${BUILD_ROOT}/tidb-insight
-cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/tidb-insight/
-
-cd ${BUILD_ROOT}/tidb-insight/collector/
+rm -rf ${BUILD_ROOT}/${PKGNAME} ${BUILD_ROOT}/${PKGNAME}-*.tar.gz
+mkdir -p ${BUILD_ROOT}/${PKGNAME}
+cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${PKGNAME}/
 
 # prepare dependencies
-GOBIN=${GOROOT}/bin/go make deps
+GOROOT="${BUILD_ROOT}/go"
+GOPATH="${BUILD_ROOT}/${PKGNAME}"
+export GOROOT GOPATH
+
+cd ${BUILD_ROOT}/${PKGNAME}
+ln -sfv vendor src
+
 # compile a static binary
+cd ${BUILD_ROOT}/${PKGNAME}/collector/
 GOBIN=${GOROOT}/bin/go make static || exit 1
 
-cd ${BUILD_ROOT}/tidb-insight/tools/vmtouch
+# compile other tools
+cd ${BUILD_ROOT}/${PKGNAME}/tools/vmtouch
 LDFLAGS="-static" make || exit 1
-install -Dsm755 vmtouch ${BUILD_ROOT}/tidb-insight/bin/
+install -Dsm755 vmtouch ${BUILD_ROOT}/${PKGNAME}/bin/
 
 # clean unecessary files
-cd ${BUILD_ROOT}/tidb-insight/
-rm -rf collector tools docs tests Makefile package.sh *.log
-find ${BUILD_ROOT}/tidb-insight/ -name "*.pyc" | xargs rm
+cd ${BUILD_ROOT}/${PKGNAME}/
+rm -rf collector tools docs tests src vendor Makefile package.sh *.log
+find ${BUILD_ROOT}/${PKGNAME}/ -name "*.pyc" | xargs rm 2>/dev/null
 
 # make tarball archive
 cd ${BUILD_ROOT}
-tar zcf ${RELPATH}.tar.gz tidb-insight
+tar zcf ${RELPATH}.tar.gz ${PKGNAME}

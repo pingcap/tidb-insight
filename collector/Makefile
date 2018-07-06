@@ -30,12 +30,9 @@ debug:
 		-i *.go
 
 release:
-	$(GOBUILD) -ldflags '-w $(LDFLAGS)' \
+	$(GOBUILD) -ldflags '-s -w $(LDFLAGS)' \
 		-o ../bin/collector \
 		-i *.go
-
-deps:
-	$(GO) get ./...
 
 static:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
