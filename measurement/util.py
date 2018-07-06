@@ -39,6 +39,7 @@ def chdir(nwd):
 def is_abs_path(path):
     return os.path.isabs(path)
 
+
 def run_cmd(cmd, shell=False):
     p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     return p.communicate()
@@ -129,7 +130,7 @@ def parse_insight_opts():
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
 
-    parser.add_argument("-f", "--ftrace", action="store_true", default=False,
+    parser.add_argument("--ftrace", action="store_true", default=False,
                         help="Collect trace info using ftrace. Disabled by default.")
     parser.add_argument("--ftracepoint",  action="store", default=None,
                         help="Tracepoint to be traced (only support to trace direct reclaim latency).")
@@ -142,6 +143,13 @@ def parse_insight_opts():
                         help="Collect page cache info using vmtouch. Disabled by default.")
     parser.add_argument("--vmtouch-target", action="store", default=None,
                         help="File or dir to be diagnosed.")
+
+    parser.add_argument("--blktrace", action="store_true", default=False,
+                        help="Collect traces of the i/o traffic on block devices by blktrace. Disabled by default.")
+    parser.add_argument("--blktrace-target",  action="store", default=None,
+                        help="The device to trace")
+    parser.add_argument("--blktrace-time", type=int, action="store", default=None,
+                        help="Time period of blktrace recording, in seconds (default 60s).")
 
     return parser.parse_args()
 
@@ -175,6 +183,7 @@ def get_hostname():
     # This function is merely used, so only import socket package when necessary
     import socket
     return socket.gethostname()
+
 
 def python_version():
     # get a numeric Python version
