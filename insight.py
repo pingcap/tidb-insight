@@ -298,6 +298,8 @@ if __name__ == "__main__":
         insight.get_datadir_size()
         # list files opened by TiDB processes
         insight.get_lsof_tidb()
+    elif args.collector:
+        insight.collector()
     # WIP: call scripts that collect metrics of the node
     insight.run_perf(args)
     # save log files

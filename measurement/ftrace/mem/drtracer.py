@@ -45,7 +45,8 @@ class DirectReclaimTracer():
 
         bufsize_kb = self.ftrace_options["ftrace_bufsize"] if "ftrace_bufsize" in \
             self.ftrace_options and self.ftrace_options["ftrace_bufsize"] else "4096"
-        _, stderr = util.run_cmd(["echo %s > buffer_size_kb" % bufsize_kb], shell=True)
+        _, stderr = util.run_cmd(
+            ["echo %s > buffer_size_kb" % bufsize_kb], shell=True)
         if stderr:
             logging.fatal("ERROR: set bufsize_kb failed")
             os.chdir(cwd)
@@ -62,7 +63,8 @@ class DirectReclaimTracer():
         # collect trace
         time = self.ftrace_options["ftrace_time"] if "ftrace_time" in \
             self.ftrace_options and self.ftrace_options["ftrace_time"] else 60
-        util.run_cmd_for_a_while(["cat trace_pipe > %s/%s" %(outputdir, self.data_file)], time, shell=True)
+        util.run_cmd_for_a_while(
+            ["cat trace_pipe > %s/%s" % (outputdir, self.data_file)], time, shell=True)
 
         # End tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:

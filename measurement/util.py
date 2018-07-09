@@ -77,6 +77,8 @@ def parse_insight_opts():
                         help="The alias of this instance. This value be part of the name of output tarball.")
     parser.add_argument("-c", "--compress", action="store_true", default=False,
                         help="Compress all output files to a tarball, disabled by default.")
+    parser.add_argument("--collector", action="store_true", default=False,
+                        help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
 
     parser.add_argument("-p", "--perf", action="store_true", default=False,
                         help="Collect trace info using perf. Disabled by default.")
@@ -132,7 +134,7 @@ def parse_insight_opts():
 
     parser.add_argument("--ftrace", action="store_true", default=False,
                         help="Collect trace info using ftrace. Disabled by default.")
-    parser.add_argument("--ftracepoint",  action="store", default=None,
+    parser.add_argument("--ftracepoint", action="store", default=None,
                         help="Tracepoint to be traced (only support to trace direct reclaim latency).")
     parser.add_argument("--ftrace-time", type=int, action="store", default=None,
                         help="Time period of ftrace recording, in seconds (default 60s).")
@@ -146,7 +148,7 @@ def parse_insight_opts():
 
     parser.add_argument("--blktrace", action="store_true", default=False,
                         help="Collect traces of the i/o traffic on block devices by blktrace. Disabled by default.")
-    parser.add_argument("--blktrace-target",  action="store", default=None,
+    parser.add_argument("--blktrace-target", action="store", default=None,
                         help="The device to trace")
     parser.add_argument("--blktrace-time", type=int, action="store", default=None,
                         help="Time period of blktrace recording, in seconds (default 60s).")
