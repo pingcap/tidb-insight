@@ -15,4 +15,8 @@ vmtouch:
 	install -Dm755 tools/vmtouch/vmtouch bin/
 
 package:
-	./package.sh 2>package.err.log
+	./package.sh
+
+clean:
+	rm -rf bin
+	$(MAKE) -C tools/vmtouch $(MAKECMDGOALS)

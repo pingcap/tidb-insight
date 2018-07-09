@@ -32,8 +32,8 @@
     "net",
     "process"
   ]
-  revision = "e30b7839cd6161b2fbef5f187377a345157abe04"
-  version = "v2.17.05"
+  revision = "4a180b209f5f494e5923cfce81ea30ba23915877"
+  version = "v2.18.06"
 
 [[projects]]
   branch = "master"
@@ -41,9 +41,18 @@
   packages = ["."]
   revision = "bb4de0191aa41b5507caa14b0650cdbddcd9280b"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "ce36f3865eeb42541ce3f87f32f8462c5687befa"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f2f0769f9232ac7df78e431d57ac5d98b76e4029c085404e9fa209798dcb9556"
+  inputs-digest = "b5a3f371da70bbb872f3e24445178ec77d5c1a2a5a2d33c3bea0c11ed0d060a8"
   solver-name = "gps-cdcl"
   solver-version = 1
