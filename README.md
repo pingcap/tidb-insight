@@ -24,10 +24,10 @@ It is recommended to run this script with the root privilege.
 The following features have been implemented:
 
  - Record `perf` data of the whole system, TiDB modules, or specific process. (disabled by default)
- - Check the file size of TiDB modules' data directories. (enabled by default)
+ - Check the file size of TiDB modules' data directories. (disabled by default)
  - Collect and save log files of TiDB modules or system. (disabled by default)
  - Collect and save various configuration files of system. (disabled by default)
- - Query PD API to collect runtime information of the TiDB cluster. (enabled by default)
+ - Query PD API to collect runtime information of the TiDB cluster. (disabled by default)
 
 ### Usage
 
@@ -169,7 +169,9 @@ The `tidb-insight` project is designed to intergrate with [tidb-ansible](https:/
 
 > All collecting features will be disabled by default after the development of intergration is finished, so it's highly recommended to specify all the arguments needed when using `tidb-insight` now, even if the feature is currently enabled by default.
 
-TO DO: Add documents/links to documents of using `tidb-insight` with `tidb-ansible`.
+The `tidb-insight` tarball is included in `tidb-ansible` as part of playbook `collect_diagnosis`, it deploies the pre-build `tidb-insight` dependencies and tools, as well as scripts to target server. Several tasks can be called directly from `ansible-playbook` such as collecting log files of all deployed TiDB/TiKV/PD instances (While `--log-auto` of `tidb-insight` only collects log files of running processes), and copy them back to the controller server in `.tar.gz` format.
+
+There might be features that are not yet implemented or enabled in `tidb-ansible`, that users can login to target server to call `tidb-insight` by hand. The package is located at `deploy/scripts/tidb-insight` on target server.
 
 ## Insight
 
