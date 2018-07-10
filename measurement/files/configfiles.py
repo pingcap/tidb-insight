@@ -86,7 +86,7 @@ class InsightConfigFiles():
         output_dir = os.path.join(output_base, output_name)
 
         # prepare output directory
-        if not fileutils.create_dir(output_dir):
+        if not fileutils.build_full_output_dir(basedir=output_dir, subdir=self.config_dir):
             logging.fatal("Failed to prepare output dir.")
             return
 

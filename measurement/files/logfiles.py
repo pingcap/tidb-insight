@@ -123,8 +123,8 @@ class InsightLogFiles():
         # the output tarball name
         output_name = "%s_%s" % (file_prefix, self.log_options.alias)
         # the full path of output directory
-        output_dir = fileutils.create_dir(
-            os.path.join(output_base, output_name))
+        output_dir = fileutils.build_full_output_dir(
+            basedir=os.path.join(output_base, output_name), subdir=self.log_dir)
 
         # copy valid log files to output directory
         file_list = self.get_filelist_in_time(source_dir, file_prefix,
