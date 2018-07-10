@@ -7,6 +7,8 @@ import os
 from measurement import util
 
 # read data from file
+
+
 def read_file(filename):
     data = None
     with open(filename, 'r') as f:
