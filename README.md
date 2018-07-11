@@ -28,6 +28,12 @@ The following features have been implemented:
  - Collect and save log files of TiDB modules or system. (disabled by default)
  - Collect and save various configuration files of system. (disabled by default)
  - Query PD API to collect runtime information of the TiDB cluster. (disabled by default)
+ - Record `direct reclaim latency` data of the whole system. (disabled by default)
+   When the system has low memory remaining, and `watch -n 1 -d "cat /proc/vmstat | grep allocstall"`
+   continues to grow, and the processes latencies are higher than usual, you should enable it.
+ - Record the loading of a file or all files in a path in the page cache. (disabled by default)
+   When the system's page cache is used too much, you can enable it.
+ - Record `block IO latency` data of the disk. (disabled by default)
 
 ### Usage
 
