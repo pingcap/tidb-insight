@@ -77,11 +77,11 @@ class PDCtl():
         pd_health = self.read_health()
         if pd_health:
             fileutils.write_file(os.path.join(
-                full_outputdir, "%s-health.json" % self.pd_host), pd_health)
+                full_outputdir, "%s_%s-health.json" % self.pd_host, self.pd_port), pd_health)
         pd_diagnose = self.read_diagnose()
         if pd_diagnose:
             fileutils.write_file(os.path.join(
-                full_outputdir, "%s-diagnose.json" % self.pd_host), pd_diagnose)
+                full_outputdir, "%s_%s-diagnose.json" % self.pd_host, self.pd_port), pd_diagnose)
 
         for key, info in self.read_runtime_info().items():
             if not info:
