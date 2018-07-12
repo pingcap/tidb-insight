@@ -87,4 +87,4 @@ class PDCtl():
             if not info:
                 continue
             fileutils.write_file(os.path.join(
-                full_outputdir, "%s-%s.json" % (self.pd_host, key)), info)
+                full_outputdir, "%s_%s-%s.json" % (self.pd_host, self.pd_port, key)), info)
