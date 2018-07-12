@@ -24,9 +24,20 @@ type TimeStat struct {
 }
 
 func (ts *TimeStat) getNTPInfo() {
-	syncd, err := exec.LookPath("ntpq")
-	if err != nil {
+	// try common locations first, then search PATH, this could cover some
+	// contitions when PATH is not correctly set on calling `collector`
+	var syncdBinPaths = []string{"/usr/sbin/ntpq", "/usr/bin/ntpq", "ntpq"}
+	var syncd string
+	var err error
+	for _, syncdPath := range syncdBinPaths {
+		if syncd, err = exec.LookPath(syncdPath); err == nil {
+			// use the first found exec
+			break
+		}
 		ts.Ver = err.Error()
+	}
+	// when no `ntpq` found, just return
+	if syncd == "" {
 		return
 	}
 
