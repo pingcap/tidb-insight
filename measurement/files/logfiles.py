@@ -130,7 +130,7 @@ class InsightLogFiles():
         file_list = self.get_filelist_in_time(source_dir, file_prefix,
                                               time.time(), retention_hour)
         for file in file_list:
-            if output_name in file:
+            if self.log_options.alias in file:
                 # Skip output files if source and output are the same directory
                 continue
             shutil.copy(file, output_dir)
