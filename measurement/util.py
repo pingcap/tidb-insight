@@ -74,18 +74,18 @@ def parse_insight_opts():
     parser.add_argument("-o", "--output", action="store", default=None,
                         help="The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.")
     parser.add_argument("--alias", action="store", default=None,
-                        help="The alias of this instance. This value be part of the name of output tarball.")
+                        help="The alias of this instance. This value will be part of the name of output tarball. If not set, the hostname of server will be used by default.")
     parser.add_argument("-c", "--compress", action="store_true", default=False,
-                        help="Compress all output files to a tarball, disabled by default.")
+                        help="Compress all output files to a tarball and delete temporary files, disabled by default.")
     parser.add_argument("--collector", action="store_true", default=False,
                         help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
 
     parser.add_argument("-p", "--perf", action="store_true", default=False,
                         help="Collect trace info using perf. Disabled by default.")
     parser.add_argument("--pid", type=int, action="append", default=None,
-                        help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
+                        help="PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.")
     parser.add_argument("--proc-listen-port", action="store", type=int, default=None,
-                        help="Collect perf data of process that listen on given port. This value will be ignored if `--pid` is set.")
+                        help="Collect perf data of process that listening on given port. This value will be ignored if `--pid` is set.")
     parser.add_argument("--proc-listen-proto", action="store", default=None,
                         help="Protocol type of listen port, available values are: tcp/udp. If not set, only TCP listening ports are checked.")
     parser.add_argument("--tidb-proc", action="store_true", default=False,
@@ -97,10 +97,10 @@ def parse_insight_opts():
     parser.add_argument("--perf-time", type=int, action="store", default=None,
                         help="Time period of perf recording, in seconds.")
     parser.add_argument("--perf-archive", action="store_true", default=False,
-                        help="Run `perf archive` after collecting data, useful when reading data on another machine. Disabled by default.")
+                        help="Run `perf archive` after collecting data, useful when reading data on another machine, may cause large output file size. Disabled by default.")
 
     parser.add_argument("-l", "--log", action="store_true", default=False,
-                        help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
+                        help="Collect log files in output. PD/TiDB/TiKV logs are included by default if no other argument is given.")
     parser.add_argument("--syslog", action="store_true", default=False,
                         help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
     parser.add_argument("--log-auto", action="store_true", default=False,
@@ -110,7 +110,7 @@ def parse_insight_opts():
     parser.add_argument("--log-prefix", action="store", default=None,
                         help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
     parser.add_argument("--log-retention", action="store", type=int, default=0,
-                        help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time check.")
+                        help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default means no time limit.")
 
     parser.add_argument("--config-file", action="store_true", default=False,
                         help="Collect various configuration files in output, disabled by default.")
