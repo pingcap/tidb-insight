@@ -40,8 +40,8 @@ The following features have been implemented:
 For a full list of arguments, you may refer to the output of `insight.py -h`:
 
 ```
-usage: insight.py [-h] [-o OUTPUT] [--alias ALIAS] [-c] [-p] [--pid PID]
-                  [--proc-listen-port PROC_LISTEN_PORT]
+usage: insight.py [-h] [-o OUTPUT] [--alias ALIAS] [-c] [--collector] [-p]
+                  [--pid PID] [--proc-listen-port PROC_LISTEN_PORT]
                   [--proc-listen-proto PROC_LISTEN_PROTO] [--tidb-proc]
                   [--perf-exec PERF_EXEC] [--perf-freq PERF_FREQ]
                   [--perf-time PERF_TIME] [--perf-archive] [-l] [--syslog]
@@ -64,18 +64,21 @@ optional arguments:
                         The directory to store output data of TiDB Insight.
                         Any existing file will be overwritten without futher
                         confirmation.
-  --alias ALIAS         The alias of this instance. This value be part of the
-                        name of output tarball. If not set, the hostname of
-                        server will be used by default.
+  --alias ALIAS         The alias of this instance. This value will be part of
+                        the name of output tarball. If not set, the hostname
+                        of server will be used by default.
   -c, --compress        Compress all output files to a tarball and delete
                         temporary files, disabled by default.
+  --collector           Run `collector`, which collects basic information of
+                        system, if `--log-auto` or `--config-auto` is set,
+                        collector will be called as well. Disabled by default.
   -p, --perf            Collect trace info using perf. Disabled by default.
   --pid PID             PID of process to run perf on. If `-p`/`--perf` is not
                         set, this value will not take effect. Multiple PIDs
                         can be set by using more than one `--pid` argument.
                         `None` by default which means the whole system.
   --proc-listen-port PROC_LISTEN_PORT
-                        Collect perf data of process that listen on given
+                        Collect perf data of process that listening on given
                         port. This value will be ignored if `--pid` is set.
   --proc-listen-proto PROC_LISTEN_PROTO
                         Protocol type of listen port, available values are:
@@ -93,7 +96,7 @@ optional arguments:
                         reading data on another machine, may cause large
                         output file size. Disabled by default.
   -l, --log             Collect log files in output. PD/TiDB/TiKV logs are
-                        included by default if no other argument given.
+                        included by default if no other argument is given.
   --syslog              Collect the system log in output. This may
                         significantly increase output size. If `-l/--log` is
                         not set, the system log will be ignored.
@@ -110,7 +113,7 @@ optional arguments:
                         given time period from current time will not be
                         included. Value should be a number of hour(s) in
                         positive interger. `0` by default and means no time
-                        check.
+                        limit.
   --config-file         Collect various configuration files in output,
                         disabled by default.
   --config-auto         Automatically detect and save configuration files for
@@ -175,9 +178,9 @@ The `tidb-insight` project is designed to intergrate with [tidb-ansible](https:/
 
 > All collecting features will be disabled by default after the development of intergration is finished, so it's highly recommended to specify all the arguments needed when using `tidb-insight` now, even if the feature is currently enabled by default.
 
-The `tidb-insight` tarball is included in `tidb-ansible` as part of playbook `collect_diagnosis`, it deploies the pre-build `tidb-insight` dependencies and tools, as well as scripts to target server. Several tasks can be called directly from `ansible-playbook` such as collecting log files of all deployed TiDB/TiKV/PD instances (While `--log-auto` of `tidb-insight` only collects log files of running processes), and copy them back to the controller server in `.tar.gz` format.
+The `tidb-insight` tarball is included in `tidb-ansible` as part of playbook `collect_diagnosis`, it deploys the pre-build `tidb-insight` dependencies and tools, as well as scripts to the target server. Several tasks can be called directly from `ansible-playbook` such as collecting log files of all deployed TiDB/TiKV/PD instances (While `--log-auto` of `tidb-insight` only collects log files of running processes), and copy them back to the controller server in `.tar.gz` format.
 
-There might be features that are not yet implemented or enabled in `tidb-ansible`, that users can login to target server to call `tidb-insight` by hand. The package is located at `deploy/scripts/tidb-insight` on target server.
+There might be features that are not yet implemented or enabled in `tidb-ansible`. Users can login to the target server to call `tidb-insight` and execute these features by hand. The package is located at `deploy/scripts/tidb-insight` on the target server.
 
 ## Insight
 
