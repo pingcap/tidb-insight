@@ -112,8 +112,7 @@ optional arguments:
                         The time of log retention, any log files older than
                         given time period from current time will not be
                         included. Value should be a number of hour(s) in
-                        positive interger. `0` by default and means no time
-                        limit.
+                        positive interger. `0` by default means no time limit.
   --config-file         Collect various configuration files in output,
                         disabled by default.
   --config-auto         Automatically detect and save configuration files for

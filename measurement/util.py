@@ -110,7 +110,7 @@ def parse_insight_opts():
     parser.add_argument("--log-prefix", action="store", default=None,
                         help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
     parser.add_argument("--log-retention", action="store", type=int, default=0,
-                        help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time limit.")
+                        help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default means no time limit.")
 
     parser.add_argument("--config-file", action="store_true", default=False,
                         help="Collect various configuration files in output, disabled by default.")
