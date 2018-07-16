@@ -48,6 +48,7 @@ install -Dsm755 vmtouch ${BUILD_ROOT}/${PKGNAME}/bin/
 cd ${BUILD_ROOT}/${PKGNAME}/
 rm -rf collector data tools docs tests src vendor pkg Makefile package.sh Gopkg.* *.log
 find ${BUILD_ROOT}/${PKGNAME}/ -name "*.pyc" | xargs rm 2>/dev/null
+find ${BUILD_ROOT}/${PKGNAME}/ -name "__pycache__" | xargs rm -rf 2>/dev/null
 find ${BUILD_ROOT}/${PKGNAME}/ -name "*.out" | xargs rm 2>/dev/null
 
 # make tarball archive
