@@ -7,7 +7,7 @@
 from os import path
 
 from utils import util
-from utils import files
+from utils import fileopt
 
 
 class InsightPerf():

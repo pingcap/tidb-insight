@@ -2,7 +2,7 @@
 import logging
 import os
 
-from utils import files
+from utils import fileopt
 
 
 def find_process_by_port(port=None, protocol=None):

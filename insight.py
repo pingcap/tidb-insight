@@ -28,7 +28,7 @@ from runtime import perf
 from utils import space
 from utils import util
 from file import configfiles
-from utils import files
+from utils import fileopt
 from file import logfiles
 from utils.process import meta as proc_meta
 from app.tidb import pdctl

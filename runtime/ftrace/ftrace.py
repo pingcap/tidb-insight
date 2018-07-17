@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # Collect stack trace with `ftrace`
 
+import logging
+
 from runtime.ftrace.mem import drtracer
-from utils import files
+from utils import fileopt
 
 
 class InsightFtrace():

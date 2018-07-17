@@ -10,7 +10,7 @@ import time
 from glob import glob
 
 from utils import util
-from utils import files
+from utils import fileopt
 
 
 class InsightLogFiles():

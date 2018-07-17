@@ -5,7 +5,7 @@ import os
 import logging
 
 from utils import util
-from utils import files
+from utils import fileopt
 
 
 class DirectReclaimTracer():
