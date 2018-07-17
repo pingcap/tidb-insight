@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # List open files of process by `lsof`
 
-from measurement import util
+from utils import util
 
 
 # list open files of process by `lsof`

@@ -6,8 +6,8 @@
 
 from os import path
 
-from measurement import util
-from measurement.files import fileutils
+from utils import util
+from utils import files
 
 
 class InsightPerf():
@@ -82,7 +82,7 @@ class InsightPerf():
 
     def run(self, outputdir=None):
         # set output path of perf data
-        full_outputdir = fileutils.build_full_output_dir(
+        full_outputdir = fileopt.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
 
         if not full_outputdir:
@@ -97,30 +97,30 @@ class InsightPerf():
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
                 if stdout:
-                    fileutils.write_file(
+                    fileopt.write_file(
                         path.join(full_outputdir, "%s.stdout" % pname), stdout)
                 if stderr:
-                    fileutils.write_file(
+                    fileopt.write_file(
                         path.join(full_outputdir, "%s.stderr" % pname), stderr)
                 if self.perf_options.perf_archive:
                     cmd = self.build_archive_cmd(pid, pname, full_outputdir)
                     stdout, stderr = util.run_cmd(cmd)
                     if stderr:
-                        fileutils.write_file(
+                        fileopt.write_file(
                             path.join(full_outputdir, "%s.archive.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_record_cmd()
             stdout, stderr = util.run_cmd(cmd)
             if stdout:
-                fileutils.write_file(
+                fileopt.write_file(
                     path.join(full_outputdir, "perf.stdout"), stdout)
             if stderr:
-                fileutils.write_file(
+                fileopt.write_file(
                     path.join(full_outputdir, "perf.stderr"), stderr)
             if self.perf_options.perf_archive:
                 cmd = self.build_archive_cmd()
                 stdout, stderr = util.run_cmd(cmd)
                 if stderr:
-                    fileutils.write_file(
+                    fileopt.write_file(
                         path.join(full_outputdir, "perf.archive.stderr"), stderr)

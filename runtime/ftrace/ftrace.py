@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Collect stack trace with `ftrace`
 
-from measurement.ftrace.mem import drtracer
-from measurement.files import fileutils
+from runtime.ftrace.mem import drtracer
+from utils import files
 
 
 class InsightFtrace():
@@ -18,7 +18,7 @@ class InsightFtrace():
         self.ftrace_options = vars(options)
 
     def run(self, outputdir=None):
-        ftrace_outputdir = fileutils.build_full_output_dir(
+        ftrace_outputdir = fileopt.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
 
         if not ftrace_outputdir:

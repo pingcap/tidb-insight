@@ -3,8 +3,8 @@
 
 import os
 
-from measurement import util
-from measurement.files import fileutils
+from utils import util
+from utils import files
 
 
 class PDCtl():
@@ -72,19 +72,19 @@ class PDCtl():
         return runtime_info
 
     def save_info(self, basedir=None):
-        full_outputdir = fileutils.build_full_output_dir(
+        full_outputdir = fileopt.build_full_output_dir(
             basedir=basedir, subdir=self.pdctl_dir)
         pd_health = self.read_health()
         if pd_health:
-            fileutils.write_file(os.path.join(
+            fileopt.write_file(os.path.join(
                 full_outputdir, "%s_%s-health.json" % (self.pd_host, self.pd_port)), pd_health)
         pd_diagnose = self.read_diagnose()
         if pd_diagnose:
-            fileutils.write_file(os.path.join(
+            fileopt.write_file(os.path.join(
                 full_outputdir, "%s_%s-diagnose.json" % (self.pd_host, self.pd_port)), pd_diagnose)
 
         for key, info in self.read_runtime_info().items():
             if not info:
                 continue
-            fileutils.write_file(os.path.join(
+            fileopt.write_file(os.path.join(
                 full_outputdir, "%s_%s-%s.json" % (self.pd_host, self.pd_port, key)), info)

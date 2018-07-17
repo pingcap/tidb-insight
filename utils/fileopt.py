@@ -4,7 +4,7 @@
 import logging
 import os
 
-from measurement import util
+from utils import util
 
 # read data from file
 

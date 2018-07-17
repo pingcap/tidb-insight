@@ -9,8 +9,8 @@ import time
 
 from glob import glob
 
-from measurement import util
-from measurement.files import fileutils
+from utils import util
+from utils import files
 
 
 class InsightLogFiles():
@@ -66,7 +66,7 @@ class InsightLogFiles():
         if not logfile:
             return
         # set full output path for log files
-        full_outputdir = fileutils.build_full_output_dir(
+        full_outputdir = fileopt.build_full_output_dir(
             basedir=outputdir, subdir=self.log_dir)
         if not savename:
             shutil.copy(logfile, full_outputdir)
@@ -116,14 +116,14 @@ class InsightLogFiles():
         retention_hour = self.log_options.log_retention
 
         # prepare output directory
-        if not fileutils.create_dir(output_base):
+        if not files.create_dir(output_base):
             logging.fatal("Failed to prepare output dir")
             return
 
         # the output tarball name
         output_name = "%s_%s" % (file_prefix, self.log_options.alias)
         # the full path of output directory
-        output_dir = fileutils.build_full_output_dir(
+        output_dir = fileopt.build_full_output_dir(
             basedir=os.path.join(output_base, output_name), subdir=self.log_dir)
 
         # copy valid log files to output directory

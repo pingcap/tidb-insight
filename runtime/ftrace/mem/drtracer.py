@@ -4,8 +4,8 @@
 import os
 import logging
 
-from measurement import util
-from measurement.files import fileutils
+from utils import util
+from utils import files
 
 
 class DirectReclaimTracer():

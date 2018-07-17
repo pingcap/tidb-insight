@@ -7,12 +7,12 @@ import shutil
 
 from glob import glob
 
-from measurement import util
-from measurement.files import fileutils
+from utils import util
+from utils import files
 
 
 class InsightConfigFiles():
-    # options about logfiles
+    # options about files
     config_options = {}
 
     # output dir
@@ -26,14 +26,14 @@ class InsightConfigFiles():
         path_limit_file = "/etc/security/limits.conf"
 
         # save output of `sysctl -a`
-        full_outputdir = fileutils.build_full_output_dir(
+        full_outputdir = fileopt.build_full_output_dir(
             basedir=outputdir, subdir=self.config_dir)
         stdout, stderr = util.run_cmd(cmd)
         if stdout:
-            fileutils.write_file(os.path.join(
+            fileopt.write_file(os.path.join(
                 full_outputdir, "sysctl.conf"), stdout)
         if stderr:
-            fileutils.write_file(os.path.join(
+            fileopt.write_file(os.path.join(
                 full_outputdir, "sysctl.err"), stderr)
 
         # save system limits.conf
@@ -49,7 +49,7 @@ class InsightConfigFiles():
         return
 
     def save_configs_auto(self, proc_cmdline=None, outputdir=None):
-        full_outputdir = fileutils.build_full_output_dir(
+        full_outputdir = fileopt.build_full_output_dir(
             basedir=outputdir, subdir=self.config_dir)
         for pid, cmdline in proc_cmdline.items():
             proc_configfile = self.find_tidb_configfiles(cmdline)
@@ -82,13 +82,13 @@ class InsightConfigFiles():
         file_prefix = self.config_options.config_prefix
 
         # prepare output directory
-        if not fileutils.create_dir(output_base):
+        if not files.create_dir(output_base):
             logging.fatal("Failed to prepare output dir.")
             return
 
         # the full path of output directory
         output_name = "%s_%s" % (file_prefix, self.config_options.alias)
-        output_dir = fileutils.build_full_output_dir(
+        output_dir = fileopt.build_full_output_dir(
             basedir=os.path.join(output_base, output_name), subdir=self.config_dir)
 
         file_list = list_config_files(source_dir, file_prefix)

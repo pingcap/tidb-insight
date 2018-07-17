@@ -23,16 +23,16 @@ import logging
 import os
 import time
 
-from measurement import lsof
-from measurement import perf
-from measurement import space
-from measurement import util
-from measurement.files import configfiles
-from measurement.files import fileutils
-from measurement.files import logfiles
-from measurement.process import meta as proc_meta
-from measurement.tidb import pdctl
-from measurement.ftrace import ftrace
+from utils import lsof
+from runtime import perf
+from utils import space
+from utils import util
+from file import configfiles
+from utils import files
+from file import logfiles
+from utils.process import meta as proc_meta
+from app.tidb import pdctl
+from runtime.ftrace import ftrace
 
 
 class Insight():
@@ -56,10 +56,10 @@ class Insight():
 
         if args.output and util.is_abs_path(args.output):
             self.outdir = args.output
-            self.full_outdir = fileutils.create_dir(
+            self.full_outdir = fileopt.create_dir(
                 os.path.join(self.outdir, self.alias))
         else:
-            self.full_outdir = fileutils.create_dir(
+            self.full_outdir = fileopt.create_dir(
                 os.path.join(self.cwd, self.outdir, self.alias))
         logging.debug("Output directory is: %s" % self.full_outdir)
 
@@ -85,7 +85,7 @@ class Insight():
         # call `collector` and store data to output dir
         base_dir = os.path.join(util.pwd(), "../")
         collector_exec = os.path.join(base_dir, "bin/collector")
-        collector_outdir = fileutils.create_dir(
+        collector_outdir = fileopt.create_dir(
             os.path.join(self.full_outdir, "collector"))
 
         stdout, stderr = util.run_cmd(collector_exec)
@@ -99,7 +99,7 @@ class Insight():
 
         # save various info to seperate .json files
         for k, v in self.collector_data.items():
-            fileutils.write_file(os.path.join(collector_outdir, "%s.json" % k),
+            fileopt.write_file(os.path.join(collector_outdir, "%s.json" % k),
                                  json.dumps(v, indent=2))
 
     def run_vmtouch(self, args):
@@ -111,7 +111,7 @@ class Insight():
 
         base_dir = os.path.join(util.pwd(), "../")
         vmtouch_exec = os.path.join(base_dir, "bin/vmtouch")
-        vmtouch_outdir = fileutils.create_dir(
+        vmtouch_outdir = fileopt.create_dir(
             os.path.join(self.full_outdir, "vmtouch"))
         if not vmtouch_outdir:
             return
@@ -121,7 +121,7 @@ class Insight():
         if stderr:
             logging.info("vmtouch output:" % str(stderr))
             return
-        fileutils.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" % (
+        fileopt.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" % (
             args.vmtouch_target.replace("/", "_"), (time.time() * 1000))), str(stdout))
 
     def run_blktrace(self, args):
@@ -131,7 +131,7 @@ class Insight():
         if not args.blktrace_target:
             return
 
-        blktrace_outdir = fileutils.create_dir(
+        blktrace_outdir = fileopt.create_dir(
             os.path.join(self.full_outdir, "blktrace"))
         if not blktrace_outdir:
             return
@@ -215,10 +215,10 @@ class Insight():
             else:
                 stdout, stderr = space.du_total(data_dir)
             if stdout:
-                fileutils.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
+                fileopt.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
                                      stdout)
             if stderr:
-                fileutils.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
+                fileopt.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
                                      stderr)
 
     def get_lsof_tidb(self):
@@ -230,10 +230,10 @@ class Insight():
         for proc in self.collector_data["proc_stats"]:
             stdout, stderr = lsof.lsof(proc["pid"])
             if stdout:
-                fileutils.write_file(os.path.join(self.full_outdir, "lsof-%s") % proc["pid"],
+                fileopt.write_file(os.path.join(self.full_outdir, "lsof-%s") % proc["pid"],
                                      stdout)
             if stderr:
-                fileutils.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
+                fileopt.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
                                      stderr)
 
     def save_logfiles(self, args):
@@ -320,4 +320,4 @@ if __name__ == "__main__":
 
     # compress all output to tarball
     if args.compress:
-        fileutils.compress_tarball(insight.outdir, insight.alias)
+        fileopt.compress_tarball(insight.outdir, insight.alias)
