@@ -100,10 +100,10 @@ class Insight():
         # save various info to seperate .json files
         for k, v in self.collector_data.items():
             fileopt.write_file(os.path.join(collector_outdir, "%s.json" % k),
-                                 json.dumps(v, indent=2))
+                               json.dumps(v, indent=2))
 
     def run_vmtouch(self, args):
-        if not args.vmtouch:
+        if args.subcmd_runtime != "vmtouch":
             logging.debug("Ingoring collecting of vmtouch data.")
             return
         if not args.vmtouch_target:
@@ -119,13 +119,13 @@ class Insight():
         stdout, stderr = util.run_cmd(
             [vmtouch_exec, "-v", args.vmtouch_target])
         if stderr:
-            logging.info("vmtouch output:" % str(stderr))
+            logging.info("vmtouch output: %s" % str(stderr))
             return
         fileopt.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" % (
             args.vmtouch_target.replace("/", "_"), (time.time() * 1000))), str(stdout))
 
     def run_blktrace(self, args):
-        if not args.blktrace:
+        if args.subcmd_runtime != "blktrace":
             logging.debug("Ingoring collecting of blktrace data.")
             return
         if not args.blktrace_target:
@@ -146,7 +146,7 @@ class Insight():
             return
 
     def run_perf(self, args):
-        if not args.perf:
+        if args.subcmd_runtime != "perf":
             logging.debug("Ignoring collecting of perf data.")
             return
         # perf requires root priviledge
@@ -156,6 +156,11 @@ class Insight():
 
         # "--tidb-proc" has the highest priority
         if args.tidb_proc:
+            logging.debug(
+                "Running `collector` to find running TiDB processes...")
+            self.collector()
+            logging.debug("%d running process(es) found." %
+                          len(self.collector_data["proc_stats"]))
             # build dict of pid to process name
             perf_proc = self.format_proc_info("name")
             self.insight_perf = perf.InsightPerf(perf_proc, args)
@@ -180,7 +185,7 @@ class Insight():
         self.insight_perf.run(self.full_outdir)
 
     def run_ftrace(self, args):
-        if not args.ftrace:
+        if args.subcmd_runtime != "ftrace":
             logging.debug("Ignoring collecting of ftrace data.")
             return
         # perf requires root priviledge
@@ -216,10 +221,10 @@ class Insight():
                 stdout, stderr = space.du_total(data_dir)
             if stdout:
                 fileopt.write_file(os.path.join(self.full_outdir, "size-%s" % proc["pid"]),
-                                     stdout)
+                                   stdout)
             if stderr:
                 fileopt.write_file(os.path.join(self.full_outdir, "size-%s.err" % proc["pid"]),
-                                     stderr)
+                                   stderr)
 
     def get_lsof_tidb(self):
         # lsof requires root priviledge
@@ -231,10 +236,10 @@ class Insight():
             stdout, stderr = lsof.lsof(proc["pid"])
             if stdout:
                 fileopt.write_file(os.path.join(self.full_outdir, "lsof-%s") % proc["pid"],
-                                     stdout)
+                                   stdout)
             if stderr:
                 fileopt.write_file(os.path.join(self.full_outdir, "lsof-%s.err" % proc["pid"]),
-                                     stderr)
+                                   stderr)
 
     def save_logfiles(self, args):
         if not args.log:
@@ -289,6 +294,7 @@ if __name__ == "__main__":
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Debug logging enabled.")
+        logging.debug("Input arguments are: %s" % args)
 
     insight = Insight(args)
 
@@ -301,7 +307,15 @@ if __name__ == "__main__":
     elif args.collector:
         insight.collector()
     # WIP: call scripts that collect metrics of the node
-    insight.run_perf(args)
+    if args.subcmd == "runtime":
+        insight.run_perf(args)
+        # save ftrace data
+        insight.run_ftrace(args)
+        # save vmtouch data
+        insight.run_vmtouch(args)
+        # save blktrace data
+        insight.run_blktrace(args)
+
     # save log files
     insight.save_logfiles(args)
     # save config files
@@ -310,13 +324,6 @@ if __name__ == "__main__":
     if args.pdctl:
         # read and save `pd-ctl` info
         insight.read_pdctl(args)
-
-    # save ftrace data
-    insight.run_ftrace(args)
-    # save vmtouch data
-    insight.run_vmtouch(args)
-    # save blktrace data
-    insight.run_blktrace(args)
 
     # compress all output to tarball
     if args.compress:

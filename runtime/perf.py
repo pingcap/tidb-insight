@@ -32,11 +32,6 @@ class InsightPerf():
                "-g",
                "--call-graph",
                "dwarf"]
-        try:
-            # user defined path of perf
-            cmd[0] = self.perf_options["perf_exec"]
-        except (KeyError, TypeError):
-            pass
 
         cmd.append("-F")
         try:

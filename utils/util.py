@@ -71,6 +71,7 @@ def parse_cmdline(cmdline):
 def parse_insight_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
                                      epilog="Note that some arguments may decrease system performance.")
+    subparsers = parser.add_subparsers(dest="subcmd")
     parser.add_argument("-o", "--output", action="store", default=None,
                         help="The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.")
     parser.add_argument("--alias", action="store", default=None,
@@ -80,24 +81,46 @@ def parse_insight_opts():
     parser.add_argument("--collector", action="store_true", default=False,
                         help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
 
-    parser.add_argument("-p", "--perf", action="store_true", default=False,
-                        help="Collect trace info using perf. Disabled by default.")
-    parser.add_argument("--pid", type=int, action="append", default=None,
-                        help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
-    parser.add_argument("--proc-listen-port", action="store", type=int, default=None,
-                        help="Collect perf data of process that listen on given port. This value will be ignored if `--pid` is set.")
-    parser.add_argument("--proc-listen-proto", action="store", default=None,
-                        help="Protocol type of listen port, available values are: tcp/udp. If not set, only TCP listening ports are checked.")
-    parser.add_argument("--tidb-proc", action="store_true", default=False,
-                        help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
-    parser.add_argument("--perf-exec", type=int, action="store", default=None,
-                        help="Custom path of perf executable file.")
-    parser.add_argument("--perf-freq", type=int, action="store", default=None,
-                        help="Event sampling frequency of perf-record, in Hz.")
-    parser.add_argument("--perf-time", type=int, action="store", default=None,
-                        help="Time period of perf recording, in seconds.")
-    parser.add_argument("--perf-archive", action="store_true", default=False,
-                        help="Run `perf archive` after collecting data, useful when reading data on another machine. Disabled by default.")
+    parser_runtime = subparsers.add_parser(
+        "runtime", help="Collect various runtime information.")
+    subparsers_runtime = parser_runtime.add_subparsers(dest="subcmd_runtime")
+    parser_perf = subparsers_runtime.add_parser(
+        "perf", aliases=["p"], help="Collect trace info using perf.")
+    parser_perf.add_argument("--pid", type=int, action="append", default=None,
+                             help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
+    parser_perf.add_argument("--proc-listen-port", action="store", type=int, default=None,
+                             help="Collect perf data of process that listen on given port. This value will be ignored if `--pid` is set.")
+    parser_perf.add_argument("--proc-listen-proto", action="store", default=None,
+                             help="Protocol type of listen port, available values are: tcp/udp. If not set, only TCP listening ports are checked.")
+    parser_perf.add_argument("--tidb-proc", action="store_true", default=False,
+                             help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
+    parser_perf.add_argument("--perf-freq", type=int, action="store", default=None,
+                             help="Event sampling frequency of perf-record, in Hz.")
+    parser_perf.add_argument("--perf-time", type=int, action="store", default=None,
+                             help="Time period of perf recording, in seconds.")
+    parser_perf.add_argument("--perf-archive", action="store_true", default=False,
+                             help="Run `perf archive` after collecting data, useful when reading data on another machine. Disabled by default.")
+
+    parser_ftrace = subparsers_runtime.add_parser(
+        "ftrace", help="Collect trace info using ftrace.")
+    parser_ftrace.add_argument("--ftracepoint", action="store", default=None,
+                               help="Tracepoint to be traced (only support to trace direct reclaim latency).")
+    parser_ftrace.add_argument("--ftrace-time", type=int, action="store", default=None,
+                               help="Time period of ftrace recording, in seconds (default 60s).")
+    parser_ftrace.add_argument("--ftrace-bufsize", action="store", default=None,
+                               help="Ftrace ring buffer size in kb (default 4096 kb).")
+
+    parser_vmtouch = subparsers_runtime.add_parser(
+        "vmtouch", help="Collect page cache info using vmtouch.")
+    parser_vmtouch.add_argument("--vmtouch-target", action="store", default=None,
+                                help="File or dir to be diagnosed.")
+
+    parser_blktrace = subparsers_runtime.add_parser(
+        "blktrace", help="Collect traces of the i/o traffic on block devices by blktrace.")
+    parser_blktrace.add_argument("--blktrace-target", action="store", default=None,
+                                 help="The device to trace")
+    parser_blktrace.add_argument("--blktrace-time", type=int, action="store", default=None,
+                                 help="Time period of blktrace recording, in seconds (default 60s).")
 
     parser.add_argument("-l", "--log", action="store_true", default=False,
                         help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
@@ -131,27 +154,6 @@ def parse_insight_opts():
                         help="The port of PD API service, `2379` by default.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
-
-    parser.add_argument("--ftrace", action="store_true", default=False,
-                        help="Collect trace info using ftrace. Disabled by default.")
-    parser.add_argument("--ftracepoint", action="store", default=None,
-                        help="Tracepoint to be traced (only support to trace direct reclaim latency).")
-    parser.add_argument("--ftrace-time", type=int, action="store", default=None,
-                        help="Time period of ftrace recording, in seconds (default 60s).")
-    parser.add_argument("--ftrace-bufsize", action="store", default=None,
-                        help="Ftrace ring buffer size in kb (default 4096 kb).")
-
-    parser.add_argument("--vmtouch", action="store_true", default=False,
-                        help="Collect page cache info using vmtouch. Disabled by default.")
-    parser.add_argument("--vmtouch-target", action="store", default=None,
-                        help="File or dir to be diagnosed.")
-
-    parser.add_argument("--blktrace", action="store_true", default=False,
-                        help="Collect traces of the i/o traffic on block devices by blktrace. Disabled by default.")
-    parser.add_argument("--blktrace-target", action="store", default=None,
-                        help="The device to trace")
-    parser.add_argument("--blktrace-time", type=int, action="store", default=None,
-                        help="Time period of blktrace recording, in seconds (default 60s).")
 
     return parser.parse_args()
 
