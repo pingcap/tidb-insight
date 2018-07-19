@@ -271,6 +271,8 @@ class Insight():
                 outputdir=self.full_outdir)
 
     def read_pdctl(self, args):
+        if args.subcmd_tidb != "pdctl":
+            logging.debug("Ignoring collecting of PD API.")
         self.insight_pdctl = pdctl.PDCtl(host=args.pd_host, port=args.pd_port)
         self.insight_pdctl.save_info(self.full_outdir)
 
@@ -316,7 +318,7 @@ if __name__ == "__main__":
     if args.subcmd == "config":
         insight.save_configs(args)
 
-    if args.pdctl:
+    if args.subcmd == "tidb":
         # read and save `pd-ctl` info
         insight.read_pdctl(args)
 

@@ -78,8 +78,14 @@ def parse_insight_opts():
                         help="The alias of this instance. This value be part of the name of output tarball.")
     parser.add_argument("-c", "--compress", action="store_true", default=False,
                         help="Compress all output files to a tarball, disabled by default.")
-    parser.add_argument("--collector", action="store_true", default=False,
-                        help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
+                        help="Print verbose output.")
+
+# Sub-command: system
+    parser_system = subparsers.add_parser(
+        "system", aliases=["sys"], help="Collect various system information.")
+    parser_system.add_argument("--collector", action="store_true", default=False,
+                               help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
 
 # Sub-command: runtime
     parser_runtime = subparsers.add_parser(
@@ -153,14 +159,15 @@ def parse_insight_opts():
 ####
 
 # Sub-command: tidb
-    parser.add_argument("--pdctl", action="store_true", default=False,
-                        help="Enable collecting data from PD API. Disabled by default.")
-    parser.add_argument("--pd-host", action="store", default=None,
-                        help="The host of the PD server. `localhost` by default.")
-    parser.add_argument("--pd-port", type=int, action="store", default=None,
-                        help="The port of PD API service, `2379` by default.")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                        help="Print verbose output.")
+    parser_tidb = subparsers.add_parser(
+        "tidb", help="Collect various information of running TiDB/TiKV/PD services.")
+    subparsers_tidb = parser_tidb.add_subparsers(dest="subcmd_tidb")
+    parser_pdctl = subparsers_tidb.add_parser(
+        "pdctl", help="Collect data from PD's control API.")
+    parser_pdctl.add_argument("--pd-host", action="store", default=None,
+                              help="The host of the PD server. `localhost` by default.")
+    parser_pdctl.add_argument("--pd-port", type=int, action="store", default=None,
+                              help="The port of PD API service, `2379` by default.")
 ####
     return parser.parse_args()
 
