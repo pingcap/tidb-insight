@@ -35,7 +35,7 @@ class InsightPerf():
 
         cmd.append("-F")
         try:
-            cmd.append("%d", self.perf_options["perf_freq"])
+            cmd.append("%d", self.perf_options["freq"])
         except (KeyError, TypeError):
             cmd.append("120")  # default to 120Hz
 
@@ -55,7 +55,7 @@ class InsightPerf():
 
         cmd.append("sleep")
         try:
-            cmd.append("%d", self.perf_options["perf_time"])
+            cmd.append("%d", self.perf_options["time"])
         except (KeyError, TypeError):
             cmd.append("10")  # default to 10s
 
@@ -97,7 +97,7 @@ class InsightPerf():
                 if stderr:
                     fileopt.write_file(
                         path.join(full_outputdir, "%s.stderr" % pname), stderr)
-                if self.perf_options.perf_archive:
+                if self.perf_options.archive:
                     cmd = self.build_archive_cmd(pid, pname, full_outputdir)
                     stdout, stderr = util.run_cmd(cmd)
                     if stderr:
@@ -113,7 +113,7 @@ class InsightPerf():
             if stderr:
                 fileopt.write_file(
                     path.join(full_outputdir, "perf.stderr"), stderr)
-            if self.perf_options.perf_archive:
+            if self.perf_options.archive:
                 cmd = self.build_archive_cmd()
                 stdout, stderr = util.run_cmd(cmd)
                 if stderr:

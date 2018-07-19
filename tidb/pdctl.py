@@ -12,8 +12,8 @@ class PDCtl():
     pdctl_dir = "pdctl"
 
     # default to localhost
-    pd_host = "localhost"
-    pd_port = 2379
+    host = "localhost"
+    port = 2379
 
     # The `pdctl` API base URI
     base_uri = "/pd/api"
@@ -44,22 +44,22 @@ class PDCtl():
 
     def __init__(self, host=None, port=None, api_ver=None):
         if host:
-            self.pd_host = host
+            self.host = host
         if port:
-            self.pd_port = port
+            self.port = port
         if api_ver:
             self.api_ver = api_ver
         self.base_url = "http://%s:%s%s%s" % (
-            self.pd_host, self.pd_port, self.base_uri, self.api_path)
+            self.host, self.port, self.base_uri, self.api_path)
 
     def read_health(self):
-        url = "http://%s:%s/pd%s" % (self.pd_host,
-                                     self.pd_port, self.pd_health_uri)
+        url = "http://%s:%s/pd%s" % (self.host,
+                                     self.port, self.pd_health_uri)
         return util.read_url(url)
 
     def read_diagnose(self):
-        url = "http://%s:%s/pd%s" % (self.pd_host,
-                                     self.pd_port, self.pd_diagnose_uri)
+        url = "http://%s:%s/pd%s" % (self.host,
+                                     self.port, self.pd_diagnose_uri)
         return util.read_url(url)
 
     def read_runtime_info(self):
@@ -77,14 +77,14 @@ class PDCtl():
         pd_health = self.read_health()
         if pd_health:
             fileopt.write_file(os.path.join(
-                full_outputdir, "%s_%s-health.json" % (self.pd_host, self.pd_port)), pd_health)
+                full_outputdir, "%s_%s-health.json" % (self.host, self.port)), pd_health)
         pd_diagnose = self.read_diagnose()
         if pd_diagnose:
             fileopt.write_file(os.path.join(
-                full_outputdir, "%s_%s-diagnose.json" % (self.pd_host, self.pd_port)), pd_diagnose)
+                full_outputdir, "%s_%s-diagnose.json" % (self.host, self.port)), pd_diagnose)
 
         for key, info in self.read_runtime_info().items():
             if not info:
                 continue
             fileopt.write_file(os.path.join(
-                full_outputdir, "%s_%s-%s.json" % (self.pd_host, self.pd_port, key)), info)
+                full_outputdir, "%s_%s-%s.json" % (self.host, self.port, key)), info)

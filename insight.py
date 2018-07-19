@@ -106,7 +106,7 @@ class Insight():
         if args.subcmd_runtime != "vmtouch":
             logging.debug("Ingoring collecting of vmtouch data.")
             return
-        if not args.vmtouch_target:
+        if not args.target:
             return
 
         base_dir = os.path.join(util.pwd(), "../")
@@ -117,18 +117,18 @@ class Insight():
             return
 
         stdout, stderr = util.run_cmd(
-            [vmtouch_exec, "-v", args.vmtouch_target])
+            [vmtouch_exec, "-v", args.target])
         if stderr:
             logging.info("vmtouch output: %s" % str(stderr))
             return
         fileopt.write_file(os.path.join(vmtouch_outdir, "%s_%d.txt" % (
-            args.vmtouch_target.replace("/", "_"), (time.time() * 1000))), str(stdout))
+            args.target.replace("/", "_"), (time.time() * 1000))), str(stdout))
 
     def run_blktrace(self, args):
         if args.subcmd_runtime != "blktrace":
             logging.debug("Ingoring collecting of blktrace data.")
             return
-        if not args.blktrace_target:
+        if not args.target:
             return
 
         blktrace_outdir = fileopt.create_dir(
@@ -137,10 +137,10 @@ class Insight():
             return
 
         time = 60
-        if args.blktrace_time:
-            time = args.blktrace_time
+        if args.time:
+            time = args.time
         _, stderr = util.run_cmd_for_a_while(
-            ["blktrace", "-d", args.blktrace_target, "-D", blktrace_outdir], time)
+            ["blktrace", "-d", args.target, "-D", blktrace_outdir], time)
         if stderr:
             logging.info("blktrace output:" % str(stderr))
             return
@@ -154,13 +154,8 @@ class Insight():
             logging.fatal("It's required to run perf with root priviledge.")
             return
 
-        # "--tidb-proc" has the highest priority
-        if args.tidb_proc:
-            logging.debug(
-                "Running `collector` to find running TiDB processes...")
-            self.collector()
-            logging.debug("%d running process(es) found." %
-                          len(self.collector_data["proc_stats"]))
+        # "--auto" has the highest priority
+        if args.auto:
             # build dict of pid to process name
             perf_proc = self.format_proc_info("name")
             self.insight_perf = perf.InsightPerf(perf_proc, args)
@@ -171,10 +166,10 @@ class Insight():
                 perf_proc[_pid] = None
             self.insight_perf = perf.InsightPerf(perf_proc, args)
         # find process by port
-        elif args.proc_listen_port:
+        elif args.listen_port:
             perf_proc = {}
             pid_list = proc_meta.find_process_by_port(
-                args.proc_listen_port, args.proc_listen_proto)
+                args.listen_port, args.listen_proto)
             if not pid_list or len(pid_list) < 1:
                 return
             for _pid in pid_list:
@@ -248,7 +243,7 @@ class Insight():
             # return
 
         self.insight_logfiles = logfiles.InsightLogFiles(options=args)
-        if args.log_auto:
+        if args.auto:
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
             self.insight_logfiles.save_logfiles_auto(
                 proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
@@ -259,10 +254,10 @@ class Insight():
 
     def save_configs(self, args):
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
-        if args.config_sysctl:
+        if args.sysctl:
             self.insight_configfiles.save_sysconf(outputdir=self.full_outdir)
         # collect TiDB configs
-        if args.config_auto:
+        if args.auto:
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
             self.insight_configfiles.save_configs_auto(
                 proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
@@ -273,7 +268,7 @@ class Insight():
     def read_pdctl(self, args):
         if args.subcmd_tidb != "pdctl":
             logging.debug("Ignoring collecting of PD API.")
-        self.insight_pdctl = pdctl.PDCtl(host=args.pd_host, port=args.pd_port)
+        self.insight_pdctl = pdctl.PDCtl(host=args.host, port=args.port)
         self.insight_pdctl.save_info(self.full_outdir)
 
 
@@ -293,14 +288,22 @@ if __name__ == "__main__":
 
     insight = Insight(args)
 
-    if (args.log_auto or args.config_auto):
+    try:
+        if args.auto:
+            logging.debug(
+                "In auto mode, basic information is collected by default.")
+            insight.collector()
+            # check size of data folder of TiDB processes
+            insight.get_datadir_size()
+            # list files opened by TiDB processes
+            insight.get_lsof_tidb()
+    except AttributeError:
+        logging.debug("Auto mode not detected and disabled.")
+        pass
+
+    if args.subcmd == "system" and args.collector:
         insight.collector()
-        # check size of data folder of TiDB processes
-        insight.get_datadir_size()
-        # list files opened by TiDB processes
-        insight.get_lsof_tidb()
-    elif args.collector:
-        insight.collector()
+
     # WIP: call scripts that collect metrics of the node
     if args.subcmd == "runtime":
         insight.run_perf(args)

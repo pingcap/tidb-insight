@@ -71,7 +71,7 @@ class InsightConfigFiles():
                     file_list.append(fullpath)
             return file_list
 
-        source_dir = self.config_options.config_dir
+        source_dir = self.config_options.dir
         if not source_dir or not os.path.isdir(source_dir):
             logging.fatal(
                 "Source config path is not a directory. Did you set correct `--config-dir`?")
@@ -79,10 +79,10 @@ class InsightConfigFiles():
         output_base = outputdir
         if not output_base:
             output_base = source_dir
-        file_prefix = self.config_options.config_prefix
+        file_prefix = self.config_options.prefix
 
         # prepare output directory
-        if not files.create_dir(output_base):
+        if not fileopt.create_dir(output_base):
             logging.fatal("Failed to prepare output dir.")
             return
 

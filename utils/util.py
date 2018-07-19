@@ -69,7 +69,7 @@ def parse_cmdline(cmdline):
 
 
 def parse_insight_opts():
-    parser = argparse.ArgumentParser(description="TiDB Insight Scripts",
+    parser = argparse.ArgumentParser(description="TiDB Insight Scripts, collect various diagnosis data.",
                                      epilog="Note that some arguments may decrease system performance.")
     subparsers = parser.add_subparsers(dest="subcmd")
     parser.add_argument("-o", "--output", action="store", default=None,
@@ -95,38 +95,38 @@ def parse_insight_opts():
         "perf", aliases=["p"], help="Collect trace info using perf.")
     parser_perf.add_argument("--pid", type=int, action="append", default=None,
                              help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
-    parser_perf.add_argument("--proc-listen-port", action="store", type=int, default=None,
+    parser_perf.add_argument("--listen-port", action="store", type=int, default=None,
                              help="Collect perf data of process that listen on given port. This value will be ignored if `--pid` is set.")
-    parser_perf.add_argument("--proc-listen-proto", action="store", default=None,
+    parser_perf.add_argument("--listen-proto", action="store", default=None,
                              help="Protocol type of listen port, available values are: tcp/udp. If not set, only TCP listening ports are checked.")
-    parser_perf.add_argument("--tidb-proc", action="store_true", default=False,
+    parser_perf.add_argument("--auto", action="store_true", default=False,
                              help="Collect perf data for PD/TiDB/TiKV processes instead of the whole system.")
-    parser_perf.add_argument("--perf-freq", type=int, action="store", default=None,
+    parser_perf.add_argument("--freq", type=int, action="store", default=None,
                              help="Event sampling frequency of perf-record, in Hz.")
-    parser_perf.add_argument("--perf-time", type=int, action="store", default=None,
+    parser_perf.add_argument("--time", type=int, action="store", default=None,
                              help="Time period of perf recording, in seconds.")
-    parser_perf.add_argument("--perf-archive", action="store_true", default=False,
+    parser_perf.add_argument("--archive", action="store_true", default=False,
                              help="Run `perf archive` after collecting data, useful when reading data on another machine. Disabled by default.")
 
     parser_ftrace = subparsers_runtime.add_parser(
         "ftrace", help="Collect trace info using ftrace.")
     parser_ftrace.add_argument("--ftracepoint", action="store", default=None,
                                help="Tracepoint to be traced (only support to trace direct reclaim latency).")
-    parser_ftrace.add_argument("--ftrace-time", type=int, action="store", default=None,
+    parser_ftrace.add_argument("--time", type=int, action="store", default=None,
                                help="Time period of ftrace recording, in seconds (default 60s).")
-    parser_ftrace.add_argument("--ftrace-bufsize", action="store", default=None,
+    parser_ftrace.add_argument("--bufsize", action="store", default=None,
                                help="Ftrace ring buffer size in kb (default 4096 kb).")
 
     parser_vmtouch = subparsers_runtime.add_parser(
         "vmtouch", help="Collect page cache info using vmtouch.")
-    parser_vmtouch.add_argument("--vmtouch-target", action="store", default=None,
+    parser_vmtouch.add_argument("--target", action="store", default=None,
                                 help="File or dir to be diagnosed.")
 
     parser_blktrace = subparsers_runtime.add_parser(
         "blktrace", help="Collect traces of the i/o traffic on block devices by blktrace.")
-    parser_blktrace.add_argument("--blktrace-target", action="store", default=None,
+    parser_blktrace.add_argument("--target", action="store", default=None,
                                  help="The device to trace")
-    parser_blktrace.add_argument("--blktrace-time", type=int, action="store", default=None,
+    parser_blktrace.add_argument("--time", type=int, action="store", default=None,
                                  help="Time period of blktrace recording, in seconds (default 60s).")
 ####
 
@@ -135,26 +135,26 @@ def parse_insight_opts():
                                        "l"], help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
     parser_log.add_argument("--syslog", action="store_true", default=False,
                             help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
-    parser_log.add_argument("--log-auto", action="store_true", default=False,
+    parser_log.add_argument("--auto", action="store_true", default=False,
                             help="Automatically detect and save log files of running PD/TiDB/TiKV processes.")
-    parser_log.add_argument("--log-dir", action="store", default=None,
+    parser_log.add_argument("--dir", action="store", default=None,
                             help="Location of log files. If `--log-auto` is set, this value will be ignored.")
-    parser_log.add_argument("--log-prefix", action="store", default=None,
+    parser_log.add_argument("--prefix", action="store", default=None,
                             help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
-    parser_log.add_argument("--log-retention", action="store", type=int, default=0,
+    parser_log.add_argument("--retention", action="store", type=int, default=0,
                             help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time check.")
 ####
 
 # Sub-command: config
     parser_config = subparsers.add_parser(
         "config", aliases=["c"], help="Collect various configuration files in output")
-    parser_config.add_argument("--config-auto", action="store_true", default=False,
+    parser_config.add_argument("--auto", action="store_true", default=False,
                                help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
-    parser_config.add_argument("--config-sysctl", action="store_true", default=False,
+    parser_config.add_argument("--sysctl", action="store_true", default=False,
                                help="Save kernel config by collecting output of `sysctl -a`.")
-    parser_config.add_argument("--config-dir", action="store", default=None,
+    parser_config.add_argument("--dir", action="store", default=None,
                                help="Location of config files. If `--config-auto` is set, this value will be ingored.")
-    parser_config.add_argument("--config-prefix", action="store", default=None,
+    parser_config.add_argument("--prefix", action="store", default=None,
                                help="The prefix of config files, will be directory name of all config files, will be in the name of output tarball. If `--config-auto` is set, the value will be ignored.")
 ####
 
@@ -164,9 +164,9 @@ def parse_insight_opts():
     subparsers_tidb = parser_tidb.add_subparsers(dest="subcmd_tidb")
     parser_pdctl = subparsers_tidb.add_parser(
         "pdctl", help="Collect data from PD's control API.")
-    parser_pdctl.add_argument("--pd-host", action="store", default=None,
+    parser_pdctl.add_argument("--host", action="store", default=None,
                               help="The host of the PD server. `localhost` by default.")
-    parser_pdctl.add_argument("--pd-port", type=int, action="store", default=None,
+    parser_pdctl.add_argument("--port", type=int, action="store", default=None,
                               help="The port of PD API service, `2379` by default.")
 ####
     return parser.parse_args()

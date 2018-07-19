@@ -18,7 +18,7 @@ class InsightLogFiles():
     log_options = {}
 
     # output dir
-    log_dir = "logs"
+    dir = "logs"
 
     # time when the object is created, used as a basement time point
     init_timepoint = None
@@ -67,7 +67,7 @@ class InsightLogFiles():
             return
         # set full output path for log files
         full_outputdir = fileopt.build_full_output_dir(
-            basedir=outputdir, subdir=self.log_dir)
+            basedir=outputdir, subdir=self.dir)
         if not savename:
             shutil.copy(logfile, full_outputdir)
         else:
@@ -104,7 +104,7 @@ class InsightLogFiles():
 
     def save_tidb_logfiles(self, outputdir=None):
         # init values of args
-        source_dir = self.log_options.log_dir
+        source_dir = self.log_options.dir
         if not source_dir or not os.path.isdir(source_dir):
             logging.fatal(
                 "Source log path is not a directory. Did you set correct `--log-dir`?")
@@ -112,11 +112,11 @@ class InsightLogFiles():
         output_base = outputdir
         if not output_base:
             output_base = source_dir
-        file_prefix = self.log_options.log_prefix
-        retention_hour = self.log_options.log_retention
+        file_prefix = self.log_options.prefix
+        retention_hour = self.log_options.retention
 
         # prepare output directory
-        if not files.create_dir(output_base):
+        if not fileopt.create_dir(output_base):
             logging.fatal("Failed to prepare output dir")
             return
 
@@ -124,7 +124,7 @@ class InsightLogFiles():
         output_name = "%s_%s" % (file_prefix, self.log_options.alias)
         # the full path of output directory
         output_dir = fileopt.build_full_output_dir(
-            basedir=os.path.join(output_base, output_name), subdir=self.log_dir)
+            basedir=os.path.join(output_base, output_name), subdir=self.dir)
 
         # copy valid log files to output directory
         file_list = self.get_filelist_in_time(source_dir, file_prefix,
