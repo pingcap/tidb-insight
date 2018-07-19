@@ -31,7 +31,7 @@ from file import configfiles
 from utils import fileopt
 from file import logfiles
 from utils.process import meta as proc_meta
-from app.tidb import pdctl
+from tidb import pdctl
 from runtime.ftrace import ftrace
 
 
