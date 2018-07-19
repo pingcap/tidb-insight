@@ -242,9 +242,6 @@ class Insight():
                                    stderr)
 
     def save_logfiles(self, args):
-        if not args.log:
-            logging.debug("Ignoring collecting of log files.")
-            return
         # reading logs requires root priviledge
         if not util.is_root_privilege():
             logging.warn("It's required to read logs with root priviledge.")
@@ -261,10 +258,6 @@ class Insight():
         self.insight_logfiles.save_system_log(outputdir=self.full_outdir)
 
     def save_configs(self, args):
-        if not args.config_file:
-            logging.debug("Ignoring collecting of config files.")
-            return
-
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
         if args.config_sysctl:
             self.insight_configfiles.save_sysconf(outputdir=self.full_outdir)
@@ -317,9 +310,11 @@ if __name__ == "__main__":
         insight.run_blktrace(args)
 
     # save log files
-    insight.save_logfiles(args)
+    if args.subcmd == "log":
+        insight.save_logfiles(args)
     # save config files
-    insight.save_configs(args)
+    if args.subcmd == "config":
+        insight.save_configs(args)
 
     if args.pdctl:
         # read and save `pd-ctl` info

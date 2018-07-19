@@ -81,6 +81,7 @@ def parse_insight_opts():
     parser.add_argument("--collector", action="store_true", default=False,
                         help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
 
+# Sub-command: runtime
     parser_runtime = subparsers.add_parser(
         "runtime", help="Collect various runtime information.")
     subparsers_runtime = parser_runtime.add_subparsers(dest="subcmd_runtime")
@@ -121,31 +122,37 @@ def parse_insight_opts():
                                  help="The device to trace")
     parser_blktrace.add_argument("--blktrace-time", type=int, action="store", default=None,
                                  help="Time period of blktrace recording, in seconds (default 60s).")
+####
 
-    parser.add_argument("-l", "--log", action="store_true", default=False,
-                        help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
-    parser.add_argument("--syslog", action="store_true", default=False,
-                        help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
-    parser.add_argument("--log-auto", action="store_true", default=False,
-                        help="Automatically detect and save log files of running PD/TiDB/TiKV processes.")
-    parser.add_argument("--log-dir", action="store", default=None,
-                        help="Location of log files. If `--log-auto` is set, this value will be ignored.")
-    parser.add_argument("--log-prefix", action="store", default=None,
-                        help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
-    parser.add_argument("--log-retention", action="store", type=int, default=0,
-                        help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time check.")
+# Sub-command: log
+    parser_log = subparsers.add_parser("log", aliases=[
+                                       "l"], help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
+    parser_log.add_argument("--syslog", action="store_true", default=False,
+                            help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
+    parser_log.add_argument("--log-auto", action="store_true", default=False,
+                            help="Automatically detect and save log files of running PD/TiDB/TiKV processes.")
+    parser_log.add_argument("--log-dir", action="store", default=None,
+                            help="Location of log files. If `--log-auto` is set, this value will be ignored.")
+    parser_log.add_argument("--log-prefix", action="store", default=None,
+                            help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
+    parser_log.add_argument("--log-retention", action="store", type=int, default=0,
+                            help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time check.")
+####
 
-    parser.add_argument("--config-file", action="store_true", default=False,
-                        help="Collect various configuration files in output, disabled by default.")
-    parser.add_argument("--config-auto", action="store_true", default=False,
-                        help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
-    parser.add_argument("--config-sysctl", action="store_true", default=False,
-                        help="Save kernel config by collecting output of `sysctl -a`.")
-    parser.add_argument("--config-dir", action="store", default=None,
-                        help="Location of config files. If `--config-auto` is set, this value will be ingored.")
-    parser.add_argument("--config-prefix", action="store", default=None,
-                        help="The prefix of config files, will be directory name of all config files, will be in the name of output tarball. If `--config-auto` is set, the value will be ignored.")
+# Sub-command: config
+    parser_config = subparsers.add_parser(
+        "config", aliases=["c"], help="Collect various configuration files in output")
+    parser_config.add_argument("--config-auto", action="store_true", default=False,
+                               help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
+    parser_config.add_argument("--config-sysctl", action="store_true", default=False,
+                               help="Save kernel config by collecting output of `sysctl -a`.")
+    parser_config.add_argument("--config-dir", action="store", default=None,
+                               help="Location of config files. If `--config-auto` is set, this value will be ingored.")
+    parser_config.add_argument("--config-prefix", action="store", default=None,
+                               help="The prefix of config files, will be directory name of all config files, will be in the name of output tarball. If `--config-auto` is set, the value will be ignored.")
+####
 
+# Sub-command: tidb
     parser.add_argument("--pdctl", action="store_true", default=False,
                         help="Enable collecting data from PD API. Disabled by default.")
     parser.add_argument("--pd-host", action="store", default=None,
@@ -154,7 +161,7 @@ def parse_insight_opts():
                         help="The port of PD API service, `2379` by default.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
-
+####
     return parser.parse_args()
 
 
