@@ -83,7 +83,7 @@ def parse_insight_opts():
 
 # Sub-command: system
     parser_system = subparsers.add_parser(
-        "system", aliases=["sys"], help="Collect various system information.")
+        "system", help="Collect various system information.")
     parser_system.add_argument("--collector", action="store_true", default=False,
                                help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
 
@@ -92,7 +92,7 @@ def parse_insight_opts():
         "runtime", help="Collect various runtime information.")
     subparsers_runtime = parser_runtime.add_subparsers(dest="subcmd_runtime")
     parser_perf = subparsers_runtime.add_parser(
-        "perf", aliases=["p"], help="Collect trace info using perf.")
+        "perf", help="Collect trace info using perf.")
     parser_perf.add_argument("--pid", type=int, action="append", default=None,
                              help="""PID of process to run perf on. If `-p`/`--perf` is not set, this value will not take effect. Multiple PIDs can be set by using more than one `--pid` argument. `None` by default which means the whole system.""")
     parser_perf.add_argument("--listen-port", action="store", type=int, default=None,
@@ -131,8 +131,8 @@ def parse_insight_opts():
 ####
 
 # Sub-command: log
-    parser_log = subparsers.add_parser("log", aliases=[
-                                       "l"], help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
+    parser_log = subparsers.add_parser(
+        "log", help="Collect log files in output. PD/TiDB/TiKV logs are included by default.")
     parser_log.add_argument("--syslog", action="store_true", default=False,
                             help="Collect the system log in output. This may significantly increase output size. If `-l/--log` is not set, the system log will be ignored.")
     parser_log.add_argument("--auto", action="store_true", default=False,
@@ -147,7 +147,7 @@ def parse_insight_opts():
 
 # Sub-command: config
     parser_config = subparsers.add_parser(
-        "config", aliases=["c"], help="Collect various configuration files in output")
+        "config", help="Collect various configuration files in output")
     parser_config.add_argument("--auto", action="store_true", default=False,
                                help="Automatically detect and save configuration files for all running PD/TiDB/TiKV processes.")
     parser_config.add_argument("--sysctl", action="store_true", default=False,
