@@ -34,7 +34,7 @@ class DirectReclaimTracer():
             logging.fatal("ERROR: please give a dir to save trace data")
             return
 
-        dr_outputdir = ileopt.build_full_output_dir(
+        dr_outputdir = fileopt.build_full_output_dir(
             basedir=outputdir, subdir=self.data_dir)
 
         if not dr_outputdir:
