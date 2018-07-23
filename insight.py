@@ -242,15 +242,13 @@ class Insight():
             logging.warn("It's required to read logs with root priviledge.")
             # return
 
-        self.insight_logfiles = logfiles.InsightLogFiles(options=args)
+        self.insight_logfiles = logfiles.InsightLogFiles(
+            args, self.full_outdir, 'logs')
         if args.auto:
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
-            self.insight_logfiles.save_logfiles_auto(
-                proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
         else:
-            self.insight_logfiles.save_tidb_logfiles(
-                outputdir=self.full_outdir)
-        self.insight_logfiles.save_system_log(outputdir=self.full_outdir)
+            proc_cmdline = None
+        self.insight_logfiles.run_collecting(proc_cmdline)
 
     def save_configs(self, args):
         self.insight_configfiles = configfiles.InsightConfigFiles(options=args)

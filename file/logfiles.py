@@ -4,29 +4,16 @@
 import datetime
 import logging
 import os
-import shutil
 import time
 
 from glob import glob
 
+from file.base import FileCollecting
 from utils import util
 from utils import fileopt
 
 
-class InsightLogFiles():
-    # options about logfiles
-    log_options = {}
-
-    # output dir
-    dir = "logs"
-
-    # time when the object is created, used as a basement time point
-    init_timepoint = None
-
-    def __init__(self, options={}):
-        self.log_options = options
-        self.init_timepoint = time.time()
-
+class InsightLogFiles(FileCollecting):
     def find_tidb_logfiles(self, cmdline=""):
         cmd_opts = util.parse_cmdline(cmdline)
         # TODO: support relative path, this require `collector` to output cwd of process
@@ -48,90 +35,81 @@ class InsightLogFiles():
         delta_secs = base_time - comp_time
         return datetime.timedelta(0, delta_secs) <= threhold
 
-    def get_filelist_in_time(self, base_dir, prefix, curr_time, retention_hour):
+    def get_filelist_in_time(self, srcdir):
         valid_file_list = []
-        for file in os.listdir(base_dir):
-            fullpath = os.path.join(base_dir, file)
+        if not os.path.isdir(srcdir):
+            valid_file_list.append(srcdir)
+            return valid_file_list
+        for file in os.listdir(srcdir):
+            fullpath = os.path.join(srcdir, file)
             if os.path.isdir(fullpath):
                 # check for all sub-directories
-                for f in self.get_filelist_in_time(fullpath, prefix, curr_time, retention_hour):
+                for f in self.get_filelist_in_time(fullpath):
                     valid_file_list.append(f)
-            if not self.check_time_range(curr_time, os.path.getmtime(fullpath), retention_hour):
+            if not self.check_time_range(comp_time=os.path.getmtime(fullpath), valid_range=self.options.retention):
                 continue
-            if file.startswith(prefix):
+            if file.startswith(self.options.prefix):
                 valid_file_list.append(fullpath)
         return valid_file_list
 
-    def save_logfile_to_dir(self, logfile=None, savename=None, outputdir=None):
-        if not logfile:
-            return
-        # set full output path for log files
-        full_outputdir = fileopt.build_full_output_dir(
-            basedir=outputdir, subdir=self.dir)
-        if not savename:
-            shutil.copy(logfile, full_outputdir)
-        else:
-            shutil.copyfile(logfile, os.path.join(full_outputdir, savename))
-
-    def save_journal_log(self, outputdir=None):
+    def save_journal_log(self):
         journal_path = "/var/log/journal/*/*@*.journal"
         for logfile in glob(journal_path):
-            self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
+            if not self.check_time_range(comp_time=os.path.getmtime(logfile), valid_range=self.options.retention):
+                continue
+            self.save_to_dir(srcfile=logfile)
 
-    def save_syslog(self, outputdir=None):
+    def save_syslog(self):
         syslog_path = "/var/log/message*"
         dmesg_path = "/var/log/dmesg*"
         for logfile in glob(syslog_path) + glob(dmesg_path):
-            self.save_logfile_to_dir(logfile=logfile, outputdir=outputdir)
+            if not self.check_time_range(comp_time=os.path.getmtime(logfile), valid_range=self.options.retention):
+                continue
+            self.save_to_dir(srcfile=logfile)
 
-    def save_logfiles_auto(self, proc_cmdline=None, outputdir=None):
+    def save_system_log(self):
+        # save system logs
+        if self.options.syslog:
+            if util.get_init_type() == "systemd":
+                logging.info("systemd-journald detected.")
+                self.save_journal_log()
+            else:
+                logging.info("systemd not detected, assuming syslog.")
+                self.save_syslog()
+
+    def save_logfiles_auto(self, proc_cmdline=None):
         # save log files of TiDB modules
         for pid, cmdline in proc_cmdline.items():
             proc_logfile = self.find_tidb_logfiles(cmdline=cmdline)
-            self.save_logfile_to_dir(logfile=proc_logfile,
-                                     savename="%s.log" % pid,
-                                     outputdir=outputdir)
+            file_list = self.get_filelist_in_time(proc_logfile)
+            for file in file_list:
+                if self.options.alias in file:
+                    # Skip output files if source and output are the same directory
+                    continue
+                self.save_to_dir(srcfile=file, dstfile="%s-%s" %
+                                 (pid, file.split('/')[-1]))
 
-    def save_system_log(self, outputdir=None):
-        # save system logs
-        if self.log_options.syslog:
-            if util.get_init_type() == "systemd":
-                logging.info("systemd-journald detected.")
-                self.save_journal_log(outputdir=outputdir)
-            else:
-                logging.info("systemd not detected, assuming syslog.")
-                self.save_syslog(outputdir=outputdir)
-
-    def save_tidb_logfiles(self, outputdir=None):
+    def save_tidb_logfiles(self):
         # init values of args
-        source_dir = self.log_options.dir
+        source_dir = self.options.dir
         if not source_dir or not os.path.isdir(source_dir):
             logging.fatal(
                 "Source log path is not a directory. Did you set correct `--log-dir`?")
             return
-        output_base = outputdir
-        if not output_base:
-            output_base = source_dir
-        file_prefix = self.log_options.prefix
-        retention_hour = self.log_options.retention
-
-        # prepare output directory
-        if not fileopt.create_dir(output_base):
-            logging.fatal("Failed to prepare output dir")
-            return
-
-        # the output tarball name
-        output_name = "%s_%s" % (file_prefix, self.log_options.alias)
-        # the full path of output directory
-        output_dir = fileopt.build_full_output_dir(
-            basedir=os.path.join(output_base, output_name), subdir=self.dir)
 
         # copy valid log files to output directory
-        file_list = self.get_filelist_in_time(source_dir, file_prefix,
-                                              time.time(), retention_hour)
+        file_list = self.get_filelist_in_time(source_dir)
         for file in file_list:
-            if self.log_options.alias in file:
+            if self.options.alias in file:
                 # Skip output files if source and output are the same directory
                 continue
-            shutil.copy(file, output_dir)
+            self.save_to_dir(srcfile=file)
             logging.info("Logfile saved: %s", file)
+
+    def run_collecting(self, cmdline=None):
+        if cmdline:
+            self.save_logfiles_auto(cmdline)
+        else:
+            self.save_tidb_logfiles()
+        if self.options.syslog:
+            self.save_system_log()
