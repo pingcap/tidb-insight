@@ -139,11 +139,8 @@ class Insight():
         time = 60
         if args.time:
             time = args.time
-        _, stderr = util.run_cmd_for_a_while(
+        util.run_cmd_for_a_while(
             ["blktrace", "-d", args.target, "-D", blktrace_outdir], time)
-        if stderr:
-            logging.info("blktrace output:" % str(stderr))
-            return
 
     def run_perf(self, args):
         if args.subcmd_runtime != "perf":

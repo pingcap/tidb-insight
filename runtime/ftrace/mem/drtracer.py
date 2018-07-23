@@ -13,7 +13,7 @@ class DirectReclaimTracer():
     ftrace_options = {}
 
     # output dir
-    data_file = "mem/drtrace"
+    data_dir = "mem"
 
     # tracefs mount point
     tracefs = "/sys/kernel/debug/tracing"
@@ -32,6 +32,12 @@ class DirectReclaimTracer():
 
         if not outputdir:
             logging.fatal("ERROR: please give a dir to save trace data")
+            return
+
+        dr_outputdir = fileopt.build_full_output_dir(
+            basedir=outputdir, subdir=self.data_dir)
+
+        if not dr_outputdir:
             return
 
         util.chdir(self.tracefs)
@@ -64,7 +70,7 @@ class DirectReclaimTracer():
         time = self.ftrace_options["time"] if "time" in \
             self.ftrace_options and self.ftrace_options["time"] else 60
         util.run_cmd_for_a_while(
-            ["cat trace_pipe > %s/%s" % (outputdir, self.data_file)], time, shell=True)
+            ["cat trace_pipe > %s/drtrace" % dr_outputdir], time, shell=True)
 
         # End tracing
         for event in [self.direct_reclaim_begin, self.direct_reclaim_end]:
