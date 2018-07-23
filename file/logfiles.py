@@ -14,7 +14,7 @@ from utils import fileopt
 
 
 class InsightLogFiles(FileCollecting):
-    def find_tidb_logfiles(self, cmdline=""):
+    def find_tidb_logfiles(self, cmdline=None):
         cmd_opts = util.parse_cmdline(cmdline)
         # TODO: support relative path, this require `collector` to output cwd of process
         try:

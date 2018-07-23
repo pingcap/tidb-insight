@@ -55,7 +55,7 @@ def parse_cmdline(cmdline):
     result = {}
     try:
         cmd = cmdline.split()
-    except TypeError:
+    except (TypeError, AttributeError):
         return None
     for arg in cmd:
         # parse args that start with '--something'

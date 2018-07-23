@@ -241,24 +241,19 @@ class Insight():
 
         self.insight_logfiles = logfiles.InsightLogFiles(
             args, self.full_outdir, 'logs')
+        proc_cmdline = None
         if args.auto:
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
-        else:
-            proc_cmdline = None
         self.insight_logfiles.run_collecting(proc_cmdline)
 
     def save_configs(self, args):
-        self.insight_configfiles = configfiles.InsightConfigFiles(options=args)
-        if args.sysctl:
-            self.insight_configfiles.save_sysconf(outputdir=self.full_outdir)
+        self.insight_configfiles = configfiles.InsightConfigFiles(
+            args, self.full_outdir, 'configs')
         # collect TiDB configs
+        proc_cmdline = None
         if args.auto:
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
-            self.insight_configfiles.save_configs_auto(
-                proc_cmdline=proc_cmdline, outputdir=self.full_outdir)
-        else:
-            self.insight_configfiles.save_tidb_configs(
-                outputdir=self.full_outdir)
+        self.insight_configfiles.run_collecting(proc_cmdline)
 
     def read_pdctl(self, args):
         if args.subcmd_tidb != "pdctl":

@@ -3,43 +3,31 @@
 
 import logging
 import os
-import shutil
 
 from glob import glob
 
+from file.base import FileCollecting
 from utils import util
 from utils import fileopt
 
 
-class InsightConfigFiles():
-    # options about files
-    config_options = {}
-
-    # output dir
-    config_dir = "conf"
-
-    def __init__(self, options={}):
-        self.config_options = options
-
-    def save_sysconf(self, outputdir=None):
+class InsightConfigFiles(FileCollecting):
+    def save_sysconf(self):
         cmd = ["sysctl", "-a"]
         path_limit_file = "/etc/security/limits.conf"
 
-        # save output of `sysctl -a`
-        full_outputdir = fileopt.build_full_output_dir(
-            basedir=outputdir, subdir=self.config_dir)
+        # save limits.conf
+        self.save_to_dir(srcfile=path_limit_file)
+
+        # save `sysctl -a`
         stdout, stderr = util.run_cmd(cmd)
         if stdout:
             fileopt.write_file(os.path.join(
-                full_outputdir, "sysctl.conf"), stdout)
+                self.outdir, "sysctl.conf"), stdout)
         if stderr:
-            fileopt.write_file(os.path.join(
-                full_outputdir, "sysctl.err"), stderr)
+            fileopt.write_file(os.path.join(self.outdir, "sysctl.err"), stderr)
 
-        # save system limits.conf
-        shutil.copy(path_limit_file, full_outputdir)
-
-    def find_tidb_configfiles(self, cmdline=""):
+    def find_tidb_configfiles(self, cmdline=None):
         cmd_opts = util.parse_cmdline(cmdline)
         # TODO: support relative path, this require `collector` to output cwd of process
         try:
@@ -48,17 +36,15 @@ class InsightConfigFiles():
             return None
         return
 
-    def save_configs_auto(self, proc_cmdline=None, outputdir=None):
-        full_outputdir = fileopt.build_full_output_dir(
-            basedir=outputdir, subdir=self.config_dir)
+    def save_configs_auto(self, proc_cmdline=None):
         for pid, cmdline in proc_cmdline.items():
             proc_configfile = self.find_tidb_configfiles(cmdline)
             if not proc_configfile:
                 continue
-            shutil.copyfile(proc_configfile, os.path.join(
-                full_outputdir, "%s.conf" % pid))
+            self.save_to_dir(srcfile=proc_configfile, dstfile="%s-%s" %
+                             (pid, proc_configfile.split('/')[-1]))
 
-    def save_tidb_configs(self, outputdir=None):
+    def save_tidb_configs(self):
         def list_config_files(base_dir, prefix):
             file_list = []
             for file in os.listdir(base_dir):
@@ -71,30 +57,25 @@ class InsightConfigFiles():
                     file_list.append(fullpath)
             return file_list
 
-        source_dir = self.config_options.dir
+        source_dir = self.options.dir
         if not source_dir or not os.path.isdir(source_dir):
             logging.fatal(
-                "Source config path is not a directory. Did you set correct `--config-dir`?")
+                "Source config path is not a directory. Did you set the correct `--config-dir`?")
             return
-        output_base = outputdir
-        if not output_base:
-            output_base = source_dir
-        file_prefix = self.config_options.prefix
-
-        # prepare output directory
-        if not fileopt.create_dir(output_base):
-            logging.fatal("Failed to prepare output dir.")
-            return
-
-        # the full path of output directory
-        output_name = "%s_%s" % (file_prefix, self.config_options.alias)
-        output_dir = fileopt.build_full_output_dir(
-            basedir=os.path.join(output_base, output_name), subdir=self.config_dir)
+        file_prefix = self.options.prefix
 
         file_list = list_config_files(source_dir, file_prefix)
         for file in file_list:
-            if output_name in file:
+            if self.options.alias in file:
                 # Skip output files if source and output are the same directory
                 continue
-            shutil.copy(file, output_dir)
+            self.save_to_dir(file)
             logging.info("Config file saved: %s" % file)
+
+    def run_collecting(self, cmdline=None):
+        if cmdline:
+            self.save_configs_auto(cmdline)
+        else:
+            self.save_tidb_configs()
+        if self.options.sysctl:
+            self.save_sysconf()
