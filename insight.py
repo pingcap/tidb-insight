@@ -155,13 +155,11 @@ class Insight():
         if args.auto:
             # build dict of pid to process name
             perf_proc = self.format_proc_info("name")
-            self.insight_perf = perf.InsightPerf(perf_proc, args)
         # parse pid list
         elif args.pid:
             perf_proc = {}
             for _pid in args.pid:
                 perf_proc[_pid] = None
-            self.insight_perf = perf.InsightPerf(perf_proc, args)
         # find process by port
         elif args.listen_port:
             perf_proc = {}
@@ -171,10 +169,9 @@ class Insight():
                 return
             for _pid in pid_list:
                 perf_proc[_pid] = None
-            self.insight_perf = perf.InsightPerf(perf_proc, args)
-        else:
-            self.insight_perf = perf.InsightPerf(options=args)
-        self.insight_perf.run(self.full_outdir)
+        self.insight_perf = perf.Perf(
+            args, self.full_outdir, 'perfdata', perf_proc)
+        self.insight_perf.run_collecting()
 
     def run_ftrace(self, args):
         if args.subcmd_runtime != "ftrace":

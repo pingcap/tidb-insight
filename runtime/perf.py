@@ -8,25 +8,20 @@ from os import path
 
 from utils import util
 from utils import fileopt
+from utils.measurement import MeasurementBase
 
 
-class InsightPerf():
-    # the process name and PID of processes(es) to run perf on,
-    # perf entire system if empty, in format of {"PID": "name"}
-    process_info = {}
+class Perf(MeasurementBase):
+    def __init__(self, args, basedir=None, subdir=None, process=None):
+        # init self.options and prepare self.outdir
+        super(Perf, self).__init__(args, basedir, subdir)
 
-    # options of perfing
-    perf_options = {}
-
-    # default subdir name for perf data
-    data_dir = "perfdata"
-
-    def __init__(self, process={}, options={}):
-        self.process_info = process
-        self.perf_options = options
+        # the process name and PID of processes(es) to run perf on,
+        # perf entire system if empty, in format of {"PID": "name"}
+        self.process_info = process if process else {}
 
     # set params of perf
-    def build_record_cmd(self, pid=None, outfile=None, outdir=None):
+    def build_record_cmd(self, pid=None, outfile=None):
         cmd = ["perf",    # default executable name
                "record",  # default action of perf
                "-g",
@@ -35,7 +30,7 @@ class InsightPerf():
 
         cmd.append("-F")
         try:
-            cmd.append("%d", self.perf_options["freq"])
+            cmd.append("%d", self.options["freq"])
         except (KeyError, TypeError):
             cmd.append("120")  # default to 120Hz
 
@@ -45,77 +40,68 @@ class InsightPerf():
         else:
             cmd.append("-a")  # default to whole system
 
-        # default will be perf.data if nothing specified
+        # default will be perf.data if neither pid nor outfile is specified
         if outfile:
             cmd.append("-o")
-            cmd.append("%s/%s.data" % (outdir, outfile))
+            cmd.append("%s/%s.data" % (self.outdir, outfile))
         elif not outfile and pid:
             cmd.append("-o")
-            cmd.append("%s/%d.data" % (outdir, pid))
+            cmd.append("%s/%d.data" % (self.outdir, pid))
 
         cmd.append("sleep")
         try:
-            cmd.append("%d", self.perf_options["time"])
+            cmd.append("%d", self.options["time"])
         except (KeyError, TypeError):
             cmd.append("10")  # default to 10s
 
         return cmd
 
-    def build_archive_cmd(self, pid=None, outfile=None, outdir=None):
+    def build_archive_cmd(self, pid=None, outfile=None):
         cmd = ["perf",
                "archive"]
 
         # default will be perf.data if nothing specified
         if outfile:
-            cmd.append("%s/%s.data" % (outdir, outfile))
+            cmd.append("%s/%s.data" % (self.outdir, outfile))
         elif not outfile and pid:
-            cmd.append("%s/%d.data" % (outdir, pid))
+            cmd.append("%s/%d.data" % (self.outdir, pid))
         else:
-            cmd.append("%s/perf.data" % outdir)
+            cmd.append("%s/perf.data" % self.outdir)
 
         return cmd
 
-    def run(self, outputdir=None):
-        # set output path of perf data
-        full_outputdir = fileopt.build_full_output_dir(
-            basedir=outputdir, subdir=self.data_dir)
-
-        if not full_outputdir:
-            # something went wrong when setting output dir, exit without perfing
-            # TODO: unified output: "Error when setting up output dir of perf data"
-            return
-
+    def run_collecting(self):
         if len(self.process_info) > 0:
             # perf on given process(es)
             for pid, pname in self.process_info.items():
-                cmd = self.build_record_cmd(pid, pname, full_outputdir)
+                cmd = self.build_record_cmd(pid, pname)
                 # TODO: unified output: "Now perf recording %s(%d)..." % (pname, pid)
                 stdout, stderr = util.run_cmd(cmd)
                 if stdout:
                     fileopt.write_file(
-                        path.join(full_outputdir, "%s.stdout" % pname), stdout)
+                        path.join(self.outdir, "%s.stdout" % pname), stdout)
                 if stderr:
                     fileopt.write_file(
-                        path.join(full_outputdir, "%s.stderr" % pname), stderr)
-                if self.perf_options.archive:
-                    cmd = self.build_archive_cmd(pid, pname, full_outputdir)
+                        path.join(self.outdir, "%s.stderr" % pname), stderr)
+                if self.options.archive:
+                    cmd = self.build_archive_cmd(pid, pname)
                     stdout, stderr = util.run_cmd(cmd)
                     if stderr:
                         fileopt.write_file(
-                            path.join(full_outputdir, "%s.archive.stderr" % pname), stderr)
+                            path.join(self.outdir, "%s.archive.stderr" % pname), stderr)
         else:
             # perf the entire system
             cmd = self.build_record_cmd()
             stdout, stderr = util.run_cmd(cmd)
             if stdout:
                 fileopt.write_file(
-                    path.join(full_outputdir, "perf.stdout"), stdout)
+                    path.join(self.outdir, "perf.stdout"), stdout)
             if stderr:
                 fileopt.write_file(
-                    path.join(full_outputdir, "perf.stderr"), stderr)
-            if self.perf_options.archive:
+                    path.join(self.outdir, "perf.stderr"), stderr)
+            if self.options.archive:
                 cmd = self.build_archive_cmd()
                 stdout, stderr = util.run_cmd(cmd)
                 if stderr:
                     fileopt.write_file(
-                        path.join(full_outputdir, "perf.archive.stderr"), stderr)
+                        path.join(self.outdir, "perf.archive.stderr"), stderr)
