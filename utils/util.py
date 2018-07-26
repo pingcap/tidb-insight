@@ -111,7 +111,7 @@ def parse_insight_opts():
     parser_ftrace = subparsers_runtime.add_parser(
         "ftrace", help="Collect trace info using ftrace.")
     parser_ftrace.add_argument("--ftracepoint", action="store", default=None,
-                               help="Tracepoint to be traced (only support to trace direct reclaim latency).")
+                               help="Tracepoint to be traced, only support Direct Reclaim Latency now. (`--ftracepoint dr`)")
     parser_ftrace.add_argument("--time", type=int, action="store", default=None,
                                help="Time period of ftrace recording, in seconds (default 60s).")
     parser_ftrace.add_argument("--bufsize", action="store", default=None,
