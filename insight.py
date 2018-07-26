@@ -312,7 +312,6 @@ if __name__ == "__main__":
 
     if args.subcmd == "tidb":
         # read and save `pd-ctl` info
-        print(args)
         insight.read_pdctl(args)
 
     # compress all output to tarball
