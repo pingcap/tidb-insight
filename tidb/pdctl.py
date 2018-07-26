@@ -71,7 +71,7 @@ class PDCtl(MeasurementBase):
             runtime_info[key] = util.read_url(build_url(uri))
         return runtime_info
 
-    def save_info(self):
+    def run_collecting(self):
         pd_health = self.read_health()
         if pd_health:
             fileopt.write_file(os.path.join(

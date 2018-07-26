@@ -3,32 +3,20 @@
 
 import logging
 
-from runtime.ftrace.mem import drtracer
+from runtime.ftrace import drtracer
 from utils import fileopt
+from utils import util
 
 
-class InsightFtrace():
-    # options about tracer
-    ftrace_options = {}
-    cwd = ""
+class Ftrace(drtracer.DirectReclaimTracer):
+    def __init__(self, args, basedir=None, subdir=None, cwd=None):
+        # init self.options and prepare self.outdir
+        super(Ftrace, self).__init__(args, basedir, subdir)
+        self.cwd = cwd if cwd else util.cwd()
 
-    # output dir
-    data_dir = "ftracedata"
-
-    def __init__(self, cwd, options):
-        self.cwd = cwd
-        self.ftrace_options = vars(options)
-
-    def run(self, outputdir=None):
-        ftrace_outputdir = fileopt.build_full_output_dir(
-            basedir=outputdir, subdir=self.data_dir)
-
-        if not ftrace_outputdir:
-            return
-
-        tracepoint = self.ftrace_options["ftracepoint"]
+    def run_collecting(self):
+        tracepoint = self.options["ftracepoint"]
         if tracepoint == "dr":
-            tracer = drtracer.DirectReclaimTracer(self.ftrace_options)
-            tracer.save_trace(self.cwd, ftrace_outputdir)
+            self.save_trace(self.cwd, self.outdir)
         else:
             logging.debug("Tracepiont %s is not supported." % tracepoint)

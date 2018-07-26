@@ -183,8 +183,9 @@ class Insight():
             return
 
         if args.ftracepoint:
-            self.insight_ftrace = ftrace.InsightFtrace(self.cwd, args)
-            self.insight_ftrace.run(self.full_outdir)
+            self.insight_ftrace = ftrace.Ftrace(
+                self.cwd, args, self.full_outdir, 'ftracedata')
+            self.insight_ftrace.run_collecting()
         else:
             logging.debug(
                 "Ignoring collecting of ftrace data, no tracepoint is chose.")
@@ -257,7 +258,7 @@ class Insight():
             logging.debug("Ignoring collecting of PD API.")
         self.insight_pdctl = pdctl.PDCtl(
             args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
-        self.insight_pdctl.save_info()
+        self.insight_pdctl.run_collecting()
 
 
 if __name__ == "__main__":
