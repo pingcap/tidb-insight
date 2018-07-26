@@ -5,12 +5,10 @@ import os
 
 from utils import util
 from utils import fileopt
+from utils.measurement import MeasurementBase
 
 
-class PDCtl():
-    # default output dir name
-    pdctl_dir = "pdctl"
-
+class PDCtl(MeasurementBase):
     # default to localhost
     host = "localhost"
     port = 2379
@@ -42,7 +40,9 @@ class PDCtl():
     pd_health_uri = "/health"
     pd_diagnose_uri = "/diagnose"
 
-    def __init__(self, host=None, port=None, api_ver=None):
+    def __init__(self, args, basedir=None, subdir=None, host=None, port=None, api_ver=None):
+        # init self.options and prepare self.outdir
+        super(PDCtl, self).__init__(args, basedir, subdir)
         if host:
             self.host = host
         if port:
@@ -71,20 +71,18 @@ class PDCtl():
             runtime_info[key] = util.read_url(build_url(uri))
         return runtime_info
 
-    def save_info(self, basedir=None):
-        full_outputdir = fileopt.build_full_output_dir(
-            basedir=basedir, subdir=self.pdctl_dir)
+    def save_info(self):
         pd_health = self.read_health()
         if pd_health:
             fileopt.write_file(os.path.join(
-                full_outputdir, "%s_%s-health.json" % (self.host, self.port)), pd_health)
+                self.outdir, "%s_%s-health.json" % (self.host, self.port)), pd_health)
         pd_diagnose = self.read_diagnose()
         if pd_diagnose:
             fileopt.write_file(os.path.join(
-                full_outputdir, "%s_%s-diagnose.json" % (self.host, self.port)), pd_diagnose)
+                self.outdir, "%s_%s-diagnose.json" % (self.host, self.port)), pd_diagnose)
 
         for key, info in self.read_runtime_info().items():
             if not info:
                 continue
             fileopt.write_file(os.path.join(
-                full_outputdir, "%s_%s-%s.json" % (self.host, self.port, key)), info)
+                self.outdir, "%s_%s-%s.json" % (self.host, self.port, key)), info)
