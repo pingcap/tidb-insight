@@ -15,7 +15,7 @@ class Ftrace(drtracer.DirectReclaimTracer):
         self.cwd = cwd if cwd else util.cwd()
 
     def run_collecting(self):
-        tracepoint = self.options["ftracepoint"]
+        tracepoint = self.options.ftracepoint
         if tracepoint == "dr":
             self.save_trace(self.cwd, self.outdir)
         else:

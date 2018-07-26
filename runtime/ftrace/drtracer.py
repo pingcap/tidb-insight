@@ -35,8 +35,10 @@ class DirectReclaimTracer(MeasurementBase):
             os.chdir(cwd)
             return
 
-        bufsize_kb = self.options["bufsize"] if "bufsize" in \
-            self.options and self.options["bufsize"] else "4096"
+        try:
+            bufsize_kb = self.options.bufsize
+        except AttributeError:
+            bufsize_kb = 4096
         stderr = util.run_cmd(["echo %s > buffer_size_kb" %
                                bufsize_kb], shell=True)[1]
         if stderr:
@@ -53,8 +55,10 @@ class DirectReclaimTracer(MeasurementBase):
                 return
 
         # collect trace
-        time = self.options["time"] if "time" in \
-            self.options and self.options["time"] else 60
+        try:
+            time = self.options.time
+        except AttributeError:
+            time = 60
         util.run_cmd_for_a_while(
             ["cat trace_pipe > %s/drtrace" % self.outdir], time, shell=True)
 

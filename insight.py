@@ -184,7 +184,7 @@ class Insight():
 
         if args.ftracepoint:
             self.insight_ftrace = ftrace.Ftrace(
-                self.cwd, args, self.full_outdir, 'ftracedata')
+                args, self.full_outdir, 'ftracedata', self.cwd)
             self.insight_ftrace.run_collecting()
         else:
             logging.debug(
