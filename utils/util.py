@@ -71,15 +71,18 @@ def parse_cmdline(cmdline):
 def parse_insight_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts, collect various diagnosis data.",
                                      epilog="Note that some arguments may decrease system performance.")
-    subparsers = parser.add_subparsers(dest="subcmd")
     parser.add_argument("-o", "--output", action="store", default=None,
                         help="The directory to store output data of TiDB Insight. Any existing file will be overwritten without futher confirmation.")
     parser.add_argument("--alias", action="store", default=get_hostname(),
                         help="The alias of this instance. This value be part of the name of output tarball.")
-    parser.add_argument("-c", "--compress", action="store_true", default=False,
-                        help="Compress all output files to a tarball, disabled by default.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Print verbose output.")
+
+    subparsers = parser.add_subparsers(dest="subcmd")
+
+# Sub-command: compress
+    parser_compress = subparsers.add_parser(
+        "compress", help="Compress all output files to a tarball.")
 
 # Sub-command: system
     parser_system = subparsers.add_parser(

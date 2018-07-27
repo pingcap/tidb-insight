@@ -315,5 +315,5 @@ if __name__ == "__main__":
         insight.read_pdctl(args)
 
     # compress all output to tarball
-    if args.compress:
+    if args.subcmd == "compress":
         fileopt.compress_tarball(insight.outdir, insight.alias)
