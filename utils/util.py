@@ -82,7 +82,11 @@ def parse_insight_opts():
 
 # Sub-command: compress
     parser_compress = subparsers.add_parser(
-        "compress", help="Compress all output files to a tarball.")
+        "archive", help="Compress all output files to a tarball.")
+    parser_compress.add_argument(
+        "-x", "--extract", action="store_true", default=False, help="Extract compressed data.")
+    parser_compress.add_argument(
+        "--dir", help="Location of compressed data, all tarballs under directory will be extracted.")
 
 # Sub-command: system
     parser_system = subparsers.add_parser(
