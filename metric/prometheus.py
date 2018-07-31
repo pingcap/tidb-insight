@@ -35,7 +35,7 @@ class PromMetrics(MetricBase):
     def run_collecting(self):
         for metric in self.get_label_names():
             url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
-                self.url_base, metric, self.start_time, self.end_time, self.options.resolution)
+                self.url_base, metric, self.start_time, self.end_time, self.resolution)
             matrix = json.loads(util.read_url(url))
             if not matrix['status'] == 'success':
                 logging.info("Error querying for key '%s'." % metric)
