@@ -148,7 +148,7 @@ def parse_insight_opts():
                             help="Location of log files. If `--log-auto` is set, this value will be ignored.")
     parser_log.add_argument("--prefix", action="store", default=None,
                             help="The prefix of log files, will be the directory name of all logs, will be in the name of output tarball. If `--log-auto` is set, this value will be ignored.")
-    parser_log.add_argument("--retention", action="store", type=int, default=0,
+    parser_log.add_argument("--retention", type=int, action="store", default=0,
                             help="The time of log retention, any log files older than given time period from current time will not be included. Value should be a number of hour(s) in positive interger. `0` by default and means no time check.")
 ####
 
@@ -176,6 +176,27 @@ def parse_insight_opts():
     parser_pdctl.add_argument("--port", type=int, action="store", default=None,
                               help="The port of PD API service, `2379` by default.")
 ####
+
+# Sub-command: metric
+    parser_metric = subparsers.add_parser(
+        "metric", help="Collect metric data from monitoring systems.")
+    subparser_metric = parser_metric.add_subparsers(dest="subcmd_metric")
+    parser_prom = subparser_metric.add_parser(
+        "prom", help="Collect data from Prometheus API.")
+    parser_prom.add_argument("--host", action="store", default=None,
+                             help="The host of Prometheus API, `localhost` by default.")
+    parser_prom.add_argument("--port", type=int, action="store", default=None,
+                             help="The port of Prometheus API, `9090` by default.")
+    parser_prom.add_argument("--retention", type=int, action="store", default=None,
+                             help="Collect metric of past N hours, N=2 by default. If `--retention` is set, `--start` and `--end` will be ignored.")
+    parser_prom.add_argument("--start", action="store", default=None,
+                             help="Start timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
+    parser_prom.add_argument("--end", action="store", default=None,
+                             help="End timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
+    parser_prom.add_argument("--resoluiton", type=float, default=None,
+                             help="Query resolution step width of Prometheus in seconds, 5.0 by default.")
+####
+
     return parser.parse_args()
 
 
@@ -213,3 +234,30 @@ def get_hostname():
 def python_version():
     # get a numeric Python version
     return sys.version_info[0] + sys.version_info[1] * 0.1
+
+
+def parse_timestamp(time_string):
+    # if it's already a numeric timestamp, just return it
+    try:
+        if time_string.isdigit():
+            return int(time_string)
+    except (AttributeError, ValueError):
+        pass
+    format_guess = [
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d %H",
+        "%Y-%m-%d",
+        "%m-%d",
+        "%H:%M:%S",
+        "%H:%M",
+        "%H"
+    ]
+    for time_format in format_guess:
+        try:
+            # Convert to timestamp (in seconds)
+            return time.mktime(time.strptime(time_string, time_format))
+        except ValueError:
+            pass
+    raise ValueError(
+        "time data '%s' does not match any supported format." % time_string)

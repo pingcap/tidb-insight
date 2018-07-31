@@ -25,6 +25,7 @@ import time
 
 from file import configfiles
 from file import logfiles
+from metric import prometheus
 from runtime import perf
 from tidb import pdctl
 from utils import fileopt
@@ -49,6 +50,7 @@ class Insight():
     insight_configfiles = None
     insight_pdctl = None
     insight_trace = None
+    insight_metric = None
 
     def __init__(self, args):
         if args.alias:
@@ -261,6 +263,13 @@ class Insight():
             args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
         self.insight_pdctl.run_collecting()
 
+    def dump_metric(self, args):
+        if args.subcmd_metric == "prom":
+            self.insight_metric = prometheus.PromMetrics(
+                args, self.full_outdir, 'metric/prometheus')
+            self.insight_metric.run_collecting()
+        pass
+
 
 if __name__ == "__main__":
     if not util.is_root_privilege():
@@ -314,6 +323,9 @@ if __name__ == "__main__":
     if args.subcmd == "tidb":
         # read and save `pd-ctl` info
         insight.read_pdctl(args)
+
+    if args.subcmd == "metric":
+        insight.dump_metric(args)
 
     # compress all output to tarball
     if args.subcmd == "archive":
