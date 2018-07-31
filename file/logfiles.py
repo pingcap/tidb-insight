@@ -44,11 +44,10 @@ class InsightLogFiles(FileCollecting):
             fullpath = os.path.join(srcdir, file)
             if os.path.isdir(fullpath):
                 # check for all sub-directories
-                for f in self.get_filelist_in_time(fullpath):
-                    valid_file_list.append(f)
-            if not self.check_time_range(comp_time=os.path.getmtime(fullpath), valid_range=self.options.retention):
+                valid_file_list += self.get_filelist_in_time(fullpath)
+            elif not self.check_time_range(comp_time=os.path.getmtime(fullpath), valid_range=self.options.retention):
                 continue
-            if file.startswith(self.options.prefix):
+            elif file.startswith(self.options.prefix):
                 valid_file_list.append(fullpath)
         return valid_file_list
 

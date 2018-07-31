@@ -41,6 +41,8 @@ class Insight():
     outdir = "data"
     full_outdir = ""
     alias = ""
+    # data collected by `collector`
+    collector_data = {}
 
     insight_perf = None
     insight_logfiles = None
@@ -62,9 +64,6 @@ class Insight():
             self.full_outdir = fileopt.create_dir(
                 os.path.join(self.cwd, self.outdir, self.alias))
         logging.debug("Output directory is: %s" % self.full_outdir)
-
-    # data collected by `collector`
-    collector_data = {}
 
     # parse process info in collector_data and build required dict
     def format_proc_info(self, keyname=None):

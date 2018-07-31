@@ -34,7 +34,6 @@ class InsightConfigFiles(FileCollecting):
             return cmd_opts["config"]
         except KeyError:
             return None
-        return
 
     def save_configs_auto(self, proc_cmdline=None):
         for pid, cmdline in proc_cmdline.items():
@@ -51,9 +50,8 @@ class InsightConfigFiles(FileCollecting):
                 fullpath = os.path.join(base_dir, file)
                 if os.path.isdir(fullpath):
                     # check for all sub-directories
-                    for f in list_config_files(fullpath, prefix):
-                        file_list.append(f)
-                if file.startswith(prefix):
+                    file_list += list_config_files(fullpath, prefix)
+                elif file.startswith(prefix):
                     file_list.append(fullpath)
             return file_list
 

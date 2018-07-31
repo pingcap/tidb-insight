@@ -8,7 +8,6 @@ import os
 import shutil
 import time
 
-from abc import ABCMeta
 from abc import abstractmethod
 
 from utils import fileopt
@@ -16,8 +15,6 @@ from utils.measurement import MeasurementBase
 
 
 class FileCollecting(MeasurementBase):
-    __metaclass__ = ABCMeta
-
     def __init__(self, args, basedir=None, subdir=None):
         # init self.options and prepare self.outdir
         super(FileCollecting, self).__init__(args, basedir, subdir)
@@ -37,4 +34,4 @@ class FileCollecting(MeasurementBase):
 
     @abstractmethod
     def run_collecting(self):
-        pass
+        raise NotImplementedError
