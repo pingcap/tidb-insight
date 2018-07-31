@@ -26,11 +26,13 @@ class PromMetrics(MetricBase):
         self.resolution = args.resolution if args.resolution else 5.0
 
     def get_label_names(self):
+        result = []
         url = '%s%s' % (self.url_base, '/label/__name__/values')
         labels = json.loads(util.read_url(url))
         if labels['status'] == 'success':
-            return labels['data']
-        return []
+            result = labels['data']
+        logging.debug("Found %s available metric keys..." % len(result))
+        return result
 
     def run_collecting(self):
         for metric in self.get_label_names():
@@ -44,4 +46,5 @@ class PromMetrics(MetricBase):
             metric_filename = '%s_%s_to_%s_%ss.json' % (
                 metric, self.start_time, self.end_time, self.options.resolution)
             fileopt.write_file(os.path.join(
-                self.outdir, metric_filename), matrix['data']['result'])
+                self.outdir, metric_filename), json.dumps(matrix['data']['result']))
+            logging.debug("Saved data for key '%s'." % metric)
