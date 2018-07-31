@@ -4,6 +4,7 @@
 # Prometheus API to get data, so it's not intend to be used
 # without a fully working tidb-ansible configuration.
 
+import json
 import logging
 import os
 
@@ -26,7 +27,7 @@ class PromMetrics(MetricBase):
 
     def get_label_names(self):
         url = '%s%s' % (self.url_base, '/label/__name__/values')
-        labels = util.read_url(url)
+        labels = json.loads(util.read_url(url))
         if labels['status'] == 'success':
             return labels['data']
         return []
@@ -35,7 +36,7 @@ class PromMetrics(MetricBase):
         for metric in self.get_label_names():
             url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
                 self.url_base, metric, self.start_time, self.end_time, self.options.resolution)
-            matrix = util.read_url(url)
+            matrix = json.loads(util.read_url(url))
             if not matrix['status'] == 'success':
                 logging.info("Error querying for key '%s'." % metric)
                 logging.debug("Output is:\n%s" % matrix)
@@ -43,4 +44,4 @@ class PromMetrics(MetricBase):
             metric_filename = '%s_%s_to_%s_%ss.json' % (
                 metric, self.start_time, self.end_time, self.options.resolution)
             fileopt.write_file(os.path.join(
-                self.dir, metric_filename, matrix['data']['result']))
+                self.outdir, metric_filename), matrix['data']['result'])
