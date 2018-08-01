@@ -187,7 +187,7 @@ def parse_insight_opts():
                              help="The host of Prometheus API, `localhost` by default.")
     parser_prom.add_argument("--port", type=int, action="store", default=None,
                              help="The port of Prometheus API, `9090` by default.")
-    parser_prom.add_argument("--retention", type=int, action="store", default=None,
+    parser_prom.add_argument("--retention", type=float, action="store", default=None,
                              help="Collect metric of past N hours, N=2 by default. If `--retention` is set, `--start` and `--end` will be ignored.")
     parser_prom.add_argument("--start", action="store", default=None,
                              help="Start timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")

@@ -44,7 +44,7 @@ class PromMetrics(MetricBase):
                 logging.debug("Output is:\n%s" % matrix)
                 continue
             metric_filename = '%s_%s_to_%s_%ss.json' % (
-                metric, self.start_time, self.end_time, self.options.resolution)
+                metric, self.start_time, self.end_time, self.resolution)
             fileopt.write_file(os.path.join(
                 self.outdir, metric_filename), json.dumps(matrix['data']['result']))
             logging.debug("Saved data for key '%s'." % metric)

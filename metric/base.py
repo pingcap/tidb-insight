@@ -18,10 +18,11 @@ class MetricBase(MeasurementBase):
         self.end_time = util.parse_timestamp(
             args.end) if args.end else int(time.time())
         if args.retention:
-            self.start_time = self.end_time - args.retention * 3600
+            self.start_time = int(self.end_time - args.retention * 3600.0)
         else:
             # Default time period is 2 hours
-            self.start_time = args.start if args.start else self.end_time - 7200
+            self.start_time = int(
+                args.start if args.start else self.end_time - 7200.0)
 
     @abstractmethod
     def run_collecting(self):
