@@ -23,7 +23,7 @@ class PromMetrics(MetricBase):
         self.api_uri = '/api/v1'
         self.url_base = 'http://%s:%s%s' % (self.host, self.port, self.api_uri)
 
-        self.resolution = args.resolution if args.resolution else 5.0
+        self.resolution = args.resolution if args.resolution else 15.0
 
     def get_label_names(self):
         result = []
@@ -35,6 +35,9 @@ class PromMetrics(MetricBase):
         return result
 
     def run_collecting(self):
+        if self.resolution < 15.0:
+            logging.warn(
+                "Sampling resolution < 15s don't increase accuracy but data size.")
         for metric in self.get_label_names():
             url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
                 self.url_base, metric, self.start_time, self.end_time, self.resolution)

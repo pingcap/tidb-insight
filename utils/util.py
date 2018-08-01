@@ -194,7 +194,7 @@ def parse_insight_opts():
     parser_prom.add_argument("--end", action="store", default=None,
                              help="End timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
     parser_prom.add_argument("--resolution", type=float, default=None,
-                             help="Query resolution step width of Prometheus in seconds, 5.0 by default.")
+                             help="Query resolution step width of Prometheus in seconds, 15.0 by default.")
 ####
 
     return parser.parse_args()
