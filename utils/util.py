@@ -195,6 +195,8 @@ def parse_insight_opts():
                              help="End timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
     parser_prom.add_argument("--resolution", type=float, default=None,
                              help="Query resolution step width of Prometheus in seconds, 15.0 by default.")
+    parser_prom.add_argument("--compress", action="store_true", default=False,
+                             help="Compress dumped JSON file, disabled by default. If compressed, the dumped file won't be able to read directly.")
 ####
 
     return parser.parse_args()
