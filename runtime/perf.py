@@ -4,6 +4,8 @@
 # TODO: - switch to perf entire system or only given process(es)
 #       - set time of perf record, default to 10s
 
+import logging
+
 from os import path
 
 from utils import util
@@ -81,14 +83,14 @@ class Perf(MeasurementBase):
                     fileopt.write_file(
                         path.join(self.outdir, "%s.stdout" % pname), stdout)
                 if stderr:
-                    fileopt.write_file(
-                        path.join(self.outdir, "%s.stderr" % pname), stderr)
+                    logging.warn(
+                        "Command '%s' returned error: %s" % (cmd, stderr))
                 if self.options.archive:
                     cmd = self.build_archive_cmd(pid, pname)
                     stdout, stderr = util.run_cmd(cmd)
                     if stderr:
-                        fileopt.write_file(
-                            path.join(self.outdir, "%s.archive.stderr" % pname), stderr)
+                        logging.warn(
+                            "Command '%s' returned error: %s" % (cmd, stderr))
         else:
             # perf the entire system
             cmd = self.build_record_cmd()
@@ -97,11 +99,10 @@ class Perf(MeasurementBase):
                 fileopt.write_file(
                     path.join(self.outdir, "perf.stdout"), stdout)
             if stderr:
-                fileopt.write_file(
-                    path.join(self.outdir, "perf.stderr"), stderr)
+                logging.warn("Command '%s' returned error: %s" % (cmd, stderr))
             if self.options.archive:
                 cmd = self.build_archive_cmd()
                 stdout, stderr = util.run_cmd(cmd)
                 if stderr:
-                    fileopt.write_file(
-                        path.join(self.outdir, "perf.archive.stderr"), stderr)
+                    logging.warn(
+                        "Command '%s' returned error: %s" % (cmd, stderr))

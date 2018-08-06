@@ -45,7 +45,8 @@ class InsightLogFiles(FileCollecting):
             if os.path.isdir(fullpath):
                 # check for all sub-directories
                 valid_file_list += self.get_filelist_in_time(fullpath)
-            elif not self.check_time_range(comp_time=os.path.getmtime(fullpath), valid_range=self.options.retention):
+            elif not self.check_time_range(comp_time=os.path.getmtime(fullpath),
+                                           valid_range=self.options.retention):
                 continue
             elif file.startswith(self.options.prefix):
                 valid_file_list.append(fullpath)
@@ -54,7 +55,8 @@ class InsightLogFiles(FileCollecting):
     def save_journal_log(self):
         journal_path = "/var/log/journal/*/*@*.journal"
         for logfile in glob(journal_path):
-            if not self.check_time_range(comp_time=os.path.getmtime(logfile), valid_range=self.options.retention):
+            if not self.check_time_range(comp_time=os.path.getmtime(logfile),
+                                         valid_range=self.options.retention):
                 continue
             self.save_to_dir(srcfile=logfile)
 
@@ -62,7 +64,8 @@ class InsightLogFiles(FileCollecting):
         syslog_path = "/var/log/message*"
         dmesg_path = "/var/log/dmesg*"
         for logfile in glob(syslog_path) + glob(dmesg_path):
-            if not self.check_time_range(comp_time=os.path.getmtime(logfile), valid_range=self.options.retention):
+            if not self.check_time_range(comp_time=os.path.getmtime(logfile),
+                                         valid_range=self.options.retention):
                 continue
             self.save_to_dir(srcfile=logfile)
 

@@ -25,7 +25,7 @@ class InsightConfigFiles(FileCollecting):
             fileopt.write_file(os.path.join(
                 self.outdir, "sysctl.conf"), stdout)
         if stderr:
-            fileopt.write_file(os.path.join(self.outdir, "sysctl.err"), stderr)
+            logging.warn("Reading limits.conf returned error: %s" % stderr)
 
     def find_tidb_configfiles(self, cmdline=None):
         cmd_opts = util.parse_cmdline(cmdline)

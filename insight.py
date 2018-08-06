@@ -23,23 +23,23 @@ import logging
 import os
 import time
 
-from utils import lsof
+from file import configfiles
+from file import logfiles
 from runtime import perf
+from tidb import pdctl
+from utils import fileopt
+from utils import lsof
 from utils import space
 from utils import util
-from file import configfiles
-from utils import fileopt
-from file import logfiles
-from utils.process import meta as proc_meta
-from tidb import pdctl
+
 from runtime.ftrace import ftrace
+from utils.process import meta as proc_meta
 
 
 class Insight():
     cwd = util.cwd()
     # data output dir
     outdir = "data"
-    full_outdir = ""
     alias = ""
     # data collected by `collector`
     collector_data = {}
@@ -61,15 +61,17 @@ class Insight():
             self.full_outdir = fileopt.create_dir(
                 os.path.join(self.outdir, self.alias))
         else:
+            if args.output:
+                self.outdir = args.output
             self.full_outdir = fileopt.create_dir(
                 os.path.join(self.cwd, self.outdir, self.alias))
         logging.debug("Output directory is: %s" % self.full_outdir)
 
     # parse process info in collector_data and build required dict
     def format_proc_info(self, keyname=None):
-        if not keyname:
-            return None
         result = {}
+        if not keyname:
+            return result
         for proc in self.collector_data["proc_stats"]:
             try:
                 result[proc["pid"]] = proc[keyname]
