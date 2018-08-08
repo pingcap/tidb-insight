@@ -2,7 +2,7 @@
 import logging
 import os
 
-from measurement.files import fileutils
+from utils import fileopt
 
 
 def find_process_by_port(port=None, protocol=None):
@@ -16,11 +16,11 @@ def find_process_by_port(port=None, protocol=None):
     # iterate over all file descriptors and build a socket address -> pid map
     def build_inode_to_pid_map():
         result = {}
-        for entry in fileutils.list_dir("/proc"):
+        for entry in fileopt.list_dir("/proc"):
             # find all PIDs
             fname = entry.split('/')[-1]
             if str.isdigit(fname):
-                for _fd in fileutils.list_dir("/proc/%s/fd" % fname):
+                for _fd in fileopt.list_dir("/proc/%s/fd" % fname):
                     try:
                         _fd_target = os.readlink(_fd)
                     except OSError as e:
@@ -47,7 +47,7 @@ def find_process_by_port(port=None, protocol=None):
         }
         listen_list = []
         for netstat_file in netstat_files[protocol]:
-            listen_list += fileutils.read_file(netstat_file).split("\n")
+            listen_list += fileopt.read_file(netstat_file).split("\n")
         for line in listen_list:
             if not line or "local_address" in line:
                 continue

@@ -18,3 +18,8 @@ data/
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class

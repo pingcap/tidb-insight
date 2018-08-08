@@ -3,7 +3,7 @@
 
 from glob import glob
 
-from measurement import util
+from utils import util
 
 
 # check total size of filepath with `du`

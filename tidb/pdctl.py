@@ -3,17 +3,15 @@
 
 import os
 
-from measurement import util
-from measurement.files import fileutils
+from utils import util
+from utils import fileopt
+from utils.measurement import MeasurementBase
 
 
-class PDCtl():
-    # default output dir name
-    pdctl_dir = "pdctl"
-
+class PDCtl(MeasurementBase):
     # default to localhost
-    pd_host = "localhost"
-    pd_port = 2379
+    host = "localhost"
+    port = 2379
 
     # The `pdctl` API base URI
     base_uri = "/pd/api"
@@ -42,24 +40,26 @@ class PDCtl():
     pd_health_uri = "/health"
     pd_diagnose_uri = "/diagnose"
 
-    def __init__(self, host=None, port=None, api_ver=None):
+    def __init__(self, args, basedir=None, subdir=None, host=None, port=None, api_ver=None):
+        # init self.options and prepare self.outdir
+        super(PDCtl, self).__init__(args, basedir, subdir)
         if host:
-            self.pd_host = host
+            self.host = host
         if port:
-            self.pd_port = port
+            self.port = port
         if api_ver:
             self.api_ver = api_ver
         self.base_url = "http://%s:%s%s%s" % (
-            self.pd_host, self.pd_port, self.base_uri, self.api_path)
+            self.host, self.port, self.base_uri, self.api_path)
 
     def read_health(self):
-        url = "http://%s:%s/pd%s" % (self.pd_host,
-                                     self.pd_port, self.pd_health_uri)
+        url = "http://%s:%s/pd%s" % (self.host,
+                                     self.port, self.pd_health_uri)
         return util.read_url(url)
 
     def read_diagnose(self):
-        url = "http://%s:%s/pd%s" % (self.pd_host,
-                                     self.pd_port, self.pd_diagnose_uri)
+        url = "http://%s:%s/pd%s" % (self.host,
+                                     self.port, self.pd_diagnose_uri)
         return util.read_url(url)
 
     def read_runtime_info(self):
@@ -71,20 +71,18 @@ class PDCtl():
             runtime_info[key] = util.read_url(build_url(uri))
         return runtime_info
 
-    def save_info(self, basedir=None):
-        full_outputdir = fileutils.build_full_output_dir(
-            basedir=basedir, subdir=self.pdctl_dir)
+    def run_collecting(self):
         pd_health = self.read_health()
         if pd_health:
-            fileutils.write_file(os.path.join(
-                full_outputdir, "%s_%s-health.json" % (self.pd_host, self.pd_port)), pd_health)
+            fileopt.write_file(os.path.join(
+                self.outdir, "%s_%s-health.json" % (self.host, self.port)), pd_health)
         pd_diagnose = self.read_diagnose()
         if pd_diagnose:
-            fileutils.write_file(os.path.join(
-                full_outputdir, "%s_%s-diagnose.json" % (self.pd_host, self.pd_port)), pd_diagnose)
+            fileopt.write_file(os.path.join(
+                self.outdir, "%s_%s-diagnose.json" % (self.host, self.port)), pd_diagnose)
 
         for key, info in self.read_runtime_info().items():
             if not info:
                 continue
-            fileutils.write_file(os.path.join(
-                full_outputdir, "%s_%s-%s.json" % (self.pd_host, self.pd_port, key)), info)
+            fileopt.write_file(os.path.join(
+                self.outdir, "%s_%s-%s.json" % (self.host, self.port, key)), info)

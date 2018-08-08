@@ -3,8 +3,9 @@
 
 import logging
 import os
+import tarfile
 
-from measurement import util
+from utils import util
 
 # read data from file
 
@@ -94,3 +95,22 @@ def compress_tarball(output_base=None, output_name=None):
         logging.info("tar stderr: %s" % stderr)
     if not stdout and stdout != '':
         logging.debug("tar output: %s" % stdout)
+
+
+def decompress_tarball_recursive(srcdir=None, dstdir=None):
+    if not srcdir:
+        srcdir = util.cwd()
+    if not dstdir:
+        dstdir = util.cwd()
+
+    # find tarballs
+    for file in list_dir(srcdir):
+        if file.endswith('.tar.gz'):
+            tar = tarfile.open(file)
+            tar.extractall(dstdir)
+            tar.close()
+        elif os.path.isdir(file):
+            subdir = create_dir(os.path.join(dstdir, file.split('/')[-1]))
+            decompress_tarball_recursive(file, subdir)
+        else:
+            pass
