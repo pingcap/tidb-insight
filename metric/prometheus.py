@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # Export monitoring metrics from Prometheus API
-# This feature reads Grafana Dashboard JSON config and querys
-# Prometheus API to get data, so it's not intend to be used
-# without a fully working tidb-ansible configuration.
+# This feature queries Prometheus API to get all metric key and data,
+# then store them as files in the output directory.
 
 import json
 import logging

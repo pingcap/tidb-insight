@@ -263,7 +263,7 @@ class Insight():
             args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
         self.insight_pdctl.run_collecting()
 
-    def dump_metric(self, args):
+    def dump_metrics(self, args):
         if args.subcmd_metric == "prom":
             self.insight_metric = prometheus.PromMetrics(
                 args, self.full_outdir, 'metric/prometheus')
@@ -325,7 +325,7 @@ if __name__ == "__main__":
         insight.read_pdctl(args)
 
     if args.subcmd == "metric":
-        insight.dump_metric(args)
+        insight.dump_metrics(args)
 
     # compress all output to tarball
     if args.subcmd == "archive":
