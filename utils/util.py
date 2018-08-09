@@ -190,9 +190,9 @@ def parse_insight_opts():
     parser_prom.add_argument("--retention", type=float, action="store", default=None,
                              help="Collect metric of past N hours, N=2 by default. If `--retention` is set, `--start` and `--end` will be ignored.")
     parser_prom.add_argument("--start", action="store", default=None,
-                             help="Start timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
+                             help="Start time point of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
     parser_prom.add_argument("--end", action="store", default=None,
-                             help="End timestamp of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
+                             help="End time point of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
     parser_prom.add_argument("--resolution", type=float, default=None,
                              help="Query resolution step width of Prometheus in seconds, 15.0 by default.")
     parser_prom.add_argument("--compress", action="store_true", default=False,
@@ -259,7 +259,7 @@ def parse_timestamp(time_string):
         try:
             # Convert to timestamp (in seconds)
             return time.mktime(time.strptime(time_string, time_format))
-        except ValueError:
+        except (TypeError, ValueError):
             pass
     raise ValueError(
         "time data '%s' does not match any supported format." % time_string)
