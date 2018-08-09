@@ -18,6 +18,8 @@ class MetricBase(MeasurementBase):
         self.end_time = util.parse_timestamp(
             args.end) if args.end else int(time.time())
         if args.retention:
+            if args.retention <= 0:
+                raise ValueError("Retention hours must be a positive number.")
             self.start_time = int(self.end_time - args.retention * 3600.0)
         else:
             # Default time period is 2 hours
