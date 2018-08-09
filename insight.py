@@ -25,6 +25,7 @@ import time
 
 from file import configfiles
 from file import logfiles
+from metric import prometheus
 from runtime import perf
 from tidb import pdctl
 from utils import fileopt
@@ -49,6 +50,7 @@ class Insight():
     insight_configfiles = None
     insight_pdctl = None
     insight_trace = None
+    insight_metric = None
 
     def __init__(self, args):
         if args.alias:
@@ -261,20 +263,33 @@ class Insight():
             args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
         self.insight_pdctl.run_collecting()
 
+    def dump_metrics(self, args):
+        if args.subcmd_metric == "prom":
+            self.insight_metric = prometheus.PromMetrics(
+                args, self.full_outdir, 'metric/prometheus')
+            self.insight_metric.run_collecting()
+        pass
+
 
 if __name__ == "__main__":
-    if not util.is_root_privilege():
-        logging.warning("""Running TiDB Insight with non-superuser privilege may result
-        in lack of some information or data in the final output, if
-        you find certain data missing or empty in result, please try
-        to run this script again with root.""")
-
     # WIP: add params to set output dir / overwriting on non-empty target dir
     args = util.parse_insight_opts()
     if args.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-        logging.debug("Debug logging enabled.")
+        logging.basicConfig(
+            format='[%(levelname)s] %(message)s (at %(filename)s:%(lineno)d in %(funcName)s).',
+            level=logging.DEBUG)
+        logging.info("Debug logging enabled.")
         logging.debug("Input arguments are: %s" % args)
+    else:
+        logging.basicConfig(
+            format='[%(levelname)s] %(message)s.', level=logging.INFO)
+        logging.info("Using logging level: INFO.")
+
+    if not util.is_root_privilege():
+        logging.warning("""Running TiDB Insight with non-superuser privilege may result
+          in lack of some information or data in the final output, if
+          you find certain data missing or empty in result, please try
+          to run this script again with root.""")
 
     insight = Insight(args)
 
@@ -314,6 +329,9 @@ if __name__ == "__main__":
     if args.subcmd == "tidb":
         # read and save `pd-ctl` info
         insight.read_pdctl(args)
+
+    if args.subcmd == "metric":
+        insight.dump_metrics(args)
 
     # compress all output to tarball
     if args.subcmd == "archive":
