@@ -10,17 +10,17 @@ from utils import util
 # read data from file
 
 
-def read_file(filename):
+def read_file(filename, mode='r'):
     data = None
-    with open(filename, 'r') as f:
+    with open(filename, mode) as f:
         data = f.read()
     f.close()
     return data
 
 
-# write data to file, in plain text
-def write_file(filename, data):
-    with open(filename, 'w') as f:
+# write data to file
+def write_file(filename, data, mode='w'):
+    with open(filename, mode) as f:
         try:
             f.write(str(data, 'utf-8'))
         except TypeError:
