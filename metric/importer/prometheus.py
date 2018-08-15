@@ -79,7 +79,10 @@ class PromDump():
                 for value in instance['values']:
                     point['time'] = datetime.datetime.utcfromtimestamp(
                         value[0]).strftime('%Y-%m-%dT%H:%M:%SZ')
-                    point['fields']['value'] = value[1]
+                    try:
+                        point['fields']['value'] = float(value[1])
+                    except ValueError:
+                        point['fields']['value'] = value[1]
                     points.append(point.copy())
             return points
 
