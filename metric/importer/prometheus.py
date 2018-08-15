@@ -70,17 +70,11 @@ class PromDump():
             for instance in metric:
                 point['measurement'] = instance['metric']['__name__']
                 point['tags'] = {
-                    '__name__': instance['metric']['__name__'],
                     'cluster': self.db_name,
-                    'instance': instance['metric']['instance'],
-                    'job': instance['metric']['job'],
                     'monitor': 'prometheus',
                 }
-                try:
-                    point['tags']['type'] = instance['metric']['type']
-                except KeyError:
-                    # not all metric have a 'type' tag
-                    pass
+                for k, v in instance['metric'].items():
+                    point['tags'][k] = v
                 # build point values
                 for value in instance['values']:
                     point['time'] = datetime.datetime.utcfromtimestamp(
@@ -102,7 +96,11 @@ class PromDump():
                      self.db_name)
 
         for series in self.build_series():
-            client.write_points(series, batch_size=200000)
+            try:
+                client.write_points(series, batch_size=2000)
+            except influxdb.exceptions.InfluxDBClientError as e:
+                logging.warn("Write error for request.")
+                logging.debug(e)
 
     def run_importing(self):
         self.write2influxdb()
