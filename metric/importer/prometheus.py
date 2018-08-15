@@ -83,9 +83,10 @@ class PromDump():
                     pass
                 # build point values
                 for value in instance['values']:
-                    point['time'] = value[0]
+                    point['time'] = datetime.datetime.utcfromtimestamp(
+                        value[0]).strftime('%Y-%m-%dT%H:%M:%SZ')
                     point['fields']['value'] = value[1]
-                    points.append(point)
+                    points.append(point.copy())
             return points
 
         for metric in self.load_dump():
