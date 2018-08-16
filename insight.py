@@ -26,6 +26,7 @@ import time
 from file import configfiles
 from file import logfiles
 from metric import prometheus
+from metric.importer import prometheus as import_prom
 from runtime import perf
 from tidb import pdctl
 from utils import fileopt
@@ -290,6 +291,12 @@ if __name__ == "__main__":
           in lack of some information or data in the final output, if
           you find certain data missing or empty in result, please try
           to run this script again with root.""")
+
+    # re-import dumped data
+    if args.subcmd == 'metric' and args.subcmd_metric == "load":
+        insight_importer = import_prom.PromDump(args)
+        insight_importer.run_importing()
+        exit(0)
 
     insight = Insight(args)
 
