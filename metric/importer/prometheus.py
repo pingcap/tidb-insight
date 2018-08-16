@@ -8,7 +8,6 @@ import datetime
 import influxdb
 import json
 import logging
-import multiprocessing
 import os
 import random
 import string

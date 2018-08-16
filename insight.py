@@ -284,7 +284,7 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(
             format='[%(levelname)s] %(message)s.', level=logging.INFO)
-        logging.info("Using logging level: INFO")
+        logging.info("Using logging level: INFO.")
 
     if not util.is_root_privilege():
         logging.warning("""Running TiDB Insight with non-superuser privilege may result
