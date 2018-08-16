@@ -63,20 +63,20 @@ class PromDump():
             yield json.loads(raw)
 
     def build_series(self):
-        def format_prom_metric(metric=None):
+        def format_prom_metric(key=None):
             points = []
             point = {'fields': {}}
             # build point header
-            for instance in metric:
-                point['measurement'] = instance['metric']['__name__']
+            for metric in key:
+                point['measurement'] = metric['metric']['__name__']
                 point['tags'] = {
                     'cluster': self.db_name,
                     'monitor': 'prometheus',
                 }
-                for k, v in instance['metric'].items():
+                for k, v in metric['metric'].items():
                     point['tags'][k] = v
                 # build point values
-                for value in instance['values']:
+                for value in metric['values']:
                     point['time'] = datetime.datetime.utcfromtimestamp(
                         value[0]).strftime('%Y-%m-%dT%H:%M:%SZ')
                     try:
@@ -86,8 +86,8 @@ class PromDump():
                     points.append(point.copy())
             return points
 
-        for metric in self.load_dump():
-            yield format_prom_metric(metric)
+        for key in self.load_dump():
+            yield format_prom_metric(key)
 
     def write2influxdb(self):
         client = influxdb.InfluxDBClient(
@@ -102,7 +102,8 @@ class PromDump():
             try:
                 client.write_points(series, batch_size=2000)
             except influxdb.exceptions.InfluxDBClientError as e:
-                logging.warn("Write error for request.")
+                logging.warn(
+                    "Write error for key '%s', data may be empty." % series[0]['measurement'])
                 logging.debug(e)
 
     def run_importing(self):
