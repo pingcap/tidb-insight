@@ -175,6 +175,12 @@ def parse_insight_opts():
                               help="The host of the PD server. `localhost` by default.")
     parser_pdctl.add_argument("--port", type=int, action="store", default=None,
                               help="The port of PD API service, `2379` by default.")
+    parser_tidbinfo = subparsers_tidb.add_parser(
+        "tidbinfo", help="Collect data from TiDB's server API.")
+    parser_tidbinfo.add_argument("--host", action="store", default=None,
+                                 help="The host of the TiDB server, `localhost` by default.")
+    parser_tidbinfo.add_argument("--port", type=int, action="store", default=None,
+                                 help="The port of TiDB server API port, `10080` by default.")
 ####
 
 # Sub-command: metric

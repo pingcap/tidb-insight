@@ -29,6 +29,7 @@ from metric import prometheus
 from metric.importer import prometheus as import_prom
 from runtime import perf
 from tidb import pdctl
+from tidb import tidbinfo
 from utils import fileopt
 from utils import lsof
 from utils import space
@@ -49,7 +50,7 @@ class Insight():
     insight_perf = None
     insight_logfiles = None
     insight_configfiles = None
-    insight_pdctl = None
+    insight_tidb = None
     insight_trace = None
     insight_metric = None
 
@@ -257,12 +258,17 @@ class Insight():
             proc_cmdline = self.format_proc_info("cmd")  # cmdline of process
         self.insight_configfiles.run_collecting(proc_cmdline)
 
-    def read_pdctl(self, args):
-        if args.subcmd_tidb != "pdctl":
-            logging.debug("Ignoring collecting of PD API.")
-        self.insight_pdctl = pdctl.PDCtl(
-            args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
-        self.insight_pdctl.run_collecting()
+    def read_apis(self, args):
+        if args.subcmd_tidb == "pdctl":
+            # read and save `pd-ctl` info
+            self.insight_tidb = pdctl.PDCtl(
+                args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
+            self.insight_tidb.run_collecting()
+        elif args.subcmd_tidb == 'tidbinfo':
+            # read and save TiDB's server info
+            self.insight_tidb = tidbinfo.TiDBInfo(
+                args, self.full_outdir, 'tidbinfo')
+            self.insight_tidb.run_collecting()
 
     def dump_metrics(self, args):
         if args.subcmd_metric == "prom":
@@ -334,8 +340,8 @@ if __name__ == "__main__":
         insight.save_configs(args)
 
     if args.subcmd == "tidb":
-        # read and save `pd-ctl` info
-        insight.read_pdctl(args)
+        # read and save info from TiDB related APIs
+        insight.read_apis(args)
 
     if args.subcmd == "metric":
         insight.dump_metrics(args)
