@@ -40,15 +40,15 @@ class PDCtl(MeasurementBase):
     pd_health_uri = "/health"
     pd_diagnose_uri = "/diagnose"
 
-    def __init__(self, args, basedir=None, subdir=None, host=None, port=None, api_ver=None):
+    def __init__(self, args, basedir=None, subdir=None):
         # init self.options and prepare self.outdir
         super(PDCtl, self).__init__(args, basedir, subdir)
-        if host:
-            self.host = host
-        if port:
-            self.port = port
-        if api_ver:
-            self.api_ver = api_ver
+        if args.host:
+            self.host = args.host
+        if args.port:
+            self.port = args.port
+        if args.api_ver:
+            self.api_ver = args.api_ver
         self.base_url = "http://%s:%s%s%s" % (
             self.host, self.port, self.base_uri, self.api_path)
 

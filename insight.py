@@ -261,8 +261,7 @@ class Insight():
     def read_apis(self, args):
         if args.subcmd_tidb == "pdctl":
             # read and save `pd-ctl` info
-            self.insight_tidb = pdctl.PDCtl(
-                args, self.full_outdir, 'pdctl', host=args.host, port=args.port)
+            self.insight_tidb = pdctl.PDCtl(args, self.full_outdir, 'pdctl')
             self.insight_tidb.run_collecting()
         elif args.subcmd_tidb == 'tidbinfo':
             # read and save TiDB's server info
