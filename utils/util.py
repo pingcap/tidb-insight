@@ -234,18 +234,18 @@ def get_init_type():
 
 def read_url(url, data=None):
     if not url or url == "":
-        return None
+        return None, None
 
     try:
         logging.debug("Requesting URL: %s" % url)
         response = urlreq.urlopen(url, data)
-        return response.read()
+        return response.read(), response.getcode()
     except HTTPError as e:
         logging.debug("HTTP Error: %s" % e.read())
-        return e.read()
+        return e.read(), e.getcode()
     except URLError as e:
         logging.warning("Reading URL %s error: %s" % (url, e))
-        return None
+        return None, None
 
 
 def get_hostname():

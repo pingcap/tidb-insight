@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Collect infomation with TiDB API
 
+import logging
 import os
 
 from utils import util
@@ -27,7 +28,12 @@ class TiDBInfo(MeasurementBase):
             self.host, self.port, self.uri)
 
     def read_api(self):
-        return util.read_url(self.url)
+        result, code = util.read_url(self.url)
+        if code == 404:
+            logging.info(
+                "TiDB server API is not supported by this running instance.")
+            return None
+        return result
 
     def run_collecting(self):
         info = self.read_api()

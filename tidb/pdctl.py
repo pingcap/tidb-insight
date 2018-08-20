@@ -55,12 +55,12 @@ class PDCtl(MeasurementBase):
     def read_health(self):
         url = "http://%s:%s/pd%s" % (self.host,
                                      self.port, self.pd_health_uri)
-        return util.read_url(url)
+        return util.read_url(url)[0]
 
     def read_diagnose(self):
         url = "http://%s:%s/pd%s" % (self.host,
                                      self.port, self.pd_diagnose_uri)
-        return util.read_url(url)
+        return util.read_url(url)[0]
 
     def read_runtime_info(self):
         def build_url(uri):
@@ -68,7 +68,7 @@ class PDCtl(MeasurementBase):
 
         runtime_info = {}
         for key, uri in self.api_map.items():
-            runtime_info[key] = util.read_url(build_url(uri))
+            runtime_info[key] = util.read_url(build_url(uri))[0]
         return runtime_info
 
     def run_collecting(self):
