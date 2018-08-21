@@ -26,7 +26,6 @@ import time
 from file import configfiles
 from file import logfiles
 from metric import prometheus
-from metric.importer import prometheus as import_prom
 from runtime import perf
 from tidb import pdctl
 from tidb import tidbinfo
@@ -299,6 +298,7 @@ if __name__ == "__main__":
 
     # re-import dumped data
     if args.subcmd == 'metric' and args.subcmd_metric == "load":
+        from metric.importer import prometheus as import_prom
         insight_importer = import_prom.PromDump(args)
         insight_importer.run_importing()
         exit(0)
