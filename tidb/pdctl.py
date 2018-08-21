@@ -40,13 +40,13 @@ class PDCtl(MeasurementBase):
     pd_health_uri = "/health"
     pd_diagnose_uri = "/diagnose"
 
-    def __init__(self, args, basedir=None, subdir=None, host=None, port=None, api_ver=None):
+    def __init__(self, args, basedir=None, subdir=None, api_ver=None):
         # init self.options and prepare self.outdir
         super(PDCtl, self).__init__(args, basedir, subdir)
-        if host:
-            self.host = host
-        if port:
-            self.port = port
+        if args.host:
+            self.host = args.host
+        if args.port:
+            self.port = args.port
         if api_ver:
             self.api_ver = api_ver
         self.base_url = "http://%s:%s%s%s" % (
@@ -55,12 +55,12 @@ class PDCtl(MeasurementBase):
     def read_health(self):
         url = "http://%s:%s/pd%s" % (self.host,
                                      self.port, self.pd_health_uri)
-        return util.read_url(url)
+        return util.read_url(url)[0]
 
     def read_diagnose(self):
         url = "http://%s:%s/pd%s" % (self.host,
                                      self.port, self.pd_diagnose_uri)
-        return util.read_url(url)
+        return util.read_url(url)[0]
 
     def read_runtime_info(self):
         def build_url(uri):
@@ -68,7 +68,7 @@ class PDCtl(MeasurementBase):
 
         runtime_info = {}
         for key, uri in self.api_map.items():
-            runtime_info[key] = util.read_url(build_url(uri))
+            runtime_info[key] = util.read_url(build_url(uri))[0]
         return runtime_info
 
     def run_collecting(self):

@@ -28,7 +28,7 @@ class PromMetrics(MetricBase):
     def get_label_names(self):
         result = []
         url = '%s%s' % (self.url_base, '/label/__name__/values')
-        labels = json.loads(util.read_url(url))
+        labels = json.loads(util.read_url(url)[0])
         if labels['status'] == 'success':
             result = labels['data']
         logging.debug("Found %s available metric keys..." % len(result))
@@ -41,7 +41,7 @@ class PromMetrics(MetricBase):
         for metric in self.get_label_names():
             url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
                 self.url_base, metric, self.start_time, self.end_time, self.resolution)
-            matrix = json.loads(util.read_url(url))
+            matrix = json.loads(util.read_url(url)[0])
             if not matrix['status'] == 'success':
                 logging.info("Error querying for key '%s'." % metric)
                 logging.debug("Output is:\n%s" % matrix)
