@@ -26,7 +26,6 @@ class Perf(MeasurementBase):
     def build_record_cmd(self, pid=None, outfile=None):
         cmd = ["perf",    # default executable name
                "record",  # default action of perf
-               "-g",
                "--call-graph",
                "dwarf"]
 
