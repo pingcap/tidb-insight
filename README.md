@@ -88,11 +88,11 @@ If you want to collect runtime information of a TiDB cluster from PD on a remote
 
 The system log is not collectd by default, even if `-l` is set. If needed, use `-l --syslog` to enable it. Both `syslog` and `systemd-journald` logs are supported and automatically detected. Note that there is no content filter available for log files, thus enabling log file collecting may lead to a very large output size.
 
-## Intergration with Ansible
+## Integration with Ansible
 
-The `tidb-insight` project is designed to intergrate with [tidb-ansible](https://github.com/pingcap/tidb-ansible) playbooks.
+The `tidb-insight` project is designed to integrate with [tidb-ansible](https://github.com/pingcap/tidb-ansible) playbooks.
 
-> All collecting features will be disabled by default after the development of intergration is finished, so it's highly recommended to specify all the arguments needed when using `tidb-insight` now, even if the feature is currently enabled by default.
+> All collecting features will be disabled by default after the development of integration is finished, so it's highly recommended to specify all the arguments needed when using `tidb-insight` now, even if the feature is currently enabled by default.
 
 TO DO: Add documents/links to documents of using `tidb-insight` with `tidb-ansible`.
 
