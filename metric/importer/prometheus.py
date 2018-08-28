@@ -85,21 +85,37 @@ class PromDump():
                     points.append(point.copy())
             return points
 
-        for key in self.load_dump():
-            yield format_prom_metric(key)
+        for metric in self.load_dump():
+            if not metric:
+                continue
+            fileopt.write_file("test", json.dumps(metric))
+            cmd = ["/home/allen/dev/pingcap/tidb-insight/tools/prom2influx",
+                        "-db", self.db_name,
+                        "-host", self.host,
+                        "-port", str(self.port)]
+            logging.debug("Running cmd: %s" % ' '.join(cmd))
+            stdout, stderr = util.run_cmd(cmd, input=json.dumps(metric))
+            logging.debug("stdout: %s\nstderr: %s" % (len(stdout), len(stderr)))
+            if stderr:
+                logging.warn(stderr)
+            yield format_prom_metric(metric)
 
     def write2influxdb(self):
-        client = influxdb.InfluxDBClient(
-            host=self.host, port=self.port, username=self.user, password=self.passwd,
-            database=self.db_name, timeout=30)
+        #client = influxdb.InfluxDBClient(
+        #    host=self.host, port=self.port, username=self.user, password=self.passwd,
+        #    database=self.db_name, timeout=30)
         # create_database has no effect if the database already exist
-        client.create_database(self.db_name)
+        #client.create_database(self.db_name)
         logging.info("Metrics will be imported to database '%s'." %
                      self.db_name)
 
         for series in self.build_series():
+            if not series:
+                continue
             try:
-                client.write_points(series, batch_size=2000)
+                print("series size: %s" % len(series))
+                #fileopt.write_file("test", json.dumps(series))
+                #client.write_points(series, batch_size=2000)
             except influxdb.exceptions.InfluxDBClientError as e:
                 logging.warn(
                     "Write error for key '%s', data may be empty." % series[0]['measurement'])

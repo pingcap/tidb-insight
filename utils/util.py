@@ -40,9 +40,9 @@ def is_abs_path(path):
     return os.path.isabs(path)
 
 
-def run_cmd(cmd, shell=False):
-    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
-    return p.communicate()
+def run_cmd(cmd, shell=False, input=None):
+    p = Popen(cmd, shell=shell, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    return p.communicate(input=input)
 
 
 def run_cmd_for_a_while(cmd, duration, shell=False):
