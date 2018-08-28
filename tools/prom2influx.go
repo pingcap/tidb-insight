@@ -22,6 +22,7 @@ type options struct {
 	User   string
 	Passwd string
 	DBName string
+	Chunk  int
 }
 
 func parseOpts() options {
@@ -30,6 +31,7 @@ func parseOpts() options {
 	influxUser := flag.String("user", "", "The username of influxdb.")
 	influxPass := flag.String("passwd", "", "The password of user.")
 	influxDB := flag.String("db", "tidb-insight", "The database name of imported metrics.")
+	influxChunk := flag.Int("chunk", 2000, "The chunk size of writing.")
 	flag.Parse()
 
 	var opts options
@@ -38,6 +40,7 @@ func parseOpts() options {
 	opts.User = *influxUser
 	opts.Passwd = *influxPass
 	opts.DBName = *influxDB
+	opts.Chunk = *influxChunk
 	return opts
 }
 
@@ -58,12 +61,25 @@ func queryDB(clnt influx.Client, db_name string, cmd string) (res []influx.Resul
 	return res, nil
 }
 
+func slicePoints(data []map[string]interface{}, chunkSize int) [][]map[string]interface{} {
+	var result [][]map[string]interface{}
+	for i := 0; i < len(data); i += chunkSize {
+		endPos := i + chunkSize
+		if endPos > len(data) {
+			endPos = len(data)
+		}
+		result = append(result, data[i:endPos])
+	}
+	return result
+}
+
 func buildPoints(data []map[string]interface{}, client influx.Client,
-	opts options) (bp influx.BatchPoints, err error) {
-	if bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
+	opts options) (influx.BatchPoints, error) {
+	bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
 		Database:  opts.DBName,
 		Precision: "s",
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
 	}
 
@@ -119,20 +135,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	bp, err := buildPoints(data, client, opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// create database has no side effect if database already exist
 	_, err = queryDB(client, opts.DBName, fmt.Sprintf("CREATE DATABASE %s", opts.DBName))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// write batch points to influxdb
-	if err := client.Write(bp); err != nil {
-		log.Fatal(err)
+	for _, slicedData := range slicePoints(data, opts.Chunk) {
+		bp, err := buildPoints(slicedData, client, opts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// write batch points to influxdb
+		if err := client.Write(bp); err != nil {
+			log.Fatal(err)
+		}
 	}
-	fmt.Println(bp)
 }
