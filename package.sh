@@ -38,6 +38,8 @@ ln -sfv vendor src
 # compile a static binary
 cd ${BUILD_ROOT}/${PKGNAME}/collector/
 GOBIN=${GOROOT}/bin/go make static || exit 1
+cd ${BUILD_ROOT}/${PKGNAME}/tools/
+GOBIN=${GOROOT}/bin/go make static || exit 1
 
 # compile other tools
 cd ${BUILD_ROOT}/${PKGNAME}/tools/vmtouch
