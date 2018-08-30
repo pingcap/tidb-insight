@@ -88,7 +88,7 @@ class PromDump():
                     logging.info("Retry succeeded for metric '%s'." %
                                  metric_name)
                 else:
-                    logging.warn(
-                        "Retry failed for metric '%s', stderr is: '%s'" % metric_name, retry_stderr)
+                    logging.warn("Retry failed for metric '%s', stderr is: '%s'" % (
+                        metric_name, retry_stderr))
             elif stderr:
                 logging.warn(stderr)
