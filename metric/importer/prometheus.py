@@ -10,7 +10,6 @@ import logging
 import os
 import random
 import string
-import zlib
 
 from utils import fileopt
 from utils import util
@@ -51,13 +50,7 @@ class PromDump():
             return f_list
 
         for file in file_list(self.datadir):
-            if file.endswith('.json'):
-                raw = fileopt.read_file(file)
-            elif file.endswith('.dat'):
-                raw = zlib.decompress(fileopt.read_file(file, 'rb'))
-            else:
-                logging.debug("Skip unrecorgnized file '%s'" % file)
-                continue
+            raw = fileopt.read_file(file)
             yield json.loads(raw)
 
     def exec_importer(self, data, chunk_size=2000):
