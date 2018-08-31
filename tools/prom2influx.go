@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
 	influx "github.com/influxdata/influxdb/client/v2"
@@ -21,6 +20,7 @@ type options struct {
 	User   string
 	Passwd string
 	DBName string
+	File   string
 	Chunk  int
 }
 
@@ -30,6 +30,7 @@ func parseOpts() options {
 	influxUser := flag.String("user", "", "The username of influxdb.")
 	influxPass := flag.String("passwd", "", "The password of user.")
 	influxDB := flag.String("db", "tidb-insight", "The database name of imported metrics.")
+	influxFile := flag.String("file", "", "The dumped metric JSON file to load.")
 	influxChunk := flag.Int("chunk", 2000, "The chunk size of writing.")
 	flag.Parse()
 
@@ -39,6 +40,7 @@ func parseOpts() options {
 	opts.User = *influxUser
 	opts.Passwd = *influxPass
 	opts.DBName = *influxDB
+	opts.File = *influxFile
 	opts.Chunk = *influxChunk
 	return opts
 }
@@ -132,8 +134,8 @@ func main() {
 	}
 	defer client.Close()
 
-	// read JSON data from stdin
-	input, err := ioutil.ReadAll(os.Stdin)
+	// read JSON data from file
+	input, err := ioutil.ReadFile(opts.File)
 	if err != nil {
 		log.Fatal(err)
 	}
