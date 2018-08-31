@@ -6,7 +6,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -86,14 +85,14 @@ func buildPoints(data []map[string]interface{}, client influx.Client,
 		}
 		tags["cluster"] = opts.DBName
 		tags["monitor"] = "prometheus"
-		measurement := series["metric"].(map[string]interface{})["__name__"]
+		measurement := tags["__name__"]
 		for _, point := range series["values"].([]interface{}) {
 			timestamp := point.([]interface{})[0].(float64)
 			timepoint := time.Unix(int64(timestamp), 0)
 			fields := map[string]interface{}{
 				"value": point.([]interface{})[1].(string),
 			}
-			if pt, err := influx.NewPoint(measurement.(string), tags, fields,
+			if pt, err := influx.NewPoint(measurement, tags, fields,
 				timepoint); err == nil {
 				ptList = append(ptList, *pt)
 				continue
