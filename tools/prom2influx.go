@@ -61,8 +61,8 @@ func queryDB(clnt influx.Client, db_name string, cmd string) (res []influx.Resul
 	return res, nil
 }
 
-func slicePoints(data []map[string]interface{}, chunkSize int) [][]map[string]interface{} {
-	var result [][]map[string]interface{}
+func slicePoints(data []influx.Point, chunkSize int) [][]influx.Point {
+	var result [][]influx.Point
 	for i := 0; i < len(data); i += chunkSize {
 		endPos := i + chunkSize
 		if endPos > len(data) {
@@ -74,14 +74,9 @@ func slicePoints(data []map[string]interface{}, chunkSize int) [][]map[string]in
 }
 
 func buildPoints(data []map[string]interface{}, client influx.Client,
-	opts options) (influx.BatchPoints, error) {
-	bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
-		Database:  opts.DBName,
-		Precision: "s",
-	})
-	if err != nil {
-		return nil, err
-	}
+	opts options) ([]influx.BatchPoints, error) {
+	var bpList []influx.BatchPoints
+	var ptList []influx.Point
 
 	for _, series := range data {
 		raw_tags := series["metric"].(map[string]interface{})
@@ -100,13 +95,28 @@ func buildPoints(data []map[string]interface{}, client influx.Client,
 			}
 			if pt, err := influx.NewPoint(measurement.(string), tags, fields,
 				timepoint); err == nil {
-				bp.AddPoint(pt)
+				ptList = append(ptList, *pt)
 				continue
+			} else {
+				return bpList, err
 			}
-			return bp, err
 		}
 	}
-	return bp, nil
+
+	for _, chunk := range slicePoints(ptList, opts.Chunk) {
+		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
+			Database:  opts.DBName,
+			Precision: "s",
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, pt := range chunk {
+			bp.AddPoint(&pt)
+		}
+		bpList = append(bpList, bp)
+	}
+	return bpList, nil
 }
 
 func main() {
@@ -141,11 +151,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _, slicedData := range slicePoints(data, opts.Chunk) {
-		bp, err := buildPoints(slicedData, client, opts)
-		if err != nil {
-			log.Fatal(err)
-		}
+	bpChunkList, err := buildPoints(data, client, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, bp := range bpChunkList {
 		// write batch points to influxdb
 		if err := client.Write(bp); err != nil {
 			log.Fatal(err)
