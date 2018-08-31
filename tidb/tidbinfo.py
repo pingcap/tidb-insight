@@ -15,7 +15,13 @@ class TiDBInfo(MeasurementBase):
     port = 10080
 
     # The API's URI
-    uri = "/info/all"
+    uri_map = {
+        "info": "/info",
+        "status": "/status",
+        "regions": "/regions/meta",
+        "schema": "/schema",
+        "settings": "/settings"
+    }
 
     def __init__(self, args, basedir=None, subdir=None):
         # init self.options and prepare self.outdir
@@ -24,11 +30,11 @@ class TiDBInfo(MeasurementBase):
             self.host = args.host
         if args.port:
             self.port = args.port
-        self.url = "http://%s:%s%s" % (
-            self.host, self.port, self.uri)
+        self.url_base = "http://%s:%s" % (
+            self.host, self.port)
 
-    def read_api(self):
-        result, code = util.read_url(self.url)
+    def read_api(self, url):
+        result, code = util.read_url(url)
         if code == 404:
             logging.info(
                 "TiDB server API is not supported by this running instance.")
@@ -36,7 +42,8 @@ class TiDBInfo(MeasurementBase):
         return result
 
     def run_collecting(self):
-        info = self.read_api()
-        if info:
-            fileopt.write_file(os.path.join(
-                self.outdir, "%s_%s-tidb-info.json" % (self.host, self.port)), info)
+        for key, uri in self.uri_map.items():
+            data = self.read_api(self.url_base + uri)
+            if data:
+                fileopt.write_file(os.path.join(
+                    self.outdir, "%s_%s-tidb-%s.json" % (self.host, self.port, key)), data)
