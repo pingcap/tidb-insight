@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"runtime/pprof"
 	"time"
 
 	influx "github.com/influxdata/influxdb/client/v2"
@@ -74,55 +76,7 @@ func slicePoints(data []*influx.Point, chunkSize int) [][]*influx.Point {
 	return result
 }
 
-func buildPoints(data []map[string]interface{}, client influx.Client,
-	opts options) ([]*influx.BatchPoints, error) {
-	var bpList []*influx.BatchPoints
-	var ptList []*influx.Point
-
-	for _, series := range data {
-		raw_tags := series["metric"].(map[string]interface{})
-		tags := make(map[string]string)
-		for k, v := range raw_tags {
-			tags[k] = v.(string)
-		}
-		tags["cluster"] = opts.DBName
-		tags["monitor"] = "prometheus"
-		measurement := tags["__name__"]
-		for _, point := range series["values"].([]interface{}) {
-			timestamp := point.([]interface{})[0].(float64)
-			timepoint := time.Unix(int64(timestamp), 0)
-			fields := map[string]interface{}{
-				"value": point.([]interface{})[1].(string),
-			}
-			if pt, err := influx.NewPoint(measurement, tags, fields,
-				timepoint); err == nil {
-				ptList = append(ptList, pt)
-				continue
-			} else {
-				return bpList, err
-			}
-		}
-	}
-
-	for _, chunk := range slicePoints(ptList, opts.Chunk) {
-		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
-			Database:  opts.DBName,
-			Precision: "s",
-		})
-		if err != nil {
-			return nil, err
-		}
-		for _, pt := range chunk {
-			bp.AddPoint(pt)
-		}
-		bpList = append(bpList, &bp)
-	}
-	return bpList, nil
-}
-
-func main() {
-	opts := parseOpts()
-
+func newClient(opts options) influx.Client {
 	// connect to influxdb
 	client, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     "http://" + opts.Host + ":" + opts.Port,
@@ -132,7 +86,74 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
+	return client
+}
+
+func buildPoints(series map[string]interface{}, client influx.Client, opts options,
+	ptList []*influx.Point) error {
+	raw_tags := series["metric"].(map[string]interface{})
+	tags := make(map[string]string)
+	for k, v := range raw_tags {
+		tags[k] = v.(string)
+	}
+	tags["cluster"] = opts.DBName
+	tags["monitor"] = "prometheus"
+	measurement := tags["__name__"]
+	for _, point := range series["values"].([]interface{}) {
+		timestamp := point.([]interface{})[0].(float64)
+		timepoint := time.Unix(int64(timestamp), 0)
+		fields := map[string]interface{}{
+			"value": point.([]interface{})[1].(string),
+		}
+		if pt, err := influx.NewPoint(measurement, tags, fields,
+			timepoint); err == nil {
+			ptList = append(ptList, pt)
+			continue
+		} else {
+			return err
+		}
+	}
+	return nil
+}
+
+func writeBatchPoints(data []map[string]interface{}, opts options) error {
+	for _, series := range data {
+		client := newClient(opts)
+		var ptList []*influx.Point
+		err := buildPoints(series, client, opts, ptList)
+		if err != nil {
+			return err
+		}
+
+		for _, chunk := range slicePoints(ptList, opts.Chunk) {
+			// create influx.Client and close it every time we write a BatchPoints
+			// series to reduce memory usage on large dataset
+			bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
+				Database:  opts.DBName,
+				Precision: "s",
+			})
+			if err != nil {
+				return err
+			}
+			for _, pt := range chunk {
+				bp.AddPoint(pt)
+			}
+			// write batch points to influxdb
+			if err := client.Write(bp); err != nil {
+				return err
+			}
+		}
+		client.Close()
+	}
+	return nil
+}
+
+func main() {
+	pf_cpu, _ := os.Create("cpuprofile.gz")
+	pprof.StartCPUProfile(pf_cpu)
+	defer pprof.StopCPUProfile()
+
+	opts := parseOpts()
 
 	// read JSON data from file
 	input, err := ioutil.ReadFile(opts.File)
@@ -146,20 +167,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// connect to influxdb
+	client := newClient(opts)
 	// create database has no side effect if database already exist
 	_, err = queryDB(client, opts.DBName, fmt.Sprintf("CREATE DATABASE %s", opts.DBName))
 	if err != nil {
 		log.Fatal(err)
 	}
+	client.Close()
 
-	bpChunkList, err := buildPoints(data, client, opts)
-	if err != nil {
+	if err := writeBatchPoints(data, opts); err != nil {
 		log.Fatal(err)
 	}
-	for _, bp := range bpChunkList {
-		// write batch points to influxdb
-		if err := client.Write(*bp); err != nil {
-			log.Fatal(err)
-		}
-	}
+
+	pf_mem, _ := os.Create("memprofile.gz")
+	pprof.WriteHeapProfile(pf_mem)
+	pf_mem.Close()
 }
