@@ -62,8 +62,8 @@ func queryDB(clnt influx.Client, db_name string, cmd string) (res []influx.Resul
 	return res, nil
 }
 
-func slicePoints(data []influx.Point, chunkSize int) [][]influx.Point {
-	var result [][]influx.Point
+func slicePoints(data []*influx.Point, chunkSize int) [][]*influx.Point {
+	var result [][]*influx.Point
 	for i := 0; i < len(data); i += chunkSize {
 		endPos := i + chunkSize
 		if endPos > len(data) {
@@ -75,9 +75,9 @@ func slicePoints(data []influx.Point, chunkSize int) [][]influx.Point {
 }
 
 func buildPoints(data []map[string]interface{}, client influx.Client,
-	opts options) ([]influx.BatchPoints, error) {
-	var bpList []influx.BatchPoints
-	var ptList []influx.Point
+	opts options) ([]*influx.BatchPoints, error) {
+	var bpList []*influx.BatchPoints
+	var ptList []*influx.Point
 
 	for _, series := range data {
 		raw_tags := series["metric"].(map[string]interface{})
@@ -96,7 +96,7 @@ func buildPoints(data []map[string]interface{}, client influx.Client,
 			}
 			if pt, err := influx.NewPoint(measurement, tags, fields,
 				timepoint); err == nil {
-				ptList = append(ptList, *pt)
+				ptList = append(ptList, pt)
 				continue
 			} else {
 				return bpList, err
@@ -113,9 +113,9 @@ func buildPoints(data []map[string]interface{}, client influx.Client,
 			return nil, err
 		}
 		for _, pt := range chunk {
-			bp.AddPoint(&pt)
+			bp.AddPoint(pt)
 		}
-		bpList = append(bpList, bp)
+		bpList = append(bpList, &bp)
 	}
 	return bpList, nil
 }
@@ -158,7 +158,7 @@ func main() {
 	}
 	for _, bp := range bpChunkList {
 		// write batch points to influxdb
-		if err := client.Write(bp); err != nil {
+		if err := client.Write(*bp); err != nil {
 			log.Fatal(err)
 		}
 	}
