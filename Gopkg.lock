@@ -41,6 +41,14 @@
   version = "v1.6.2"
 
 [[projects]]
+  branch = "master"
+  digest = "1:644d7e65ea431241ea1b95ae423634da11e6a2776a36f0049b49eac9defb877b"
+  name = "github.com/prometheus/common"
+  packages = ["model"]
+  pruneopts = "UT"
+  revision = "c7de2306084e37d54b8be01f3541a8464345e9a5"
+
+[[projects]]
   digest = "1:7395b855a6078ad2e6c40311402a057a91125fb9f32cf228e1b32cdc57c33538"
   name = "github.com/shirou/gopsutil"
   packages = [
@@ -80,6 +88,7 @@
   input-imports = [
     "github.com/AstroProfundis/sysinfo",
     "github.com/influxdata/influxdb/client/v2",
+    "github.com/prometheus/common/model",
     "github.com/shirou/gopsutil/cpu",
     "github.com/shirou/gopsutil/process",
   ]
