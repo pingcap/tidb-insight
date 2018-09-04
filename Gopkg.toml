@@ -37,6 +37,10 @@
   name = "github.com/influxdata/influxdb"
   version = "v1.6.2"
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/prometheus/common"
+
 [prune]
   go-tests = true
   unused-packages = true

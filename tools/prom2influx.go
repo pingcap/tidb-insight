@@ -11,9 +11,9 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
-	"time"
 
 	influx "github.com/influxdata/influxdb/client/v2"
+	"github.com/prometheus/common/model"
 )
 
 type options struct {
@@ -89,38 +89,37 @@ func newClient(opts options) influx.Client {
 	return client
 }
 
-func buildPoints(series map[string]interface{}, client influx.Client, opts options,
-	ptList []*influx.Point) error {
-	raw_tags := series["metric"].(map[string]interface{})
+func buildPoints(series *model.SampleStream, client influx.Client,
+	opts options) ([]*influx.Point, error) {
+	var ptList []*influx.Point
+	raw_tags := series.Metric
 	tags := make(map[string]string)
 	for k, v := range raw_tags {
-		tags[k] = v.(string)
+		tags[string(k)] = string(v)
 	}
 	tags["cluster"] = opts.DBName
 	tags["monitor"] = "prometheus"
 	measurement := tags["__name__"]
-	for _, point := range series["values"].([]interface{}) {
-		timestamp := point.([]interface{})[0].(float64)
-		timepoint := time.Unix(int64(timestamp), 0)
+	for _, point := range series.Values {
+		timestamp := point.Timestamp.Time()
 		fields := map[string]interface{}{
-			"value": point.([]interface{})[1].(string),
+			"value": point.Value,
 		}
 		if pt, err := influx.NewPoint(measurement, tags, fields,
-			timepoint); err == nil {
+			timestamp); err == nil {
 			ptList = append(ptList, pt)
 			continue
 		} else {
-			return err
+			return ptList, err
 		}
 	}
-	return nil
+	return ptList, nil
 }
 
-func writeBatchPoints(data []map[string]interface{}, opts options) error {
+func writeBatchPoints(data model.Matrix, opts options) error {
 	for _, series := range data {
 		client := newClient(opts)
-		var ptList []*influx.Point
-		err := buildPoints(series, client, opts, ptList)
+		ptList, err := buildPoints(series, client, opts)
 		if err != nil {
 			return err
 		}
@@ -162,7 +161,7 @@ func main() {
 	}
 
 	// decode JSON
-	var data []map[string]interface{}
+	var data model.Matrix
 	if err = json.Unmarshal(input, &data); err != nil {
 		log.Fatal(err)
 	}
