@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
-	"runtime/pprof"
 
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/prometheus/common/model"
@@ -148,10 +146,6 @@ func writeBatchPoints(data model.Matrix, opts options) error {
 }
 
 func main() {
-	pf_cpu, _ := os.Create("cpuprofile.gz")
-	pprof.StartCPUProfile(pf_cpu)
-	defer pprof.StopCPUProfile()
-
 	opts := parseOpts()
 
 	// read JSON data from file
@@ -178,8 +172,4 @@ func main() {
 	if err := writeBatchPoints(data, opts); err != nil {
 		log.Fatal(err)
 	}
-
-	pf_mem, _ := os.Create("memprofile.gz")
-	pprof.WriteHeapProfile(pf_mem)
-	pf_mem.Close()
 }
