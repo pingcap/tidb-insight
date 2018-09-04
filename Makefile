@@ -11,7 +11,7 @@ collector:
 	$(MAKE) -C collector $(MAKECMDGOALS)
 
 tools:
-	$(MAKE) -c tools $(MAKECMDGOALS)
+	$(MAKE) -C tools $(MAKECMDGOALS)
 	$(MAKE) -C tools/vmtouch $(MAKECMDGOALS)
 	install -Dm755 tools/vmtouch/vmtouch bin/
 
