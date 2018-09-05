@@ -7,6 +7,7 @@
 import datetime
 import json
 import logging
+import multiprocessing
 import os
 import random
 import string
@@ -24,6 +25,7 @@ class PromDump():
         self.db_name = args.db if args.db else self.unique_dbname()
         self.user = args.user
         self.passwd = args.passwd
+        self.proc_num = args.proc_num if args.proc_num else multiprocessing.cpu_count()
 
     # unique_dbname() generates a unique database name for importing, to prevents
     # overwritting of previous imported data
@@ -55,6 +57,22 @@ class PromDump():
         logging.debug("Running cmd: %s" % ' '.join(cmd))
         return util.run_cmd(cmd)
 
+    def importer_worker(self, filename):
+        # all dumped files are in 'prometheus' sub-directory
+        if not filename or not filename.endswith('.json') or 'prometheus' not in filename:
+            return
+        stderr = self.exec_importer(filename)[1]
+        if stderr and "Request Entity Too Large" in stderr.decode('utf-8'):
+            logging.info("Write to DB failed, retry for once...")
+            retry_stderr = self.exec_importer(filename, chunk_size=100)[1]
+            if not retry_stderr:
+                logging.info("Retry succeeded.")
+            else:
+                logging.warning("Retry failed, stderr is: '%s'" %
+                                retry_stderr)
+        elif stderr:
+            logging.warning(stderr)
+
     def run_importing(self):
         logging.info("Metrics will be imported to database '%s'." %
                      self.db_name)
@@ -68,18 +86,14 @@ class PromDump():
                     f_list.append(file)
             return f_list
 
-        for file in file_list(self.datadir):
-            # all dumped files are in 'prometheus' sub-directory
-            if not file or not file.endswith('.json') or 'prometheus' not in file:
-                continue
-            stderr = self.exec_importer(file)[1]
-            if stderr and "Request Entity Too Large" in stderr.decode('utf-8'):
-                logging.info("Write to DB failed, retry for once...")
-                retry_stderr = self.exec_importer(file, chunk_size=100)[1]
-                if not retry_stderr:
-                    logging.info("Retry succeeded.")
-                else:
-                    logging.warning("Retry failed, stderr is: '%s'" %
-                                    retry_stderr)
-            elif stderr:
-                logging.warning(stderr)
+        pool = multiprocessing.Pool(self.proc_num)
+        files = file_list(self.datadir)
+        pool.map_async(unwrap_self_f, zip([self] * len(files), files))
+        pool.close()
+        pool.join()
+
+
+# a trick to use multiprocessing.Pool inside a class
+# see http://www.rueckstiess.net/research/snippets/show/ca1d7d90 for details
+def unwrap_self_f(arg, **kwarg):
+    return PromDump.importer_worker(*arg, **kwarg)

@@ -216,6 +216,8 @@ def parse_insight_opts():
                              help="The user with priviledge to create database, empty (no authentication needed) by default.")
     parser_load.add_argument("--passwd", action="store", default=None,
                              help="The password of user, empty (no authentication needed) by default.")
+    parser_load.add_argument("--proc-num", type=int, action="store", default=None,
+                             help="Number of parallel importer processes to run, 'CPU count + 1' by default.")
 ####
 
     return parser.parse_args()
