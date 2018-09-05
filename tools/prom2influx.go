@@ -132,9 +132,7 @@ func writeBatchPoints(data model.Matrix, opts options) error {
 			if err != nil {
 				return err
 			}
-			for _, pt := range chunk {
-				bp.AddPoint(pt)
-			}
+			bp.AddPoints(chunk)
 			// write batch points to influxdb
 			if err := client.Write(bp); err != nil {
 				return err
