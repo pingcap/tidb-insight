@@ -238,7 +238,7 @@ class Insight():
     def save_logfiles(self, args):
         # reading logs requires root priviledge
         if not util.is_root_privilege():
-            logging.warn("It's required to read logs with root priviledge.")
+            logging.warning("It's required to read logs with root priviledge.")
             # return
 
         self.insight_logfiles = logfiles.InsightLogFiles(

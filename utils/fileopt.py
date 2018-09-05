@@ -62,7 +62,7 @@ def list_dir(path):
         # There is PermissionError in Python 3.3+, but only OSError in Python 2
         import errno
         if e.errno == errno.EACCES or e.errno == errno.EPERM:
-            logging.warn("Permission Denied reading %s" % path)
+            logging.warning("Permission Denied reading %s" % path)
         elif e.errno == errno.ENOENT:
             # when a process just exited
             pass

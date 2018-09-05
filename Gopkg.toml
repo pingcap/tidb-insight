@@ -31,7 +31,15 @@
 
 [[constraint]]
   name = "github.com/shirou/gopsutil"
-  version = "2.18.06"
+  version = "2.18.07"
+
+[[constraint]]
+  name = "github.com/influxdata/influxdb"
+  version = "v1.6.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/prometheus/common"
 
 [prune]
   go-tests = true

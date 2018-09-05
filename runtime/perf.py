@@ -82,13 +82,13 @@ class Perf(MeasurementBase):
                     fileopt.write_file(
                         path.join(self.outdir, "%s.stdout" % pname), stdout)
                 if stderr:
-                    logging.warn(
+                    logging.warning(
                         "Command '%s' returned error: %s" % (cmd, stderr))
                 if self.options.archive:
                     cmd = self.build_archive_cmd(pid, pname)
                     stdout, stderr = util.run_cmd(cmd)
                     if stderr:
-                        logging.warn(
+                        logging.warning(
                             "Command '%s' returned error: %s" % (cmd, stderr))
         else:
             # perf the entire system
@@ -98,10 +98,11 @@ class Perf(MeasurementBase):
                 fileopt.write_file(
                     path.join(self.outdir, "perf.stdout"), stdout)
             if stderr:
-                logging.warn("Command '%s' returned error: %s" % (cmd, stderr))
+                logging.warning("Command '%s' returned error: %s" %
+                                (cmd, stderr))
             if self.options.archive:
                 cmd = self.build_archive_cmd()
                 stdout, stderr = util.run_cmd(cmd)
                 if stderr:
-                    logging.warn(
+                    logging.warning(
                         "Command '%s' returned error: %s" % (cmd, stderr))

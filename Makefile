@@ -1,16 +1,17 @@
 ### Makefile for tidb-insight
-.PHONY: collector vmtouch
+.PHONY: collector tools
 
-default: collector vmtouch
+default: collector tools
 
-debug: collector vmtouch
+debug: collector tools
 
 all: default
 
 collector:
 	$(MAKE) -C collector $(MAKECMDGOALS)
 
-vmtouch:
+tools:
+	$(MAKE) -C tools $(MAKECMDGOALS)
 	$(MAKE) -C tools/vmtouch $(MAKECMDGOALS)
 	install -Dm755 tools/vmtouch/vmtouch bin/
 

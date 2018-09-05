@@ -40,9 +40,9 @@ def is_abs_path(path):
     return os.path.isabs(path)
 
 
-def run_cmd(cmd, shell=False):
-    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
-    return p.communicate()
+def run_cmd(cmd, shell=False, input=None):
+    p = Popen(cmd, shell=shell, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    return p.communicate(input=input)
 
 
 def run_cmd_for_a_while(cmd, duration, shell=False):
@@ -201,8 +201,6 @@ def parse_insight_opts():
                              help="End time point of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
     parser_prom.add_argument("--resolution", type=float, default=None,
                              help="Query resolution step width of Prometheus in seconds, 15.0 by default.")
-    parser_prom.add_argument("--compress", action="store_true", default=False,
-                             help="Compress dumped JSON file, disabled by default. If compressed, the dumped file won't be able to read directly.")
 
     parser_load = subparser_metric.add_parser(
         "load", help="Load dumped metrics to local influxdb.")
