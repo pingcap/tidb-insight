@@ -79,7 +79,7 @@ class PromDump():
                 if not retry_stderr:
                     logging.info("Retry succeeded.")
                 else:
-                    logging.warn("Retry failed, stderr is: '%s'" %
-                                 retry_stderr)
+                    logging.warning("Retry failed, stderr is: '%s'" %
+                                    retry_stderr)
             elif stderr:
-                logging.warn(stderr)
+                logging.warning(stderr)

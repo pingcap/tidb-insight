@@ -35,7 +35,7 @@ class PromMetrics(MetricBase):
 
     def run_collecting(self):
         if self.resolution < 15.0:
-            logging.warn(
+            logging.warning(
                 "Sampling resolution < 15s don't increase accuracy but data size.")
         for metric in self.get_label_names():
             url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
