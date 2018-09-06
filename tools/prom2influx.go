@@ -25,13 +25,13 @@ type options struct {
 }
 
 type promResult struct {
-	resultType string
-	result     model.Matrix
+	ResultType string
+	Result     model.Matrix
 }
 
 type promDump struct {
-	status string
-	data   promResult
+	Status string
+	Data   promResult
 }
 
 func parseOpts() options {
@@ -125,7 +125,7 @@ func buildPoints(series *model.SampleStream, client influx.Client,
 }
 
 func writeBatchPoints(data promDump, opts options) error {
-	for _, series := range data.data.result {
+	for _, series := range data.Data.Result {
 		client := newClient(opts)
 		ptList, err := buildPoints(series, client, opts)
 		if err != nil {
