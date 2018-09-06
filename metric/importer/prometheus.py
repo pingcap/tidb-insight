@@ -25,7 +25,8 @@ class PromDump():
         self.db_name = args.db if args.db else self.unique_dbname()
         self.user = args.user
         self.passwd = args.passwd
-        self.proc_num = args.proc_num if args.proc_num else multiprocessing.cpu_count()
+        self.proc_num = args.proc_num if args.proc_num else (
+            multiprocessing.cpu_count() + 1)
 
     # unique_dbname() generates a unique database name for importing, to prevents
     # overwritting of previous imported data
