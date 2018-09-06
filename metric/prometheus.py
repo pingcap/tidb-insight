@@ -5,8 +5,9 @@
 
 import json
 import logging
-import multiprocessing
 import os
+
+import multiprocessing as mp
 
 from metric.base import MetricBase
 from utils import fileopt
@@ -20,7 +21,8 @@ class PromMetrics(MetricBase):
 
         self.host = args.host if args.host else 'localhost'
         self.port = args.port if args.port else 9090
-        self.prom_num = args.prom_num if args.prom_num else multiprocessing.cpu_count() * 2
+        self.proc_num = args.proc_num if args.proc_num else (
+            mp.cpu_count() / 2 + 1)
 
         self.api_uri = '/api/v1'
         self.url_base = 'http://%s:%s%s' % (self.host, self.port, self.api_uri)
@@ -39,23 +41,25 @@ class PromMetrics(MetricBase):
     def query_worker(self, metric):
         url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
             self.url_base, metric, self.start_time, self.end_time, self.resolution)
-        matrix = json.loads(util.read_url(url)[0])
-        if not matrix['status'] == 'success':
+        matrix = util.read_url(url)[0]
+        if 'success' not in matrix[:20]:
             logging.info("Error querying for key '%s'." % metric)
             logging.debug("Output is:\n%s" % matrix)
             return
         metric_filename = '%s_%s_to_%s_%ss.json' % (
             metric, self.start_time, self.end_time, self.resolution)
         fileopt.write_file(os.path.join(
-            self.outdir, metric_filename), json.dumps(matrix['data']['result']))
+            self.outdir, metric_filename), matrix)
         logging.debug("Saved data for key '%s'." % metric)
 
     def run_collecting(self):
         if self.resolution < 15.0:
             logging.warning(
                 "Sampling resolution < 15s don't increase accuracy but data size.")
-        pool = multiprocessing.Pool(self.prom_num)
-        pool.map_async(unwrap_self_f, self.get_label_names())
+        pool = mp.Pool(self.proc_num)
+        metric_names = self.get_label_names()
+        pool.map_async(unwrap_self_f, zip(
+            [self] * len(metric_names), metric_names))
         pool.close()
         pool.join()
 

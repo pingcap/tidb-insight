@@ -201,6 +201,8 @@ def parse_insight_opts():
                              help="End time point of time range, format: '%%Y-%%m-%%d %%H:%%M:%%S' (local time).")
     parser_prom.add_argument("--resolution", type=float, default=None,
                              help="Query resolution step width of Prometheus in seconds, 15.0 by default.")
+    parser_prom.add_argument("--proc-num", type=int, action="store", default=None,
+                             help="Number of parallel queries to run, 'CPU count / 2 + 1' by default.")
 
     parser_load = subparser_metric.add_parser(
         "load", help="Load dumped metrics to local influxdb.")

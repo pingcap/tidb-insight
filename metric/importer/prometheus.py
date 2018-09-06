@@ -7,10 +7,11 @@
 import datetime
 import json
 import logging
-import multiprocessing
 import os
 import random
 import string
+
+import multiprocessing as mp
 
 from utils import fileopt
 from utils import util
@@ -26,7 +27,7 @@ class PromDump():
         self.user = args.user
         self.passwd = args.passwd
         self.proc_num = args.proc_num if args.proc_num else (
-            multiprocessing.cpu_count() + 1)
+            mp.cpu_count() + 1)
 
     # unique_dbname() generates a unique database name for importing, to prevents
     # overwritting of previous imported data
@@ -87,7 +88,7 @@ class PromDump():
                     f_list.append(file)
             return f_list
 
-        pool = multiprocessing.Pool(self.proc_num)
+        pool = mp.Pool(self.proc_num)
         files = file_list(self.datadir)
         pool.map_async(unwrap_self_f, zip([self] * len(files), files))
         pool.close()
