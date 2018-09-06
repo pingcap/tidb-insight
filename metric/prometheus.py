@@ -21,7 +21,7 @@ class PromMetrics(MetricBase):
 
         self.host = args.host if args.host else 'localhost'
         self.port = args.port if args.port else 9090
-        self.proc_num = args.proc_num if args.proc_num else (
+        self.proc_num = args.proc_num if args.proc_num else int(
             mp.cpu_count() / 2 + 1)
 
         self.api_uri = '/api/v1'
@@ -41,15 +41,15 @@ class PromMetrics(MetricBase):
     def query_worker(self, metric):
         url = '%s/query_range?query=%s&start=%s&end=%s&step=%s' % (
             self.url_base, metric, self.start_time, self.end_time, self.resolution)
-        matrix = util.read_url(url)[0]
-        if 'success' not in matrix[:20]:
+        response = util.read_url(url)[0]
+        if 'success' not in response[:20].decode('utf-8'):
             logging.info("Error querying for key '%s'." % metric)
-            logging.debug("Output is:\n%s" % matrix)
+            logging.debug("Output is:\n%s" % response)
             return
         metric_filename = '%s_%s_to_%s_%ss.json' % (
             metric, self.start_time, self.end_time, self.resolution)
         fileopt.write_file(os.path.join(
-            self.outdir, metric_filename), matrix)
+            self.outdir, metric_filename), response)
         logging.debug("Saved data for key '%s'." % metric)
 
     def run_collecting(self):
