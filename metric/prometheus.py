@@ -43,7 +43,7 @@ class PromMetrics(MetricBase):
             self.url_base, metric, self.start_time, self.end_time, self.resolution)
         response = util.read_url(url)[0]
         if 'success' not in response[:20].decode('utf-8'):
-            logging.info("Error querying for key '%s'." % metric)
+            logging.error("Error querying for key '%s'." % metric)
             logging.debug("Output is:\n%s" % response)
             return
         metric_filename = '%s_%s_to_%s_%ss.json' % (
