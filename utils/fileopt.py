@@ -65,9 +65,20 @@ def list_dir(path):
         if e.errno == errno.EACCES or e.errno == errno.EPERM:
             logging.warning("Permission Denied reading %s" % path)
         elif e.errno == errno.ENOENT:
-            # when a process just exited
+            # ignore files that just been deleted
             pass
     return file_list
+
+
+# list all files under path recusive
+def list_files(path):
+    f_list = []
+    for file in list_dir(path):
+        if os.path.isdir(file):
+            f_list += list_files(file)
+        else:
+            f_list.append(file)
+    return f_list
 
 
 def build_full_output_dir(basedir=None, subdir=None):
