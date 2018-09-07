@@ -52,6 +52,7 @@ class Insight():
     insight_tidb = None
     insight_trace = None
     insight_metric = None
+    insight_tui = None
 
     def __init__(self, args):
         if args.alias:
@@ -295,6 +296,14 @@ if __name__ == "__main__":
           in lack of some information or data in the final output, if
           you find certain data missing or empty in result, please try
           to run this script again with root.""")
+
+    # display information, read-only functions are excuted before any others
+    if args.subcmd == "show":
+        if args.subcmd_show == "servers":
+            from explorer import servers
+            insight_tui = servers.TUIServers(args)
+            insight_tui.display()
+        exit(0)
 
     # re-import dumped data
     if args.subcmd == 'metric' and args.subcmd_metric == "load":

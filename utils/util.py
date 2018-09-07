@@ -68,6 +68,69 @@ def parse_cmdline(cmdline):
     return result
 
 
+def get_init_type():
+    try:
+        init_exec = os.readlink("/proc/1/exe")
+    except OSError:
+        logging.warning("Unable to detect init type, am I running with root?")
+        return None
+    return init_exec.split("/")[-1]
+
+
+def read_url(url, data=None):
+    if not url or url == "":
+        return None, None
+
+    try:
+        logging.debug("Requesting URL: %s" % url)
+        response = urlreq.urlopen(url, data)
+        return response.read(), response.getcode()
+    except HTTPError as e:
+        logging.debug("HTTP Error: %s" % e.read())
+        return e.read(), e.getcode()
+    except URLError as e:
+        logging.warning("Reading URL %s error: %s" % (url, e))
+        return None, None
+
+
+def get_hostname():
+    # This function is merely used, so only import socket package when necessary
+    import socket
+    return socket.gethostname()
+
+
+def python_version():
+    # get a numeric Python version
+    return sys.version_info[0] + sys.version_info[1] * 0.1
+
+
+def parse_timestamp(time_string):
+    # if it's already a numeric timestamp, just return it
+    try:
+        if time_string.isdigit():
+            return int(time_string)
+    except (AttributeError, ValueError):
+        pass
+    format_guess = [
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d %H",
+        "%Y-%m-%d",
+        "%m-%d",
+        "%H:%M:%S",
+        "%H:%M",
+        "%H"
+    ]
+    for time_format in format_guess:
+        try:
+            # Convert to timestamp (in seconds)
+            return time.mktime(time.strptime(time_string, time_format))
+        except (TypeError, ValueError):
+            pass
+    raise ValueError(
+        "time data '%s' does not match any supported format." % time_string)
+
+
 def parse_insight_opts():
     parser = argparse.ArgumentParser(description="TiDB Insight Scripts, collect various diagnosis data.",
                                      epilog="Note that some arguments may decrease system performance.")
@@ -224,67 +287,13 @@ def parse_insight_opts():
                              help="Number of parallel importer processes to run, 'CPU count + 1' by default.")
 ####
 
+# Sub-commad: show
+    parser_show = subparsers.add_parser("show", help="Display information.")
+    subparser_show = parser_show.add_subparsers(dest="subcmd_show")
+    parser_servers = subparser_show.add_parser(
+        "servers", help="List servers in a cluster.")
+    parser_servers.add_argument("--dir", action="store", default=None,
+                                help="Directory where all collected data stored. None by default and will raise an exception.")
+####
+
     return parser.parse_args()
-
-
-def get_init_type():
-    try:
-        init_exec = os.readlink("/proc/1/exe")
-    except OSError:
-        logging.warning("Unable to detect init type, am I running with root?")
-        return None
-    return init_exec.split("/")[-1]
-
-
-def read_url(url, data=None):
-    if not url or url == "":
-        return None, None
-
-    try:
-        logging.debug("Requesting URL: %s" % url)
-        response = urlreq.urlopen(url, data)
-        return response.read(), response.getcode()
-    except HTTPError as e:
-        logging.debug("HTTP Error: %s" % e.read())
-        return e.read(), e.getcode()
-    except URLError as e:
-        logging.warning("Reading URL %s error: %s" % (url, e))
-        return None, None
-
-
-def get_hostname():
-    # This function is merely used, so only import socket package when necessary
-    import socket
-    return socket.gethostname()
-
-
-def python_version():
-    # get a numeric Python version
-    return sys.version_info[0] + sys.version_info[1] * 0.1
-
-
-def parse_timestamp(time_string):
-    # if it's already a numeric timestamp, just return it
-    try:
-        if time_string.isdigit():
-            return int(time_string)
-    except (AttributeError, ValueError):
-        pass
-    format_guess = [
-        "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d %H:%M",
-        "%Y-%m-%d %H",
-        "%Y-%m-%d",
-        "%m-%d",
-        "%H:%M:%S",
-        "%H:%M",
-        "%H"
-    ]
-    for time_format in format_guess:
-        try:
-            # Convert to timestamp (in seconds)
-            return time.mktime(time.strptime(time_string, time_format))
-        except (TypeError, ValueError):
-            pass
-    raise ValueError(
-        "time data '%s' does not match any supported format." % time_string)
