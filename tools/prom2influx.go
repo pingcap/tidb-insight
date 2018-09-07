@@ -24,6 +24,16 @@ type options struct {
 	Chunk  int
 }
 
+type promResult struct {
+	ResultType string
+	Result     model.Matrix
+}
+
+type promDump struct {
+	Status string
+	Data   promResult
+}
+
 func parseOpts() options {
 	influxHost := flag.String("host", "localhost", "The host of influxdb.")
 	influxPort := flag.String("port", "8086", "The port of influxdb.")
@@ -114,8 +124,8 @@ func buildPoints(series *model.SampleStream, client influx.Client,
 	return ptList, nil
 }
 
-func writeBatchPoints(data model.Matrix, opts options) error {
-	for _, series := range data {
+func writeBatchPoints(data promDump, opts options) error {
+	for _, series := range data.Data.Result {
 		client := newClient(opts)
 		ptList, err := buildPoints(series, client, opts)
 		if err != nil {
@@ -153,7 +163,7 @@ func main() {
 	}
 
 	// decode JSON
-	var data model.Matrix
+	var data promDump
 	if err = json.Unmarshal(input, &data); err != nil {
 		log.Fatal(err)
 	}

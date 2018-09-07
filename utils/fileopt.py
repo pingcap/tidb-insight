@@ -21,6 +21,7 @@ def read_file(filename, mode='r'):
 # write data to file
 def write_file(filename, data, mode='w'):
     with open(filename, mode) as f:
+        logging.debug("Writting %s of data to %s" % (len(data), filename))
         try:
             f.write(str(data, 'utf-8'))
         except TypeError:
