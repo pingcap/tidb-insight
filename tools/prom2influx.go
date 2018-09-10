@@ -98,7 +98,7 @@ func newClient(opts options) influx.Client {
 }
 
 func buildPoints(series *model.SampleStream, client influx.Client,
-	opts options) ([]*influx.Point, error) {
+	opts options) []*influx.Point {
 	var ptList []*influx.Point
 	raw_tags := series.Metric
 	tags := make(map[string]string)
@@ -117,21 +117,15 @@ func buildPoints(series *model.SampleStream, client influx.Client,
 		if pt, err := influx.NewPoint(measurement, tags, fields,
 			timestamp); err == nil {
 			ptList = append(ptList, pt)
-			continue
-		} else {
-			return ptList, err
-		}
+		} // errored points are ignored
 	}
-	return ptList, nil
+	return ptList
 }
 
 func writeBatchPoints(data promDump, opts options) error {
 	for _, series := range data.Data.Result {
 		client := newClient(opts)
-		ptList, err := buildPoints(series, client, opts)
-		if err != nil {
-			return err
-		}
+		ptList := buildPoints(series, client, opts)
 
 		for _, chunk := range slicePoints(ptList, opts.Chunk) {
 			// create influx.Client and close it every time we write a BatchPoints
