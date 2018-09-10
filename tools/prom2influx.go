@@ -111,7 +111,8 @@ func buildPoints(series *model.SampleStream, client influx.Client,
 	for _, point := range series.Values {
 		timestamp := point.Timestamp.Time()
 		fields := map[string]interface{}{
-			"value": point.Value,
+			// model.SampleValue is alias of float64
+			"value": float64(point.Value),
 		}
 		if pt, err := influx.NewPoint(measurement, tags, fields,
 			timestamp); err == nil {
