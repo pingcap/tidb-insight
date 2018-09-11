@@ -77,7 +77,8 @@ class InsightLogFiles(FileCollecting):
                 self.save_journal_log()
             else:
                 logging.info("systemd not detected, assuming syslog.")
-                self.save_syslog()
+            # always save syslogs
+            self.save_syslog()
 
     def save_logfiles_auto(self, proc_cmdline=None):
         # save log files of TiDB modules
