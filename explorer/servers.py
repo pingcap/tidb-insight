@@ -22,4 +22,4 @@ class TUIServers(tui.TUIBase):
         return result
 
     def display(self):
-        print("Dummy output.")
+        print(self.inventory.get_groups_dict())

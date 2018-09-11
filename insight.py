@@ -291,12 +291,6 @@ if __name__ == "__main__":
             format='[%(levelname)s] %(message)s.', level=logging.INFO)
         logging.info("Using logging level: INFO.")
 
-    if not util.is_root_privilege():
-        logging.warning("""Running TiDB Insight with non-superuser privilege may result
-          in lack of some information or data in the final output, if
-          you find certain data missing or empty in result, please try
-          to run this script again with root.""")
-
     # display information, read-only functions are excuted before any others
     if args.subcmd == "show":
         if args.subcmd_show == "servers":
@@ -311,6 +305,12 @@ if __name__ == "__main__":
         insight_importer = import_prom.PromDump(args)
         insight_importer.run_importing()
         exit(0)
+
+    if not util.is_root_privilege():
+        logging.warning("""Running TiDB Insight with non-superuser privilege may result
+          in lack of some information or data in the final output, if
+          you find certain data missing or empty in result, please try
+          to run this script again with root.""")
 
     insight = Insight(args)
 
