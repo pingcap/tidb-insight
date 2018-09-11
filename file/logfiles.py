@@ -111,7 +111,8 @@ class InsightLogFiles(FileCollecting):
     def run_collecting(self, cmdline=None):
         if cmdline:
             self.save_logfiles_auto(cmdline)
+            self.save_system_log()
+        elif self.options.syslog:
+            self.save_system_log()
         else:
             self.save_tidb_logfiles()
-        if self.options.syslog:
-            self.save_system_log()
