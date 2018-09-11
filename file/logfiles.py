@@ -72,7 +72,7 @@ class InsightLogFiles(FileCollecting):
     def save_system_log(self):
         # save system logs
         if self.options.syslog:
-            if util.get_init_type() == "systemd":
+            if util.get_init_type() == "systemd" and self.options.systemd:
                 logging.info("systemd-journald detected.")
                 self.save_journal_log()
             else:
