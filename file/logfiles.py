@@ -72,12 +72,13 @@ class InsightLogFiles(FileCollecting):
     def save_system_log(self):
         # save system logs
         if self.options.syslog:
-            if util.get_init_type() == "systemd":
+            if util.get_init_type() == "systemd" and self.options.systemd:
                 logging.info("systemd-journald detected.")
                 self.save_journal_log()
             else:
                 logging.info("systemd not detected, assuming syslog.")
-                self.save_syslog()
+            # always save syslogs
+            self.save_syslog()
 
     def save_logfiles_auto(self, proc_cmdline=None):
         # save log files of TiDB modules
@@ -111,7 +112,8 @@ class InsightLogFiles(FileCollecting):
     def run_collecting(self, cmdline=None):
         if cmdline:
             self.save_logfiles_auto(cmdline)
+            self.save_system_log()
+        elif self.options.syslog:
+            self.save_system_log()
         else:
             self.save_tidb_logfiles()
-        if self.options.syslog:
-            self.save_system_log()
