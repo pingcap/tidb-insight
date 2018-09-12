@@ -2,6 +2,7 @@
 
 # Base Class for basic TUI features
 
+import json
 import logging
 
 from abc import abstractmethod
@@ -22,13 +23,27 @@ class TUIBase(object):
         logging.debug("Found %s files in data directory." %
                       len(self.file_list))
         self.inventory = self.read_ansible_inventory()
+        self.collector = self.read_collector_data()
 
     # adjust column width to fit the longest content
     def format_columns(self, data):
         result = []
-        col_width = max(len(word) for row in data for word in row) + 2
+        col_width = []
         for row in data:
-            result.append("".join(word.ljust(col_width) for word in row))
+            i = 0
+            for word in row:
+                try:
+                    col_width[i] = max(len(word), col_width[i])
+                except IndexError:
+                    col_width.append(len(word))
+                i += 1
+        for row in data:
+            i = 0
+            wide_row = []
+            for word in row:
+                wide_row.append(word.ljust(col_width[i] + 2))
+                i += 1
+            result.append("".join(wide_row))
         return result
 
     def read_ansible_inventory(self):
@@ -43,6 +58,22 @@ class TUIBase(object):
                       inventory_file)
         loader = DataLoader()
         return InventoryManager(loader=loader, sources=inventory_file)
+
+    def read_collector_data(self):
+        data = {}
+        for file in self.file_list:
+            # paths are like some/path/<host_alias>/collector/<key>.json
+            if 'collector' not in file or not file.endswith('.json'):
+                continue
+            _path = file.split('/')
+            alias = _path[-3]
+            key = _path[-1][:-5]  # remove the '.json' suffix
+            _data = json.loads(fileopt.read_file(file))
+            try:
+                data[alias][key] = _data
+            except KeyError:
+                data[alias] = {key: _data}
+        return data
 
     @abstractmethod
     def display(self):

@@ -19,10 +19,12 @@ class TUIServers(tui.TUIBase):
             if group == 'all':
                 continue
             role = group[:-8] if group.endswith('_servers') else group
-            # monitored_servers are all hosting servers, other roles may be
-            # instances on hosting servers
             if group == 'monitored_servers':
-                role = 'host'
+                role = 'exporter'
+            elif group == 'monitoring_servers':
+                role = 'monitor'
+            elif group == 'alertmanager_servers':
+                role = 'alert'
             for host in hosts:
                 try:
                     self.host_roles[host].add(role)
@@ -30,13 +32,33 @@ class TUIServers(tui.TUIBase):
                     self.host_roles[host] = set()
                     self.host_roles[host].add(role)
 
-    def display(self):
-        output = [['Server', 'Roles']]
+    def build_server_list(self):
+        output = []
+        column_headers = ['Server', 'VM', 'OS', 'Kernel', 'Roles']
         for host, roles in self.host_roles.items():
             row = [host]
+
+            # basic system info
+            sysinfo = self.collector[host]['sysinfo']
+            # check if virtual machines
+            try:
+                row.append(sysinfo['node']['hypervisor'])
+            except KeyError:
+                row.append('No')
+            # system version
+            row.append(sysinfo['os']['name'])
+            row.append(sysinfo['kernel']['release'])
+
             role_list = list(roles)
             role_list.sort()
             row.append(','.join(role_list))
+
             output.append(row)
+
+        output.sort()
+        output = [column_headers] + output
         for row in self.format_columns(output):
             print(row)
+
+    def display(self):
+        self.build_server_list()
