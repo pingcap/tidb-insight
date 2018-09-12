@@ -12,7 +12,7 @@ from utils import fileopt
 from utils import util
 
 
-class TUIBase():
+class TUIBase(object):
     def __init__(self, args):
         self.datadir = args.dir
         if not self.datadir:
