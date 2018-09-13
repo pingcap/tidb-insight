@@ -29,6 +29,7 @@ from metric import prometheus
 from runtime import perf
 from tidb import pdctl
 from tidb import tidbinfo
+from utils import cmd
 from utils import fileopt
 from utils import lsof
 from utils import space
@@ -279,7 +280,7 @@ class Insight():
 
 if __name__ == "__main__":
     # WIP: add params to set output dir / overwriting on non-empty target dir
-    args = util.parse_insight_opts()
+    args = cmd.parse_insight_opts()
     if args.verbose:
         logging.basicConfig(
             format='[%(levelname)s] %(message)s (at %(filename)s:%(lineno)d in %(funcName)s).',
