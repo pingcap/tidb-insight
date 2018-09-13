@@ -358,6 +358,6 @@ if __name__ == "__main__":
     # compress all output to tarball
     if args.subcmd == "archive":
         if args.extract:
-            fileopt.decompress_tarball_recursive(args.dir, args.output)
+            fileopt.decompress_tarball_recursive(args.input, args.output)
         else:
             fileopt.compress_tarball(insight.outdir, insight.alias)

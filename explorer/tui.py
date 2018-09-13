@@ -15,9 +15,9 @@ from utils import util
 
 class TUIBase(object):
     def __init__(self, args):
-        self.datadir = args.dir
+        self.datadir = args.input
         if not self.datadir:
-            raise ValueError("Data dir must be set.")
+            raise ValueError("Data dir must be set with `-i/--input`.")
         logging.debug("Using data dir: %s" % self.datadir)
         self.file_list = fileopt.list_files(self.datadir)
         logging.debug("Found %s files in data directory." %
