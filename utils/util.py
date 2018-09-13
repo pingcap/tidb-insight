@@ -128,3 +128,14 @@ def parse_timestamp(time_string):
             pass
     raise ValueError(
         "time data '%s' does not match any supported format." % time_string)
+
+
+def format_size_bytes(size):
+    # 2**10 = 1024
+    power = 2**10
+    i = 0
+    unit = ['', 'K', 'M', 'G', 'T', 'P', 'E']
+    while size > power:
+        size /= power
+        i += 1
+    return '%.1f%s' % (size, unit[i])

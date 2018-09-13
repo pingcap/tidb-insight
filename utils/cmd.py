@@ -171,6 +171,8 @@ def parse_insight_opts():
 
     cmd2_server_info = subparsers_show.add_parser(
         "server", help="Show information for specific server.")
+    cmd2_server_info.add_argument(
+        "hostalias", default=None, help="The alias of server to show.")
 ####
 
     return parser.parse_args()

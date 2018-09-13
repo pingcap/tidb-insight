@@ -295,9 +295,12 @@ if __name__ == "__main__":
     # display information, read-only functions are excuted before any others
     if args.subcmd == "show":
         if args.subcmd_show == "servers":
-            from explorer import servers
-            insight_tui = servers.TUIServers(args)
-            insight_tui.display()
+            from explorer import server
+            insight_tui = server.TUIServerList(args)
+        elif args.subcmd_show == 'server':
+            from explorer import server
+            insight_tui = server.TUIServerInfo(args)
+        insight_tui.display()
         exit(0)
 
     # re-import dumped data
