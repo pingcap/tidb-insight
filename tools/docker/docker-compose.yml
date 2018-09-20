@@ -1,45 +1,36 @@
-version: '0.3'
+version: '3'
 
-volumes:
-    influxdb_data: {.data}
-    prometheus_data: {.data}
-    grafana_data: {.data}
+services:
+  influxdb:
+    image: influxdb:1.6.2
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DATA_ENGINE=tsm1
+      - INFLUXDB_REPORTING_DISABLED=true
+    volumes:
+      - ./data/influx:/var/lib/influxdb
+    user: "0"
 
-influxdb:
-  image: influxdb:1.6.2
-  container_name: influxdb
-  ports:
-    - "8083:8083"
-    - "8086:8086"
-    - "8090:8090"
-  environment:
-    - INFLUXDB_DATA_ENGINE=tsm1
-    - INFLUXDB_REPORTING_DISABLED=true
-  volumes:
-    - influxdb_data:/var/lib/influxdb
+  prometheus:
+    image: prom/prometheus:v2.4.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    volumes:
+      - ./data/prom:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    user: "0"
 
-prometheus:
-  image: prom/prometheus:v2.4.0
-  container_name: prometheus
-  ports:
-    - "9090:9090"
-  command:
-    - '--config.file=/etc/prometheus/prometheus.yml'
-  links:
-    - influxdb
-  volumes:
-    - prometheus_data:/var/lib/prometheus
-
-grafana:
-  image: grafana/grafana:5.1.5
-  container_name: grafana
-  ports:
-    - "3000:3000"
-  environment:
-    - GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource
-  links:
-    - influxdb
-  depends_on:
-    - prometheus
-  volumes:
-    - grafana_data:/var/lib/grafana
+  grafana:
+    image: grafana/grafana:5.1.5
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    user: "0"
