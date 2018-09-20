@@ -25,7 +25,7 @@ fi
 # clean exist binaries
 rm -rf ${BUILD_ROOT}/${PKGNAME} ${BUILD_ROOT}/${PKGNAME}-*.tar.gz
 mkdir -p ${BUILD_ROOT}/${PKGNAME}
-cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${PKGNAME}/
+cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${PKGNAME}/ 2>/dev/null
 
 # prepare dependencies
 GOROOT="${BUILD_ROOT}/go"
