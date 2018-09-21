@@ -14,7 +14,7 @@ case $1 in
         cd $PWD/tools/docker
         if [ ! -f prometheus.yml ]; then
             # use the template as default config, to start Prometheus process
-            cp config/prometheus.yml.template prometheus.yml
+            cp configs/prometheus.yml.template prometheus.yml
         fi
         $SUDO docker-compose up -d
 
@@ -42,7 +42,7 @@ case $1 in
                     }' \
                 "http://localhost:3000/api/datasources"
             # import dashboards
-            cd config
+            cd configs
             ./grafana-config-copy.py
         fi
 
@@ -67,7 +67,7 @@ case $1 in
         ;;
     *)
         echo "Setting InfluxDB database name to $1..."
-        sed "s/<DBNAME>/$1/g" $PWD/tools/docker/config/prometheus.yml.template \
+        sed "s/<DBNAME>/$1/g" $PWD/tools/docker/configs/prometheus.yml.template \
             > $PWD/tools/docker/prometheus.yml
         $SUDO docker exec prometheus kill -HUP 1
         ;;
