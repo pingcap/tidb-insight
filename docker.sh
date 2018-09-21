@@ -12,6 +12,10 @@ case $1 in
     start)
         echo "Starting containers..."
         cd $PWD/tools/docker
+        if [ ! -f prometheus.yml ]; then
+            # use the template as default config, to start Prometheus process
+            cp prometheus.yml.template prometheus.yml
+        fi
         $DOCKER-compose up -d
         cd $PWD
         ;;
