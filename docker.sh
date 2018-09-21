@@ -20,7 +20,14 @@ case $1 in
 
         # if datasource "test-cluster" doesn't exist, this is a new Grafana instahce,
         # and we'll going to initial its configs
-        if [[ `curl -s -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Basic YWRtaW46YWRtaW4=" "http://localhost:3000/api/datasources/id/test-cluster"` = *"Data source not found"* ]]; then
+        echo "Wait 30s for Grafana to finish startup..."
+        sleep 30 # wail Grafana to startup
+        DATASOURCE=$(curl -s -H 'Accept: application/json' \
+                        -H 'Content-Type: application/json' \
+                        -H 'Authorization: Basic YWRtaW46YWRtaW4=' \
+                        'http://localhost:3000/api/datasources/id/test-cluster')
+        if [[ $DATASOURCE = *"Data source not found"* ]]; then
+            echo "Initializing Grafana configuration..."
             # add datasource
             curl -s -H "Accept: application/json" -H "Content-Type: application/json" \
                 -H "Authorization: Basic YWRtaW46YWRtaW4=" -XPOST \
@@ -44,6 +51,8 @@ case $1 in
             # import dashboards
             cd configs
             ./grafana-config-copy.py
+        else
+            echo "Using existing Grafana datasource $DATASOURCE"
         fi
 
         cd $PWD
