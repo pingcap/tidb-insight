@@ -25,7 +25,7 @@ fi
 # clean exist binaries
 rm -rf ${BUILD_ROOT}/${PKGNAME} ${BUILD_ROOT}/${PKGNAME}-*.tar.gz
 mkdir -p ${BUILD_ROOT}/${PKGNAME}
-cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${PKGNAME}/
+cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${PKGNAME}/ 2>/dev/null
 
 # prepare dependencies
 GOROOT="${BUILD_ROOT}/go"
@@ -48,6 +48,7 @@ install -Dsm755 vmtouch ${BUILD_ROOT}/${PKGNAME}/bin/
 
 # clean unecessary files
 cd ${BUILD_ROOT}/${PKGNAME}/
+mv tools/docker bin/ && sed -i 's/tools/bin/g' docker.sh
 rm -rf collector data tools docs tests src vendor pkg Makefile package.sh Gopkg.* *.log
 find ${BUILD_ROOT}/${PKGNAME}/ -name "*.pyc" | xargs rm 2>/dev/null
 find ${BUILD_ROOT}/${PKGNAME}/ -name "__pycache__" | xargs rm -rf 2>/dev/null
