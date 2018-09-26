@@ -44,6 +44,8 @@ def parse_insight_opts():
 # Sub-command: system
     cmd1_system.add_argument("--collector", action="store_true", default=False,
                              help="Run `collector`, which collects basic information of system, if `--log-auto` or `--config-auto` is set, collector will be called as well. Disabled by default.")
+    cmd1_system.add_argument("--pid", type=int, action="store", default=None,
+                             help="Collect only specified process, rather than finding TiDB/TiKV/PD processes automatically. Disabled by default.")
 
 # Sub-command: runtime
     subparsers_runtime = cmd1_runtime.add_subparsers(dest="subcmd_runtime")

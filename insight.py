@@ -85,15 +85,15 @@ class Insight():
         return result
 
     # collect data with `collector` and store it to disk
-    def collector(self):
-        # TODO: warn on non-empty output dir
-
+    def collector(self, args):
         # call `collector` and store data to output dir
         base_dir = os.path.join(util.pwd(), "../")
         collector_exec = os.path.join(base_dir, "bin/collector")
         collector_outdir = fileopt.create_dir(
             os.path.join(self.full_outdir, "collector"))
 
+        if args.pid:
+            collector_exec = [collector_exec, '-pid', '%s' % args.pid]
         stdout, stderr = util.run_cmd(collector_exec)
         if stderr:
             logging.info("collector output:" % str(stderr))
@@ -322,7 +322,7 @@ if __name__ == "__main__":
         if args.auto:
             logging.debug(
                 "In auto mode, basic information is collected by default.")
-            insight.collector()
+            insight.collector(args)
             # check size of data folder of TiDB processes
             insight.get_datadir_size()
             # list files opened by TiDB processes
@@ -332,7 +332,7 @@ if __name__ == "__main__":
         pass
 
     if args.subcmd == "system" and args.collector:
-        insight.collector()
+        insight.collector(args)
 
     # WIP: call scripts that collect metrics of the node
     if args.subcmd == "runtime":
