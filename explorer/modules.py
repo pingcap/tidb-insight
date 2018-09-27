@@ -44,31 +44,38 @@ class TUIModuleTiDB(TUIModuleBase):
                 self.tidbinfo[host][key] = json.loads(fileopt.read_file(file))
 
     def build_module_info(self):
-        # TODO: one host per line: pid, data_dir(dev), log_dir(dev), proc_mem, proc_cpu
-        #      info from PD & tidb apis
         result = []
 
         info = []
         status = []
-        info.append(['Host', 'Addr', 'AdvAddr', 'Port', 'Store', 'Owner'])
-        status.append(['Host', 'Version', 'DDL-ID', 'Conns', 'Regions'])
+        info.append(['Host', 'AdvAddr', 'Store', 'Version'])
+        status.append(['Host', 'DDL-ID', 'Conns', 'Regions',
+                       'MemRSS', 'VMS', 'Swap', 'Owner'])
         for host, stats in self.tidbinfo.items():
             _setting = stats['settings']
             _info = stats['info']
             _stat = stats['status']
+            _proc = None
+            for proc in self.collector[host]['proc_stats']:
+                if 'tidb' in proc['name']:
+                    _proc = proc['memory']
+
             info.append([
-                host, _info['ip'], _setting['advertise-address'],
-                '%s' % _info['listening_port'],
+                host,
+                '%s:%s' % (_setting['advertise-address'],
+                           _info['listening_port']),
                 '%s %s' % (_setting['store'], _setting['path']),
-                '*' if _info['is_owner'] else ''
+                '%s %s' % (_info['version'], '*' if _info['is_owner'] else '')
             ])
             status.append([
                 host,
-                _info['version'],
                 _info['ddl_id'],
                 '%s' % _stat['connections'],
-                '%s %s' % (len(stats['regions']),
-                           '*' if _info['is_owner'] else '')
+                '%s' % len(stats['regions']),
+                util.format_size_bytes(_proc['rss']) if _proc else '',
+                util.format_size_bytes(_proc['vms']) if _proc else '',
+                util.format_size_bytes(_proc['swap']) if _proc else '',
+                '*' if _info['is_owner'] else ''
             ])
         result.append(info)
         result.append(status)

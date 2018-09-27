@@ -63,7 +63,7 @@ class TUIBase(object):
         data = {}
         for file in self.file_list:
             # paths are like some/path/<host_alias>/collector/<key>.json
-            if 'collector' not in file or not file.endswith('.json'):
+            if 'collector/' not in file or not file.endswith('.json'):
                 continue
             _path = file.split('/')
             alias = _path[-3]
