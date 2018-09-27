@@ -71,13 +71,18 @@ def list_dir(path):
 
 
 # list all files under path recusive
-def list_files(path):
+def list_files(path, filter=None):
     f_list = []
     for file in list_dir(path):
         if os.path.isdir(file):
-            f_list += list_files(file)
-        else:
+            f_list += list_files(file, filter=filter)
+        elif not filter:
             f_list.append(file)
+        else:
+            if filter in file:
+                f_list.append(file)
+            else:
+                pass
     return f_list
 
 

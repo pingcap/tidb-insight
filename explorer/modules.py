@@ -2,11 +2,13 @@
 
 # Display information for TiDB modules
 
+import json
 import logging
 
 from datetime import datetime
 
 from explorer import tui
+from utils import fileopt
 from utils import util
 
 
@@ -31,12 +33,50 @@ class TUIModule(TUIModuleBase):
 class TUIModuleTiDB(TUIModuleBase):
     def __init__(self, args):
         super(TUIModuleTiDB, self).__init__(args)
+        self.tidbinfo = {}
+
+        for host in self.hosts:
+            host = str(host)
+            self.tidbinfo[host] = {}
+            # list all tidbinfo information of this host
+            for file in fileopt.list_files(self.datadir, filter='%s/tidbinfo' % host):
+                key = file.split('-tidb-')[-1][:-5]
+                self.tidbinfo[host][key] = json.loads(fileopt.read_file(file))
 
     def build_module_info(self):
         # TODO: one host per line: pid, data_dir(dev), log_dir(dev), proc_mem, proc_cpu
         #      info from PD & tidb apis
-        for host in self.hosts:
-            print(host)
+        result = []
+
+        info = []
+        status = []
+        info.append(['Host', 'Addr', 'AdvAddr', 'Port', 'Store', 'Owner'])
+        status.append(['Host', 'Version', 'DDL-ID', 'Conns', 'Regions'])
+        for host, stats in self.tidbinfo.items():
+            _setting = stats['settings']
+            _info = stats['info']
+            _stat = stats['status']
+            info.append([
+                host, _info['ip'], _setting['advertise-address'],
+                '%s' % _info['listening_port'],
+                '%s %s' % (_setting['store'], _setting['path']),
+                '*' if _info['is_owner'] else ''
+            ])
+            status.append([
+                host,
+                _info['version'],
+                _info['ddl_id'],
+                '%s' % _stat['connections'],
+                '%s %s' % (len(stats['regions']),
+                           '*' if _info['is_owner'] else '')
+            ])
+        result.append(info)
+        result.append(status)
+
+        return result
 
     def display(self):
-        self.build_module_info()
+        for section in self.build_module_info():
+            print('')
+            for row in self.format_columns(section):
+                print(row)
