@@ -175,6 +175,13 @@ def parse_insight_opts():
         "server", help="Show information for specific server.")
     cmd2_server_info.add_argument(
         "hostalias", default=None, help="The alias of server to show.")
+
+    cmd2_server_list = subparsers_show.add_parser(
+        "tidb", help="Show TiDB information.")
+    cmd2_server_list = subparsers_show.add_parser(
+        "tikv", help="Show TiV information.")
+    cmd2_server_list = subparsers_show.add_parser(
+        "pd", help="Show PD information.")
 ####
 
     return parser.parse_args()

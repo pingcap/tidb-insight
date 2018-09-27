@@ -294,12 +294,12 @@ if __name__ == "__main__":
 
     # display information, read-only functions are excuted before any others
     if args.subcmd == "show":
-        if args.subcmd_show == "servers":
+        if args.subcmd_show in ["servers", "server"]:
             from explorer import server
             insight_tui = server.TUIServerList(args)
-        elif args.subcmd_show == 'server':
-            from explorer import server
-            insight_tui = server.TUIServerInfo(args)
+        elif args.subcmd_show in ["tidb", "tikv", "pd"]:
+            from explorer import modules
+            insight_tui = modules.TUIModule(args)
         insight_tui.display()
         exit(0)
 

@@ -76,6 +76,7 @@ class TUIServerInfo(TUIServerList):
         result = []
         _sys = self.collector[self.host]
 
+        result.append([['\n* System:']])
         header = []
         # strip milisec part of the time string to 6 digits
         _time = _sys['meta']['timestamp'][:-9] + _sys['meta']['timestamp'][-6:]
@@ -124,18 +125,18 @@ class TUIServerInfo(TUIServerList):
         result.append(sysinfo)
 
         network = []
-        result.append([['Network:']])
+        result.append([['\n* Network:']])
         for interface in _sys['sysinfo']['network']:
             network.append([
                 'Interface: %s (%s)' % (
                     interface['name'], interface['driver']),
-                'MAC: %s' % interface['macaddress'],
-                'IP: %s' % ', '.join(interface['ipaddress'])
+                'MAC: %s' % interface['macaddress']
             ])
+            network.append(['IP(s): %s' % ', '.join(interface['ipaddress'])])
         result.append(network)
 
         storage = []
-        result.append([['Storage:']])
+        result.append([['\n* Storage:']])
         storage.append(['Name', 'Size', 'FS', 'MountPoint', 'MountOptions'])
         storage += self.parse_partitions(_sys['partitions'])
         result.append(storage)
@@ -175,6 +176,5 @@ class TUIServerInfo(TUIServerList):
 
     def display(self):
         for section in self.build_server_info():
-            print('')
             for row in self.format_columns(section):
                 print(row)
