@@ -17,6 +17,7 @@ class TiDBInfo(MeasurementBase):
     # The API's URI
     uri_map = {
         "info": "/info",
+        "info-all": "/info/all",
         "status": "/status",
         "regions": "/regions/meta",
         "schema": "/schema",
