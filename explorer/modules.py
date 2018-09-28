@@ -27,6 +27,8 @@ class TUIModule(TUIModuleBase):
             self.module = TUIModuleTiDB(args)
         elif args.subcmd_show == 'tikv':
             self.module = TUIModuleTiKV(args)
+        elif args.subcmd_show == 'pd':
+            self.module = TUIModulePD(args)
 
     def display(self):
         self.module.display()
@@ -41,7 +43,7 @@ class TUIModuleTiDB(TUIModuleBase):
             host = str(host)
             self.tidbinfo[host] = {}
             # list all tidbinfo information of this host
-            for file in fileopt.list_files(self.datadir, filter='%s/tidbinfo' % host):
+            for file in fileopt.list_files(self.datadir, filter='%s/tidbinfo/' % host):
                 key = file.split('-tidb-')[-1][:-5]
                 self.tidbinfo[host][key] = json.loads(fileopt.read_file(file))
 
@@ -94,12 +96,12 @@ class TUIModuleTiDB(TUIModuleBase):
 class TUIModuleTiKV(TUIModuleBase):
     def __init__(self, args):
         super(TUIModuleTiKV, self).__init__(args)
-        self.tikvinfo = {}
 
     def build_tikv_info(self):
         result = []
 
         info = []
+        info.append([''])
         info.append(['Host', 'AdvAddr', 'Version',
                      'PD', 'MemRSS', 'VMS', 'Swap'])
         for host in self.hosts:
@@ -140,6 +142,99 @@ class TUIModuleTiKV(TUIModuleBase):
 
     def display(self):
         for section in self.build_tikv_info():
-            print('')
+            for row in self.format_columns(section):
+                print(row)
+
+
+class TUIModulePD(TUIModuleBase):
+    def __init__(self, args):
+        super(TUIModulePD, self).__init__(args)
+        self.pdinfo = {}
+
+        for host in self.hosts:
+            host = str(host)
+            self.pdinfo[host] = {}
+            # list all pdctl information of this host
+            for file in fileopt.list_files(self.datadir, filter='%s/pdctl/' % host):
+                key = file.split('-')[-1][:-5]
+                self.pdinfo[host][key] = json.loads(fileopt.read_file(file))
+
+    def build_pd_cluster_info(self):
+        result = {}
+        for host in self.hosts:
+            host = str(host)
+            try:
+                id = self.pdinfo[host]['members']['header']['cluster_id']
+                result[id] = {}
+            except KeyError:
+                continue
+            for member in self.pdinfo[host]['members']['members']:
+                member_id = member['member_id']
+                tmp = {
+                    'name': member['name'],
+                    'peer': member['peer_urls'],
+                    'leader': True if member_id == self.pdinfo[host]['members']['leader']['member_id'] else False,
+                    'etcd_leader': True if member_id == self.pdinfo[host]['members']['etcd_leader']['member_id'] else False,
+                }
+                try:
+                    result[id][member_id].append(tmp)
+                except KeyError:
+                    result[id][member_id] = [tmp]
+            # All PD members reports the same members.json stats
+            break
+        return result
+
+    def build_pd_info(self):
+        result = []
+        cluster_stats = self.build_pd_cluster_info()
+
+        header = []
+        header.append(['\n* PD Servers:'])
+        header.append(['Host', 'Name', 'Version',
+                       'URL', 'MemRSS', 'VMS', 'Swap'])
+        for host in self.hosts:
+            host = str(host)
+            _proc = None
+            for proc in self.collector[host]['proc_stats']:
+                if 'pd' in proc['name']:
+                    _proc = proc
+            if not _proc:
+                continue
+            _info = self.pdinfo[host]
+
+            header.append([
+                host, _info['config']['name'], _info['config']['cluster-version'],
+                _info['config']['advertise-peer-urls'],
+                util.format_size_bytes(
+                    _proc['memory']['rss']) if _proc else '',
+                util.format_size_bytes(
+                    _proc['memory']['vms']) if _proc else '',
+                util.format_size_bytes(
+                    _proc['memory']['swap']) if _proc else ''
+            ])
+        result.append(header)
+
+        cluster_info = []
+        cluster_info.append(["\n* Cluster:"])
+        for cluster_id, cluster in cluster_stats.items():
+            cluster_info.append(['ID: %s' % cluster_id])
+            cluster_info.append(['ID', 'Node', 'L', 'EL', 'Peer', 'Health'])
+            for member_id, nodes in cluster.items():
+                for node in nodes:
+                    cluster_info.append([
+                        '%s' % member_id,
+                        node['name'],
+                        '*' if node['leader'] else ' ',
+                        '*' if node['etcd_leader'] else ' ',
+                        ','.join(node['peer']),
+                        [str(_pd['health']) for _pd in self.pdinfo[host]
+                         ['health'] if _pd['member_id'] == member_id][0]
+                    ])
+        result.append(cluster_info)
+
+        return result
+
+    def display(self):
+        for section in self.build_pd_info():
             for row in self.format_columns(section):
                 print(row)
