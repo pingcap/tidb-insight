@@ -176,12 +176,14 @@ def parse_insight_opts():
     cmd2_server_info.add_argument(
         "hostalias", default=None, help="The alias of server to show.")
 
-    cmd2_server_list = subparsers_show.add_parser(
+    cmd2_tidb_info = subparsers_show.add_parser(
         "tidb", help="Show TiDB information.")
-    cmd2_server_list = subparsers_show.add_parser(
+    cmd2_tikv_info = subparsers_show.add_parser(
         "tikv", help="Show TiV information.")
-    cmd2_server_list = subparsers_show.add_parser(
+    cmd2_pd_info = subparsers_show.add_parser(
         "pd", help="Show PD information.")
+    cmd2_summary = subparsers_show.add_parser(
+        "summary", help="Show summarized infomation of the cluster.")
 ####
 
     return parser.parse_args()

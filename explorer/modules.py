@@ -13,10 +13,14 @@ from utils import util
 
 
 class TUIModuleBase(tui.TUIBase):
-    def __init__(self, args):
+    def __init__(self, args, module=None):
         super(TUIModuleBase, self).__init__(args)
 
-        self.hosts = self.inventory.get_hosts('%s_servers' % args.subcmd_show)
+        if not module:
+            self.hosts = self.inventory.get_hosts(
+                '%s_servers' % args.subcmd_show)
+        else:
+            self.hosts = self.inventory.get_hosts('%s_servers' % module)
 
 
 class TUIModule(TUIModuleBase):
@@ -36,7 +40,7 @@ class TUIModule(TUIModuleBase):
 
 class TUIModuleTiDB(TUIModuleBase):
     def __init__(self, args):
-        super(TUIModuleTiDB, self).__init__(args)
+        super(TUIModuleTiDB, self).__init__(args, module='tidb')
         self.tidbinfo = {}
 
         for host in self.hosts:
@@ -51,7 +55,9 @@ class TUIModuleTiDB(TUIModuleBase):
         result = []
 
         info = []
+        info.append([''])
         status = []
+        status.append([''])
         info.append(['Host', 'AdvAddr', 'Store', 'Version'])
         status.append(['Host', 'DDL-ID', 'Conns', 'Regions',
                        'MemRSS', 'VMS', 'Swap', 'Owner'])
@@ -88,14 +94,13 @@ class TUIModuleTiDB(TUIModuleBase):
 
     def display(self):
         for section in self.build_tidb_info():
-            print('')
             for row in self.format_columns(section):
                 print(row)
 
 
 class TUIModuleTiKV(TUIModuleBase):
     def __init__(self, args):
-        super(TUIModuleTiKV, self).__init__(args)
+        super(TUIModuleTiKV, self).__init__(args, 'tikv')
 
     def build_tikv_info(self):
         result = []
@@ -148,7 +153,7 @@ class TUIModuleTiKV(TUIModuleBase):
 
 class TUIModulePD(TUIModuleBase):
     def __init__(self, args):
-        super(TUIModulePD, self).__init__(args)
+        super(TUIModulePD, self).__init__(args, 'pd')
         self.pdinfo = {}
 
         for host in self.hosts:

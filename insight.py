@@ -303,6 +303,9 @@ if __name__ == "__main__":
         elif args.subcmd_show in ["tidb", "tikv", "pd"]:
             from explorer import modules
             insight_tui = modules.TUIModule(args)
+        elif args.subcmd_show in ["summary"]:
+            from explorer import summary
+            insight_tui = summary.TUISummary(args)
         insight_tui.display()
         exit(0)
 
