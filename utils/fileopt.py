@@ -115,17 +115,25 @@ def compress_tarball(output_base=None, output_name=None):
 
 
 def decompress_tarball_recursive(srcdir=None, dstdir=None):
+    def decompress(src, dst):
+        tar = tarfile.open(src)
+        tar.extractall(dst)
+        tar.close()
+
     if not srcdir:
         srcdir = util.cwd()
     if not dstdir:
         dstdir = util.cwd()
 
+    # try to decompress if input is a tarball
+    if not os.path.isdir(srcdir) and srcdir.endswith('.tar.gz'):
+        decompress(srcdir, dstdir)
+
     # find tarballs
     for file in list_dir(srcdir):
         if file.endswith('.tar.gz'):
-            tar = tarfile.open(file)
-            tar.extractall(dstdir)
-            tar.close()
+            logging.debug("Extracting tarball: %s" % file)
+            decompress(file, dstdir)
         elif os.path.isdir(file):
             subdir = create_dir(os.path.join(dstdir, file.split('/')[-1]))
             decompress_tarball_recursive(file, subdir)

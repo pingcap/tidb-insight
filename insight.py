@@ -324,6 +324,16 @@ if __name__ == "__main__":
 
     insight = Insight(args)
 
+    # compress all output to tarball
+    if args.subcmd == "archive":
+        if args.extract:
+            fileopt.decompress_tarball_recursive(args.input, insight.outdir)
+            # try once more for multi-level tarballs
+            fileopt.decompress_tarball_recursive(
+                insight.outdir, insight.outdir)
+        else:
+            fileopt.compress_tarball(insight.outdir, insight.alias)
+
     try:
         if args.auto:
             logging.debug(
@@ -363,10 +373,3 @@ if __name__ == "__main__":
 
     if args.subcmd == "metric":
         insight.dump_metrics(args)
-
-    # compress all output to tarball
-    if args.subcmd == "archive":
-        if args.extract:
-            fileopt.decompress_tarball_recursive(args.input, args.output)
-        else:
-            fileopt.compress_tarball(insight.outdir, insight.alias)
