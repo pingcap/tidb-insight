@@ -31,38 +31,47 @@ type RlimitUsage struct {
 }
 
 func GetProcStats(pidList string) []ProcessStat {
+	if len(pidList) > 0 {
+		return getProcStatsByPIDList(pidList)
+	}
+	return getProcStatsByName()
+}
+
+func getProcStatsByPIDList(pidList string) []ProcessStat {
 	stats := make([]ProcessStat, 0)
-	if pidList != "0" {
-		for _, pidStr := range strings.Split(pidList, ",") {
-			pidNum, err := strconv.Atoi(pidStr)
-			if err != nil {
-				log.Fatal(err)
-			}
-			proc, err := getProcessByPID(pidNum)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if proc == nil {
-				return stats
-			}
-			var stat ProcessStat
-			stat.getProcessStat(proc)
-			stats = append(stats, stat)
+	for _, pidStr := range strings.Split(pidList, ",") {
+		pidNum, err := strconv.Atoi(pidStr)
+		if err != nil {
+			log.Fatal(err)
 		}
-	} else {
-		tiServers := []string{"pd-server", "tikv-server", "tidb-server"}
-		for _, procName := range tiServers {
-			proc, err := getProcessesByName(procName)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if proc == nil {
-				continue
-			}
-			var stat ProcessStat
-			stat.getProcessStat(proc)
-			stats = append(stats, stat)
+		proc, err := getProcessByPID(pidNum)
+		if err != nil {
+			log.Fatal(err)
 		}
+		if proc == nil {
+			return stats
+		}
+		var stat ProcessStat
+		stat.getProcessStat(proc)
+		stats = append(stats, stat)
+	}
+	return stats
+}
+
+func getProcStatsByName() []ProcessStat {
+	tiServers := []string{"pd-server", "tikv-server", "tidb-server"}
+	stats := make([]ProcessStat, 0)
+	for _, procName := range tiServers {
+		proc, err := getProcessesByName(procName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if proc == nil {
+			continue
+		}
+		var stat ProcessStat
+		stat.getProcessStat(proc)
+		stats = append(stats, stat)
 	}
 	return stats
 }

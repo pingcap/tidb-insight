@@ -49,7 +49,7 @@ type options struct {
 }
 
 func parseOpts() options {
-	optPid := flag.String("pid", "0", "The PID of process to collect info. Multiple PIDs can be seperatted by ','.")
+	optPid := flag.String("pid", "", "The PID of process to collect info. Multiple PIDs can be seperatted by ','.")
 	flag.Parse()
 
 	var opts options
