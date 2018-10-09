@@ -8,6 +8,8 @@ from utils import fileopt
 def find_process_by_port(port=None, protocol=None):
     if not protocol:
         protocol = "tcp"
+    else:
+        protocol = protocol.lower()
     process_list = []
     if not port:
         logging.fatal("No process listening port specified.")
