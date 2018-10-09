@@ -45,11 +45,11 @@ type Metrics struct {
 }
 
 type options struct {
-	Pid int
+	Pid string
 }
 
 func parseOpts() options {
-	optPid := flag.Int("pid", 0, "The PID of process to collect info.")
+	optPid := flag.String("pid", "0", "The PID of process to collect info. Multiple PIDs can be seperatted by ','.")
 	flag.Parse()
 
 	var opts options

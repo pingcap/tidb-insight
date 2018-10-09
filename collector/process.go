@@ -3,6 +3,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -29,19 +30,25 @@ type RlimitUsage struct {
 	Used     uint64 `json:"used"`
 }
 
-func GetProcStats(pid int) []ProcessStat {
+func GetProcStats(pidList string) []ProcessStat {
 	stats := make([]ProcessStat, 0)
-	if pid > 0 {
-		proc, err := getProcessByPID(pid)
-		if err != nil {
-			log.Fatal(err)
+	if pidList != "0" {
+		for _, pidStr := range strings.Split(pidList, ",") {
+			pidNum, err := strconv.Atoi(pidStr)
+			if err != nil {
+				log.Fatal(err)
+			}
+			proc, err := getProcessByPID(pidNum)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if proc == nil {
+				return stats
+			}
+			var stat ProcessStat
+			stat.getProcessStat(proc)
+			stats = append(stats, stat)
 		}
-		if proc == nil {
-			return stats
-		}
-		var stat ProcessStat
-		stat.getProcessStat(proc)
-		stats = append(stats, stat)
 	} else {
 		tiServers := []string{"pd-server", "tikv-server", "tidb-server"}
 		for _, procName := range tiServers {
