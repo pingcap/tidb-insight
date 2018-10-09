@@ -93,10 +93,14 @@ class Insight():
             os.path.join(self.full_outdir, "collector"))
 
         if args.pid:
+            logging.debug(
+                "Collecting process infor only for PID %s" % args.pid)
             collector_exec = [collector_exec, '-pid', '%s' % args.pid]
         elif args.port:
-            pids = ','.join(list(proc_meta.find_process_by_port(
-                args.port, 'UDP' if args.udp else None)))
+            protocol = 'UDP' if args.udp else 'TCP'
+            pids = ','.join(
+                str(_pid) for _pid in proc_meta.find_process_by_port(args.port, protocol))
+            logging.debug("Collecting process infor for PIDs %s" % pids)
             collector_exec = [collector_exec, '-pid', '%s' % pids]
 
         stdout, stderr = util.run_cmd(collector_exec)
