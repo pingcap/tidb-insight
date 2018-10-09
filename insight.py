@@ -95,13 +95,13 @@ class Insight():
         if args.pid:
             logging.debug(
                 "Collecting process infor only for PID %s" % args.pid)
-            collector_exec = [collector_exec, '-pid', '%s' % args.pid]
+            collector_exec = [collector_exec, '-proc', '-pid', '%s' % args.pid]
         elif args.port:
             protocol = 'UDP' if args.udp else 'TCP'
             pids = ','.join(
                 str(_pid) for _pid in proc_meta.find_process_by_port(args.port, protocol))
             logging.debug("Collecting process infor for PIDs %s" % pids)
-            collector_exec = [collector_exec, '-pid', '%s' % pids]
+            collector_exec = [collector_exec, '-proc', '-pid', '%s' % pids]
 
         stdout, stderr = util.run_cmd(collector_exec)
         if stderr:
@@ -114,6 +114,9 @@ class Insight():
 
         # save various info to seperate .json files
         for k, v in self.collector_data.items():
+            if not v or len(v) < 1:
+                logging.debug("Skipped empty result %s:%s" % (k, v))
+                continue
             fileopt.write_file(os.path.join(collector_outdir, "%s.json" % k),
                                json.dumps(v, indent=2))
 

@@ -41,19 +41,22 @@ type Metrics struct {
 	SysInfo    sysinfo.SysInfo `json:"sysinfo"`
 	NTP        TimeStat        `json:"ntp"`
 	Partitions []BlockDev      `json:"partitions"`
-	ProcStats  []ProcessStat   `json:"proc_stats"`
+	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
 }
 
 type options struct {
-	Pid string
+	Pid  string
+	Proc bool
 }
 
 func parseOpts() options {
 	optPid := flag.String("pid", "", "The PID of process to collect info. Multiple PIDs can be seperatted by ','.")
+	optProc := flag.Bool("proc", false, "Only collect process info, disabled (Collect everything except process info) by default.")
 	flag.Parse()
 
 	var opts options
 	opts.Pid = *optPid
+	opts.Proc = *optProc
 	return opts
 }
 
@@ -76,7 +79,9 @@ func (metric *Metrics) getMetrics(opts options) {
 	metric.SysInfo.GetSysInfo()
 	metric.NTP.getNTPInfo()
 	metric.Partitions = GetPartitionStats()
-	metric.ProcStats = GetProcStats(opts.Pid)
+	if opts.Proc {
+		metric.ProcStats = GetProcStats(opts.Pid)
+	}
 }
 
 func (meta *Meta) getMeta() {
