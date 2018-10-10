@@ -102,6 +102,7 @@ class Insight():
                 str(_pid) for _pid in proc_meta.find_process_by_port(args.port, protocol))
             logging.debug("Collecting process infor for PIDs %s" % pids)
             collector_exec = [collector_exec, '-proc', '-pid', '%s' % pids]
+        # else call collector without any argument
 
         stdout, stderr = util.run_cmd(collector_exec)
         if stderr:
