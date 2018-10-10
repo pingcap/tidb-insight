@@ -8,10 +8,14 @@ from utils import fileopt
 def find_process_by_port(port=None, protocol=None):
     if not protocol:
         protocol = "tcp"
+    else:
+        protocol = protocol.lower()
     process_list = []
     if not port:
         logging.fatal("No process listening port specified.")
         return
+    logging.debug("Looking for PID(s) that listening on %s:%s" %
+                  (protocol, port))
 
     # iterate over all file descriptors and build a socket address -> pid map
     def build_inode_to_pid_map():
@@ -26,7 +30,7 @@ def find_process_by_port(port=None, protocol=None):
                     except OSError as e:
                         import errno
                         if e.errno == errno.ENOENT:
-                            pass
+                            continue
                         raise e
                     if not str.startswith(_fd_target, "socket"):
                         continue
@@ -72,4 +76,5 @@ def find_process_by_port(port=None, protocol=None):
         except KeyError:
             pass
 
+    logging.debug("Found PIDs: %s" % process_list)
     return set(process_list)  # de-duplicate

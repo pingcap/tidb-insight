@@ -3,6 +3,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -29,18 +30,46 @@ type RlimitUsage struct {
 	Used     uint64 `json:"used"`
 }
 
-func GetProcStats() []ProcessStat {
+func GetProcStats(pidList string) []ProcessStat {
+	if len(pidList) > 0 {
+		return getProcStatsByPIDList(pidList)
+	}
+	return getProcStatsByName()
+}
+
+func getProcStatsByPIDList(pidList string) []ProcessStat {
 	stats := make([]ProcessStat, 0)
+	for _, pidStr := range strings.Split(pidList, ",") {
+		pidNum, err := strconv.Atoi(pidStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		proc, err := getProcessByPID(pidNum)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if proc == nil {
+			return stats
+		}
+		var stat ProcessStat
+		stat.getProcessStat(proc)
+		stats = append(stats, stat)
+	}
+	return stats
+}
+
+func getProcStatsByName() []ProcessStat {
 	tiServers := []string{"pd-server", "tikv-server", "tidb-server"}
+	stats := make([]ProcessStat, 0)
 	for _, procName := range tiServers {
 		proc, err := getProcessesByName(procName)
-		var stat ProcessStat
 		if err != nil {
 			log.Fatal(err)
 		}
 		if proc == nil {
 			continue
 		}
+		var stat ProcessStat
 		stat.getProcessStat(proc)
 		stats = append(stats, stat)
 	}
@@ -134,12 +163,23 @@ func (proc_stat *ProcessStat) getProcessStat(proc *process.Process) {
 	proc_stat.Rlimit = getRlimitUsage(proc)
 }
 
-func getProcessesByName(searchName string) (*process.Process, error) {
+func getProcessByPID(pid int) (*process.Process, error) {
 	procList, err := process.Processes()
-	if err != nil {
+	if err != nil || len(procList) < 1 {
 		return nil, err
 	}
-	if len(procList) < 1 {
+	for _, proc := range procList {
+		// skip when process no longer exist
+		if int(proc.Pid) == pid {
+			return proc, err
+		}
+	}
+	return nil, err
+}
+
+func getProcessesByName(searchName string) (*process.Process, error) {
+	procList, err := process.Processes()
+	if err != nil || len(procList) < 1 {
 		return nil, err
 	}
 	for _, proc := range procList {

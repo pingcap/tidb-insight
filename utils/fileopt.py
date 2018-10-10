@@ -65,9 +65,25 @@ def list_dir(path):
         if e.errno == errno.EACCES or e.errno == errno.EPERM:
             logging.warning("Permission Denied reading %s" % path)
         elif e.errno == errno.ENOENT:
-            # when a process just exited
+            # ignore files that just been deleted
             pass
     return file_list
+
+
+# list all files under path recusive
+def list_files(path, filter=None):
+    f_list = []
+    for file in list_dir(path):
+        if os.path.isdir(file):
+            f_list += list_files(file, filter=filter)
+        elif not filter:
+            f_list.append(file)
+        else:
+            if filter in file:
+                f_list.append(file)
+            else:
+                pass
+    return f_list
 
 
 def build_full_output_dir(basedir=None, subdir=None):
@@ -99,17 +115,25 @@ def compress_tarball(output_base=None, output_name=None):
 
 
 def decompress_tarball_recursive(srcdir=None, dstdir=None):
+    def decompress(src, dst):
+        tar = tarfile.open(src)
+        tar.extractall(dst)
+        tar.close()
+
     if not srcdir:
         srcdir = util.cwd()
     if not dstdir:
         dstdir = util.cwd()
 
+    # try to decompress if input is a tarball
+    if not os.path.isdir(srcdir) and srcdir.endswith('.tar.gz'):
+        decompress(srcdir, dstdir)
+
     # find tarballs
     for file in list_dir(srcdir):
         if file.endswith('.tar.gz'):
-            tar = tarfile.open(file)
-            tar.extractall(dstdir)
-            tar.close()
+            logging.debug("Extracting tarball: %s" % file)
+            decompress(file, dstdir)
         elif os.path.isdir(file):
             subdir = create_dir(os.path.join(dstdir, file.split('/')[-1]))
             decompress_tarball_recursive(file, subdir)

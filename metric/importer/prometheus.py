@@ -17,7 +17,7 @@ from utils import fileopt
 from utils import util
 
 
-class PromDump():
+class PromDump(object):
     def __init__(self, args):
         # if db_name, else db_name = prom_dump_`date`
         self.host = args.host if args.host else 'localhost'

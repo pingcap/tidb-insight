@@ -29,6 +29,7 @@ from metric import prometheus
 from runtime import perf
 from tidb import pdctl
 from tidb import tidbinfo
+from utils import cmd
 from utils import fileopt
 from utils import lsof
 from utils import space
@@ -52,6 +53,7 @@ class Insight():
     insight_tidb = None
     insight_trace = None
     insight_metric = None
+    insight_tui = None
 
     def __init__(self, args):
         if args.alias:
@@ -83,14 +85,23 @@ class Insight():
         return result
 
     # collect data with `collector` and store it to disk
-    def collector(self):
-        # TODO: warn on non-empty output dir
-
+    def collector(self, args):
         # call `collector` and store data to output dir
         base_dir = os.path.join(util.pwd(), "../")
         collector_exec = os.path.join(base_dir, "bin/collector")
         collector_outdir = fileopt.create_dir(
             os.path.join(self.full_outdir, "collector"))
+
+        if args.pid:
+            logging.debug(
+                "Collecting process infor only for PID %s" % args.pid)
+            collector_exec = [collector_exec, '-pid', '%s' % args.pid]
+        elif args.port:
+            protocol = 'UDP' if args.udp else 'TCP'
+            pids = ','.join(
+                str(_pid) for _pid in proc_meta.find_process_by_port(args.port, protocol))
+            logging.debug("Collecting process infor for PIDs %s" % pids)
+            collector_exec = [collector_exec, '-pid', '%s' % pids]
 
         stdout, stderr = util.run_cmd(collector_exec)
         if stderr:
@@ -278,7 +289,7 @@ class Insight():
 
 if __name__ == "__main__":
     # WIP: add params to set output dir / overwriting on non-empty target dir
-    args = util.parse_insight_opts()
+    args = cmd.parse_insight_opts()
     if args.verbose:
         logging.basicConfig(
             format='[%(levelname)s] %(message)s (at %(filename)s:%(lineno)d in %(funcName)s).',
@@ -290,11 +301,22 @@ if __name__ == "__main__":
             format='[%(levelname)s] %(message)s.', level=logging.INFO)
         logging.info("Using logging level: INFO.")
 
-    if not util.is_root_privilege():
-        logging.warning("""Running TiDB Insight with non-superuser privilege may result
-          in lack of some information or data in the final output, if
-          you find certain data missing or empty in result, please try
-          to run this script again with root.""")
+    # display information, read-only functions are excuted before any others
+    if args.subcmd == "show":
+        if args.subcmd_show in ["servers"]:
+            from explorer import server
+            insight_tui = server.TUIServerList(args)
+        elif args.subcmd_show in ["server"]:
+            from explorer import server
+            insight_tui = server.TUIServerInfo(args)
+        elif args.subcmd_show in ["tidb", "tikv", "pd"]:
+            from explorer import modules
+            insight_tui = modules.TUIModule(args)
+        elif args.subcmd_show in ["summary"]:
+            from explorer import summary
+            insight_tui = summary.TUISummary(args)
+        insight_tui.display()
+        exit(0)
 
     # re-import dumped data
     if args.subcmd == 'metric' and args.subcmd_metric == "load":
@@ -303,13 +325,29 @@ if __name__ == "__main__":
         insight_importer.run_importing()
         exit(0)
 
+    if not util.is_root_privilege():
+        logging.warning("""Running TiDB Insight with non-superuser privilege may result
+          in lack of some information or data in the final output, if
+          you find certain data missing or empty in result, please try
+          to run this script again with root.""")
+
     insight = Insight(args)
+
+    # compress all output to tarball
+    if args.subcmd == "archive":
+        if args.extract:
+            fileopt.decompress_tarball_recursive(args.input, insight.outdir)
+            # try once more for multi-level tarballs
+            fileopt.decompress_tarball_recursive(
+                insight.outdir, insight.outdir)
+        else:
+            fileopt.compress_tarball(insight.outdir, insight.alias)
 
     try:
         if args.auto:
             logging.debug(
                 "In auto mode, basic information is collected by default.")
-            insight.collector()
+            insight.collector(args)
             # check size of data folder of TiDB processes
             insight.get_datadir_size()
             # list files opened by TiDB processes
@@ -319,7 +357,7 @@ if __name__ == "__main__":
         pass
 
     if args.subcmd == "system" and args.collector:
-        insight.collector()
+        insight.collector(args)
 
     # WIP: call scripts that collect metrics of the node
     if args.subcmd == "runtime":
@@ -344,10 +382,3 @@ if __name__ == "__main__":
 
     if args.subcmd == "metric":
         insight.dump_metrics(args)
-
-    # compress all output to tarball
-    if args.subcmd == "archive":
-        if args.extract:
-            fileopt.decompress_tarball_recursive(args.dir, args.output)
-        else:
-            fileopt.compress_tarball(insight.outdir, insight.alias)

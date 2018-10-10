@@ -15,6 +15,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"runtime"
@@ -43,9 +44,24 @@ type Metrics struct {
 	ProcStats  []ProcessStat   `json:"proc_stats"`
 }
 
+type options struct {
+	Pid string
+}
+
+func parseOpts() options {
+	optPid := flag.String("pid", "", "The PID of process to collect info. Multiple PIDs can be seperatted by ','.")
+	flag.Parse()
+
+	var opts options
+	opts.Pid = *optPid
+	return opts
+}
+
 func main() {
+	opts := parseOpts()
+
 	var metric Metrics
-	metric.getMetrics()
+	metric.getMetrics(opts)
 
 	data, err := json.MarshalIndent(&metric, "", "  ")
 	if err != nil {
@@ -55,12 +71,12 @@ func main() {
 	fmt.Println(string(data))
 }
 
-func (metric *Metrics) getMetrics() {
+func (metric *Metrics) getMetrics(opts options) {
 	metric.Meta.getMeta()
 	metric.SysInfo.GetSysInfo()
 	metric.NTP.getNTPInfo()
 	metric.Partitions = GetPartitionStats()
-	metric.ProcStats = GetProcStats()
+	metric.ProcStats = GetProcStats(opts.Pid)
 }
 
 func (meta *Meta) getMeta() {
