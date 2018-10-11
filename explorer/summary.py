@@ -59,9 +59,10 @@ class TUISummary(tui.TUIBase):
         for tikv_host in self.tikv.hosts:
             tikv_host = str(tikv_host)
             try:
-                rel_ver = '%s-g%s' % (self.tikv.collector[tikv_host]['meta']['tikv']['release_version'],
-                                      self.tikv.collector[tikv_host]['meta']['tikv']['git_commit'][:6])
-                tikv_versions.append(rel_ver)
+                for instance in self.tikv.collector[tikv_host]['meta']['tikv']:
+                    rel_ver = '%s-g%s' % (instance['release_version'],
+                                          instance['git_commit'][:6])
+                    tikv_versions.append(rel_ver)
             except KeyError:
                 continue
         sum_tikv = ['TiKV', '%s' % len(self.tikv.hosts),
