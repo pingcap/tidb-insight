@@ -38,9 +38,9 @@ type Meta struct {
 
 type Metrics struct {
 	Meta       Meta            `json:"meta"`
-	SysInfo    sysinfo.SysInfo `json:"sysinfo"`
-	NTP        TimeStat        `json:"ntp"`
-	Partitions []BlockDev      `json:"partitions"`
+	SysInfo    sysinfo.SysInfo `json:"sysinfo,omitempty"`
+	NTP        TimeStat        `json:"ntp,omitempty"`
+	Partitions []BlockDev      `json:"partitions,omitempty"`
 	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
 }
 
@@ -54,9 +54,7 @@ func parseOpts() options {
 	optProc := flag.Bool("proc", false, "Only collect process info, disabled (Collect everything except process info) by default.")
 	flag.Parse()
 
-	var opts options
-	opts.Pid = *optPid
-	opts.Proc = *optProc
+	opts := options{*optPid, *optProc}
 	return opts
 }
 
