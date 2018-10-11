@@ -76,11 +76,12 @@ func main() {
 
 func (metric *Metrics) getMetrics(opts options) {
 	metric.Meta.getMeta()
-	metric.SysInfo.GetSysInfo()
-	metric.NTP.getNTPInfo()
-	metric.Partitions = GetPartitionStats()
 	if opts.Proc {
 		metric.ProcStats = GetProcStats(opts.Pid)
+	} else {
+		metric.SysInfo.GetSysInfo()
+		metric.NTP.getNTPInfo()
+		metric.Partitions = GetPartitionStats()
 	}
 }
 

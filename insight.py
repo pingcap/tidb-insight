@@ -115,6 +115,10 @@ class Insight():
 
         # save various info to seperate .json files
         for k, v in self.collector_data.items():
+            # This is a dirty hack to omit empty results, until Go fix that upstream,
+            # see: https://github.com/golang/go/issues/11939
+            if (args.pid or args.port) and k in ['sysinfo', 'ntp']:
+                continue
             if not v or len(v) < 1:
                 logging.debug("Skipped empty result %s:%s" % (k, v))
                 continue
