@@ -19,21 +19,22 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/AstroProfundis/sysinfo"
 )
 
 type Meta struct {
-	Timestamp time.Time `json:"timestamp"`
-	SiVer     string    `json:"sysinfo_ver"`
-	GitBranch string    `json:"git_branch"`
-	GitCommit string    `json:"git_commit"`
-	BuildTime string    `json:"utc_build_time"`
-	GoVersion string    `json:"go_version"`
-	TiDBVer   TiDBMeta  `json:"tidb"`
-	TiKVVer   TiKVMeta  `json:"tikv"`
-	PDVer     PDMeta    `json:"pd"`
+	Timestamp time.Time  `json:"timestamp"`
+	SiVer     string     `json:"sysinfo_ver"`
+	GitBranch string     `json:"git_branch"`
+	GitCommit string     `json:"git_commit"`
+	BuildTime string     `json:"utc_build_time"`
+	GoVersion string     `json:"go_version"`
+	TiDBVer   []TiDBMeta `json:"tidb"`
+	TiKVVer   []TiKVMeta `json:"tikv"`
+	PDVer     []PDMeta   `json:"pd"`
 }
 
 type Metrics struct {
@@ -73,9 +74,14 @@ func main() {
 }
 
 func (metric *Metrics) getMetrics(opts options) {
-	metric.Meta.getMeta()
+	var pidList []string
+	if len(opts.Pid) > 0 {
+		pidList = strings.Split(opts.Pid, ",")
+	}
+
+	metric.Meta.getMeta(pidList)
 	if opts.Proc {
-		metric.ProcStats = GetProcStats(opts.Pid)
+		metric.ProcStats = GetProcessStats(pidList)
 	} else {
 		metric.SysInfo.GetSysInfo()
 		metric.NTP.getNTPInfo()
@@ -83,14 +89,20 @@ func (metric *Metrics) getMetrics(opts options) {
 	}
 }
 
-func (meta *Meta) getMeta() {
+func (meta *Meta) getMeta(pidList []string) {
 	meta.Timestamp = time.Now()
 	meta.SiVer = sysinfo.Version
 	meta.GitBranch = InsightGitBranch
 	meta.GitCommit = InsightGitCommit
 	meta.BuildTime = InsightBuildTime
 	meta.GoVersion = fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH)
-	meta.TiDBVer = getTiDBVersion()
-	meta.TiKVVer = getTiKVVersion()
-	meta.PDVer = getPDVersion()
+	if len(pidList) > 0 {
+		meta.TiDBVer = getTiDBVersionByPIDList(pidList)
+		meta.TiKVVer = getTiKVVersionByPIDList(pidList)
+		meta.PDVer = getPDVersionByPIDList(pidList)
+	} else {
+		meta.TiDBVer = getTiDBVersionByName()
+		meta.TiKVVer = getTiKVVersionByName()
+		meta.PDVer = getPDVersionByName()
+	}
 }

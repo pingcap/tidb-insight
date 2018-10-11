@@ -30,16 +30,16 @@ type RlimitUsage struct {
 	Used     uint64 `json:"used"`
 }
 
-func GetProcStats(pidList string) []ProcessStat {
-	if len(pidList) > 0 {
+func GetProcessStats(pidList []string) []ProcessStat {
+	if pidList != nil {
 		return getProcStatsByPIDList(pidList)
 	}
 	return getProcStatsByName()
 }
 
-func getProcStatsByPIDList(pidList string) []ProcessStat {
+func getProcStatsByPIDList(pidList []string) []ProcessStat {
 	stats := make([]ProcessStat, 0)
-	for _, pidStr := range strings.Split(pidList, ",") {
+	for _, pidStr := range pidList {
 		pidNum, err := strconv.Atoi(pidStr)
 		if err != nil {
 			log.Fatal(err)
@@ -49,7 +49,7 @@ func getProcStatsByPIDList(pidList string) []ProcessStat {
 			log.Fatal(err)
 		}
 		if proc == nil {
-			return stats
+			continue
 		}
 		var stat ProcessStat
 		stat.getProcessStat(proc)
@@ -62,16 +62,18 @@ func getProcStatsByName() []ProcessStat {
 	tiServers := []string{"pd-server", "tikv-server", "tidb-server"}
 	stats := make([]ProcessStat, 0)
 	for _, procName := range tiServers {
-		proc, err := getProcessesByName(procName)
+		procList, err := getProcessesByName(procName)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if proc == nil {
+		if len(procList) < 1 {
 			continue
 		}
-		var stat ProcessStat
-		stat.getProcessStat(proc)
-		stats = append(stats, stat)
+		for _, proc := range procList {
+			var stat ProcessStat
+			stat.getProcessStat(proc)
+			stats = append(stats, stat)
+		}
 	}
 	return stats
 }
@@ -177,18 +179,20 @@ func getProcessByPID(pid int) (*process.Process, error) {
 	return nil, err
 }
 
-func getProcessesByName(searchName string) (*process.Process, error) {
+func getProcessesByName(searchName string) ([]*process.Process, error) {
 	procList, err := process.Processes()
 	if err != nil || len(procList) < 1 {
 		return nil, err
 	}
+
+	procResult := make([]*process.Process, 0)
 	for _, proc := range procList {
 		// skip when process no longer exist
 		procName, _ := proc.Name()
-		// TODO: return multiple processes that match the search
+		// return multiple processes that match the search
 		if strings.Contains(procName, searchName) {
-			return proc, err
+			procResult = append(procResult, proc)
 		}
 	}
-	return nil, err
+	return procResult, err
 }

@@ -5,11 +5,15 @@ import (
 	"bytes"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
+
+	"github.com/shirou/gopsutil/process"
 )
 
-// TiDBMeta is the metadata struct of a TiDB server
+// TiDBMeta is the metadata struct of TiDB server
 type TiDBMeta struct {
+	Pid        int32  `json:"pid,omitempty"`
 	ReleaseVer string `json:"release_version,omitempty"`
 	GitCommit  string `json:"git_commit,omitempty"`
 	GitBranch  string `json:"git_branch,omitempty"`
@@ -17,16 +21,10 @@ type TiDBMeta struct {
 	GoVersion  string `json:"go_version,omitempty"`
 }
 
-func getTiDBVersion() TiDBMeta {
+func getTiDBVersion(proc *process.Process) TiDBMeta {
 	var tidbVer TiDBMeta
-	tidbProc, err := getProcessesByName("tidb-server")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if tidbProc == nil {
-		return tidbVer
-	}
-	file, err := tidbProc.Exe()
+	tidbVer.Pid = proc.Pid
+	file, err := proc.Exe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,6 +59,44 @@ func getTiDBVersion() TiDBMeta {
 			continue
 		}
 	}
-
 	return tidbVer
+}
+
+func getTiDBVersionByName() []TiDBMeta {
+	var tidbMeta = make([]TiDBMeta, 0)
+	procList, err := getProcessesByName("tidb-server")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(procList) < 1 {
+		return tidbMeta
+	}
+
+	for _, proc := range procList {
+		tidbMeta = append(tidbMeta, getTiDBVersion(proc))
+	}
+	return tidbMeta
+}
+
+func getTiDBVersionByPIDList(pidList []string) []TiDBMeta {
+	tidbMeta := make([]TiDBMeta, 0)
+	for _, pidStr := range pidList {
+		pidNum, err := strconv.Atoi(pidStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		proc, err := getProcessByPID(pidNum)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if proc == nil {
+			continue
+		}
+		procName, _ := proc.Name()
+		if !strings.Contains(procName, "tidb-server") {
+			continue
+		}
+		tidbMeta = append(tidbMeta, getTiDBVersion(proc))
+	}
+	return tidbMeta
 }
