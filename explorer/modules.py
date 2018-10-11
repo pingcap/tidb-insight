@@ -62,11 +62,12 @@ class TUIModuleTiDB(TUIModuleBase):
         status.append(['Host', 'DDL-ID', 'Conns', 'Regions',
                        'MemRSS', 'VMS', 'Swap', 'Owner'])
         for host, stats in self.tidbinfo.items():
+            host_alias = 'tidb_%s' % host
             _setting = stats['settings']
             _info = stats['info']
             _stat = stats['status']
             _proc = None
-            for proc in self.collector[host]['proc_stats']:
+            for proc in self.collector[host_alias]['proc_stats']:
                 if 'tidb' in proc['name']:
                     _proc = proc['memory']
                 else:
@@ -114,8 +115,9 @@ class TUIModuleTiKV(TUIModuleBase):
                      'PD', 'MemRSS', 'VMS', 'Swap'])
         for host in self.hosts:
             host = str(host)
+            host_alias = 'tikv_%s' % host
             _proc = None
-            for proc in self.collector[host]['proc_stats']:
+            for proc in self.collector[host_alias]['proc_stats']:
                 if 'tikv' in proc['name']:
                     _proc = proc
                 else:
@@ -133,7 +135,7 @@ class TUIModuleTiKV(TUIModuleBase):
                 except ValueError:
                     pd_addr = ''
                 try:
-                    for tikv_vers in self.collector[host]['meta']['tikv']:
+                    for tikv_vers in self.collector[host_alias]['meta']['tikv']:
                         if tikv_vers['pid'] != _proc['pid']:
                             continue
                         rel_ver = '%s-g%s' % (tikv_vers['release_version'],
@@ -207,8 +209,9 @@ class TUIModulePD(TUIModuleBase):
                        'URL', 'MemRSS', 'VMS', 'Swap'])
         for host in self.hosts:
             host = str(host)
+            host_alias = 'pd_%s' % host
             _proc = None
-            for proc in self.collector[host]['proc_stats']:
+            for proc in self.collector[host_alias]['proc_stats']:
                 if 'pd' in proc['name']:
                     _proc = proc
                 else:
