@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9e632ecd12afbe54f7082d6cd8d677530d3bd23e65a920d57e510fa3fe648d56"
+  digest = "1:a607119fd4603a425e8d0ab36d17c1a3f73f882239e1ef2257863cf0208f0dc7"
   name = "github.com/AstroProfundis/sysinfo"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fb38b90299c884b646c2343c7d2e86d7942906b6"
+  revision = "f89d5ba1b5b812a7ed0cfa45d18ff4e694503f7f"
 
 [[projects]]
   digest = "1:e92f5581902c345eb4ceffdcd4a854fb8f73cf436d47d837d1ec98ef1fe0a214"
@@ -22,7 +22,7 @@
   name = "github.com/go-ole/go-ole"
   packages = [
     ".",
-    "oleutil",
+    "oleutil"
   ]
   pruneopts = "UT"
   revision = "a41e3c4b706f6ae8dfbff342b06e40fa4d2d0506"
@@ -34,11 +34,11 @@
   packages = [
     "client/v2",
     "models",
-    "pkg/escape",
+    "pkg/escape"
   ]
   pruneopts = "UT"
-  revision = "7adf7f9d14ef38517d4bb19301b7f8d9a26d19dd"
-  version = "v1.6.2"
+  revision = "389de31c961831de0a9f4172173337d4a6193909"
+  version = "v1.6.3"
 
 [[projects]]
   branch = "master"
@@ -57,7 +57,7 @@
     "internal/common",
     "mem",
     "net",
-    "process",
+    "process"
   ]
   pruneopts = "UT"
   revision = "8048a2e9c5773235122027dd585cf821b2af1249"
@@ -73,14 +73,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9c99029818a3d4f53bcfd6c0158ca068aeacfecb29283f82a1f9c79b8d2a7da4"
+  digest = "1:850d28ab022512e2cd3cf511a77f363c29e22689b4031f2050871f5de47ae4a0"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows",
+    "windows"
   ]
   pruneopts = "UT"
-  revision = "d99a578cf41bfccdeaf48b0845c823a4b8b0ad5e"
+  revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -90,7 +90,7 @@
     "github.com/influxdata/influxdb/client/v2",
     "github.com/prometheus/common/model",
     "github.com/shirou/gopsutil/cpu",
-    "github.com/shirou/gopsutil/process",
+    "github.com/shirou/gopsutil/process"
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

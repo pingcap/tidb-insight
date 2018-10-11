@@ -44,14 +44,8 @@ func parseOpts() options {
 	influxChunk := flag.Int("chunk", 2000, "The chunk size of writing.")
 	flag.Parse()
 
-	var opts options
-	opts.Host = *influxHost
-	opts.Port = *influxPort
-	opts.User = *influxUser
-	opts.Passwd = *influxPass
-	opts.DBName = *influxDB
-	opts.File = *influxFile
-	opts.Chunk = *influxChunk
+	opts := options{*influxHost, *influxPort, *influxUser, *influxPass,
+		*influxDB, *influxFile, *influxChunk}
 	return opts
 }
 
