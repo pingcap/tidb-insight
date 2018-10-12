@@ -62,31 +62,35 @@ class TUIModuleTiDB(TUIModuleBase):
         status.append(['Host', 'DDL-ID', 'Conns', 'Regions',
                        'MemRSS', 'VMS', 'Swap', 'Owner'])
         for host, stats in self.tidbinfo.items():
+            host_alias = 'tidb_%s' % host
             _setting = stats['settings']
             _info = stats['info']
             _stat = stats['status']
             _proc = None
-            for proc in self.collector[host]['proc_stats']:
+            for proc in self.collector[host_alias]['proc_stats']:
                 if 'tidb' in proc['name']:
                     _proc = proc['memory']
+                else:
+                    continue
 
-            info.append([
-                host,
-                '%s:%s' % (_setting['advertise-address'],
-                           _info['listening_port']),
-                '%s %s' % (_setting['store'], _setting['path']),
-                '%s %s' % (_info['version'], '*' if _info['is_owner'] else '')
-            ])
-            status.append([
-                host,
-                _info['ddl_id'],
-                '%s' % _stat['connections'],
-                '%s' % len(stats['regions']),
-                util.format_size_bytes(_proc['rss']) if _proc else '',
-                util.format_size_bytes(_proc['vms']) if _proc else '',
-                util.format_size_bytes(_proc['swap']) if _proc else '',
-                '*' if _info['is_owner'] else ''
-            ])
+                info.append([
+                    host,
+                    '%s:%s' % (_setting['advertise-address'],
+                               _info['listening_port']),
+                    '%s %s' % (_setting['store'], _setting['path']),
+                    '%s %s' % (_info['version'],
+                               '*' if _info['is_owner'] else '')
+                ])
+                status.append([
+                    host,
+                    _info['ddl_id'],
+                    '%s' % _stat['connections'],
+                    '%s' % len(stats['regions']),
+                    util.format_size_bytes(_proc['rss']) if _proc else '',
+                    util.format_size_bytes(_proc['vms']) if _proc else '',
+                    util.format_size_bytes(_proc['swap']) if _proc else '',
+                    '*' if _info['is_owner'] else ''
+                ])
         result.append(info)
         result.append(status)
 
@@ -111,36 +115,42 @@ class TUIModuleTiKV(TUIModuleBase):
                      'PD', 'MemRSS', 'VMS', 'Swap'])
         for host in self.hosts:
             host = str(host)
+            host_alias = 'tikv_%s' % host
             _proc = None
-            for proc in self.collector[host]['proc_stats']:
+            for proc in self.collector[host_alias]['proc_stats']:
                 if 'tikv' in proc['name']:
                     _proc = proc
-            if not _proc:
-                continue
+                else:
+                    continue
+                if not _proc:
+                    continue
 
-            _cmd = _proc['cmd'].split()
-            try:
-                adv_addr = _cmd[_cmd.index('--advertise-addr') + 1]
-            except ValueError:
-                adv_addr = ''
-            try:
-                pd_addr = _cmd[_cmd.index('--pd') + 1]
-            except ValueError:
-                pd_addr = ''
-            try:
-                rel_ver = '%s-g%s' % (self.collector[host]['meta']['tikv']['release_version'],
-                                      self.collector[host]['meta']['tikv']['git_commit'][:6])
-            except KeyError:
-                rel_ver = ''
-            info.append([
-                host, adv_addr, rel_ver, pd_addr,
-                util.format_size_bytes(
-                    _proc['memory']['rss']) if _proc else '',
-                util.format_size_bytes(
-                    _proc['memory']['vms']) if _proc else '',
-                util.format_size_bytes(
-                    _proc['memory']['swap']) if _proc else ''
-            ])
+                _cmd = _proc['cmd'].split()
+                try:
+                    adv_addr = _cmd[_cmd.index('--advertise-addr') + 1]
+                except ValueError:
+                    adv_addr = ''
+                try:
+                    pd_addr = _cmd[_cmd.index('--pd') + 1]
+                except ValueError:
+                    pd_addr = ''
+                try:
+                    for tikv_vers in self.collector[host_alias]['meta']['tikv']:
+                        if tikv_vers['pid'] != _proc['pid']:
+                            continue
+                        rel_ver = '%s-g%s' % (tikv_vers['release_version'],
+                                              tikv_vers['git_commit'][:6])
+                except KeyError:
+                    rel_ver = ''
+                info.append([
+                    host, adv_addr, rel_ver, pd_addr,
+                    util.format_size_bytes(
+                        _proc['memory']['rss']) if _proc else '',
+                    util.format_size_bytes(
+                        _proc['memory']['vms']) if _proc else '',
+                    util.format_size_bytes(
+                        _proc['memory']['swap']) if _proc else ''
+                ])
         result.append(info)
 
         return result
@@ -199,24 +209,27 @@ class TUIModulePD(TUIModuleBase):
                        'URL', 'MemRSS', 'VMS', 'Swap'])
         for host in self.hosts:
             host = str(host)
+            host_alias = 'pd_%s' % host
             _proc = None
-            for proc in self.collector[host]['proc_stats']:
+            for proc in self.collector[host_alias]['proc_stats']:
                 if 'pd' in proc['name']:
                     _proc = proc
-            if not _proc:
-                continue
-            _info = self.pdinfo[host]
+                else:
+                    continue
+                if not _proc:
+                    continue
+                _info = self.pdinfo[host]
 
-            header.append([
-                host, _info['config']['name'], _info['config']['cluster-version'],
-                _info['config']['advertise-peer-urls'],
-                util.format_size_bytes(
-                    _proc['memory']['rss']) if _proc else '',
-                util.format_size_bytes(
-                    _proc['memory']['vms']) if _proc else '',
-                util.format_size_bytes(
-                    _proc['memory']['swap']) if _proc else ''
-            ])
+                header.append([
+                    host, _info['config']['name'], _info['config']['cluster-version'],
+                    _info['config']['advertise-peer-urls'],
+                    util.format_size_bytes(
+                        _proc['memory']['rss']) if _proc else '',
+                    util.format_size_bytes(
+                        _proc['memory']['vms']) if _proc else '',
+                    util.format_size_bytes(
+                        _proc['memory']['swap']) if _proc else ''
+                ])
         result.append(header)
 
         cluster_info = []

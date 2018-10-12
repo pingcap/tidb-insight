@@ -1,15 +1,19 @@
-// tidb-insight project tikv.go
+// tikv-insight project tikv.go
 package main
 
 import (
 	"bytes"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
+
+	"github.com/shirou/gopsutil/process"
 )
 
 // TiKVMeta is the metada struct of a TiKV server
 type TiKVMeta struct {
+	Pid         int32  `json:"pid,omitempty"`
 	ReleaseVer  string `json:"release_version,omitempty"`
 	GitCommit   string `json:"git_commit,omitempty"`
 	GitBranch   string `json:"git_branch,omitempty"`
@@ -17,16 +21,10 @@ type TiKVMeta struct {
 	RustVersion string `json:"rust_version,omitempty"`
 }
 
-func getTiKVVersion() TiKVMeta {
+func getTiKVVersion(proc *process.Process) TiKVMeta {
 	var tikvVer TiKVMeta
-	tikvProc, err := getProcessesByName("tikv-server")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if tikvProc == nil {
-		return tikvVer
-	}
-	file, err := tikvProc.Exe()
+	tikvVer.Pid = proc.Pid
+	file, err := proc.Exe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,4 +60,43 @@ func getTiKVVersion() TiKVMeta {
 	}
 
 	return tikvVer
+}
+
+func getTiKVVersionByName() []TiKVMeta {
+	var tikvMeta = make([]TiKVMeta, 0)
+	procList, err := getProcessesByName("tikv-server")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(procList) < 1 {
+		return tikvMeta
+	}
+
+	for _, proc := range procList {
+		tikvMeta = append(tikvMeta, getTiKVVersion(proc))
+	}
+	return tikvMeta
+}
+
+func getTiKVVersionByPIDList(pidList []string) []TiKVMeta {
+	tikvMeta := make([]TiKVMeta, 0)
+	for _, pidStr := range pidList {
+		pidNum, err := strconv.Atoi(pidStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		proc, err := getProcessByPID(pidNum)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if proc == nil {
+			continue
+		}
+		procName, _ := proc.Name()
+		if !strings.Contains(procName, "tikv-server") {
+			continue
+		}
+		tikvMeta = append(tikvMeta, getTiKVVersion(proc))
+	}
+	return tikvMeta
 }

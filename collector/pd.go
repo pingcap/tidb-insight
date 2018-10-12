@@ -1,31 +1,29 @@
-// tidb-insight project pd.go
+// pd-insight project pd.go
 package main
 
 import (
 	"bytes"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
+
+	"github.com/shirou/gopsutil/process"
 )
 
 // PDMeta is the metadata struct of a PD server
 type PDMeta struct {
+	Pid        int32  `json:"pid,omitempty"`
 	ReleaseVer string `json:"release_version,omitempty"`
 	GitCommit  string `json:"git_commit,omitempty"`
 	GitBranch  string `json:"git_branch,omitempty"`
 	BuildTime  string `json:"utc_build_time,omitempty"`
 }
 
-func getPDVersion() PDMeta {
+func getPDVersion(proc *process.Process) PDMeta {
 	var pdVer PDMeta
-	pdProc, err := getProcessesByName("pd-server")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if pdProc == nil {
-		return pdVer
-	}
-	file, err := pdProc.Exe()
+	pdVer.Pid = proc.Pid
+	file, err := proc.Exe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,4 +57,43 @@ func getPDVersion() PDMeta {
 	}
 
 	return pdVer
+}
+
+func getPDVersionByName() []PDMeta {
+	var pdMeta = make([]PDMeta, 0)
+	procList, err := getProcessesByName("pd-server")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(procList) < 1 {
+		return pdMeta
+	}
+
+	for _, proc := range procList {
+		pdMeta = append(pdMeta, getPDVersion(proc))
+	}
+	return pdMeta
+}
+
+func getPDVersionByPIDList(pidList []string) []PDMeta {
+	pdMeta := make([]PDMeta, 0)
+	for _, pidStr := range pidList {
+		pidNum, err := strconv.Atoi(pidStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		proc, err := getProcessByPID(pidNum)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if proc == nil {
+			continue
+		}
+		procName, _ := proc.Name()
+		if !strings.Contains(procName, "pd-server") {
+			continue
+		}
+		pdMeta = append(pdMeta, getPDVersion(proc))
+	}
+	return pdMeta
 }
