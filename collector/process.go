@@ -166,8 +166,6 @@ func getProcStartTime(proc *process.Process) (float64, error) {
 	fields := strings.Fields(string(contents))
 	if startTime, err := strconv.ParseFloat(fields[21], 64); err == nil {
 		return startTime / process.ClockTicks, err
-	} else {
-		log.Fatal(err)
 	}
 	return 0, err
 }

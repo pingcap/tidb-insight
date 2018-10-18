@@ -96,8 +96,6 @@ func (meta *Meta) getMeta(pidList []string) {
 	if sysUptime, sysIdleTime, err := GetSysUptime(); err == nil {
 		meta.UPTime = sysUptime
 		meta.IdleTime = sysIdleTime
-	} else {
-		log.Fatal(err)
 	}
 
 	meta.SiVer = sysinfo.Version
