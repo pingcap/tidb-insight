@@ -18,7 +18,7 @@ var (
 	InsightBuildTime = "Not Provided"
 
 	// Proc dir path for Linux
-	procPath = "/proc/"
+	procPath = "/proc"
 )
 
 func GetProcPath(paths ...string) string {
@@ -29,7 +29,7 @@ func GetProcPath(paths ...string) string {
 		all := make([]string, len(paths)+1)
 		all[0] = procPath
 		copy(all[1:], paths)
-		return strings.Join(all, "")
+		return strings.Join(all, "/")
 	}
 }
 
