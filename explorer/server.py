@@ -81,11 +81,16 @@ class TUIServerInfo(TUIServerList):
         # strip milisec part of the time string to 6 digits
         _time = _sys['meta']['timestamp'][:-9] + _sys['meta']['timestamp'][-6:]
         collect_time = datetime.strptime(_time, '%Y-%m-%dT%H:%M:%S.%f%z')
+        try:
+            uptime = util.format_time_seconds(_sys['meta']['uptime'])
+        except KeyError:
+            uptime = 'N/A'
         header.append([
             'Time:', '%s' % collect_time.strftime('%Y-%m-%d %T %Z'),
             'NTP Status:', '%s %s (offest: %sms)' % (_sys['ntp']['status'],
                                                      _sys['ntp']['sync'],
-                                                     _sys['ntp']['offset'])
+                                                     _sys['ntp']['offset']),
+            'UP:', uptime
         ])
         header.append([
             'BIOS:', '%s %s %s' % (_sys['sysinfo']['bios']['vendor'],
