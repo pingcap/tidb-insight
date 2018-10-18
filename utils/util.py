@@ -134,7 +134,7 @@ def parse_timestamp(time_string):
 def format_time_seconds(seconds):
     sec = timedelta(seconds=float(seconds))
     day = datetime(1, 1, 1) + sec
-    return '%dd %d:%d:%.2f' % (sec.days, day.hour, day.minute, day.second)
+    return '%dd %d:%d:%.1f' % (sec.days, day.hour, day.minute, day.second)
 
 
 def format_size_bytes(size):

@@ -59,8 +59,8 @@ class TUIModuleTiDB(TUIModuleBase):
         status = []
         status.append([''])
         info.append(['Host', 'AdvAddr', 'Store', 'Version'])
-        status.append(['Host', 'DDL-ID', 'Conns', 'Regions',
-                       'MemRSS', 'VMS', 'Swap', 'Owner'])
+        status.append(['Host', 'DDL-ID', 'Conn', 'Region',
+                       'MemRSS', 'VMS', 'Swap', 'Owner', 'Running'])
         for host, stats in self.tidbinfo.items():
             host_alias = 'tidb_%s' % host
             _setting = stats['settings']
@@ -70,6 +70,8 @@ class TUIModuleTiDB(TUIModuleBase):
             for proc in self.collector[host_alias]['proc_stats']:
                 if 'tidb' in proc['name']:
                     _proc = proc['memory']
+                    start_time = util.format_time_seconds(
+                        self.collector[host_alias]['meta']['uptime'] - proc['start_time'])
                 else:
                     continue
 
@@ -89,7 +91,8 @@ class TUIModuleTiDB(TUIModuleBase):
                     util.format_size_bytes(_proc['rss']) if _proc else '',
                     util.format_size_bytes(_proc['vms']) if _proc else '',
                     util.format_size_bytes(_proc['swap']) if _proc else '',
-                    '*' if _info['is_owner'] else ''
+                    '*' if _info['is_owner'] else '',
+                    start_time
                 ])
         result.append(info)
         result.append(status)
@@ -111,8 +114,8 @@ class TUIModuleTiKV(TUIModuleBase):
 
         info = []
         info.append([''])
-        info.append(['Host', 'AdvAddr', 'Version',
-                     'PD', 'MemRSS', 'VMS', 'Swap'])
+        info.append(['Host', 'AdvAddr', 'Version', 'PD',
+                     'MemRSS', 'VMS', 'Swap', 'Running'])
         for host in self.hosts:
             host = str(host)
             host_alias = 'tikv_%s' % host
@@ -120,6 +123,8 @@ class TUIModuleTiKV(TUIModuleBase):
             for proc in self.collector[host_alias]['proc_stats']:
                 if 'tikv' in proc['name']:
                     _proc = proc
+                    start_time = util.format_time_seconds(
+                        self.collector[host_alias]['meta']['uptime'] - proc['start_time'])
                 else:
                     continue
                 if not _proc:
@@ -149,7 +154,8 @@ class TUIModuleTiKV(TUIModuleBase):
                     util.format_size_bytes(
                         _proc['memory']['vms']) if _proc else '',
                     util.format_size_bytes(
-                        _proc['memory']['swap']) if _proc else ''
+                        _proc['memory']['swap']) if _proc else '',
+                    start_time
                 ])
         result.append(info)
 
@@ -205,8 +211,8 @@ class TUIModulePD(TUIModuleBase):
 
         header = []
         header.append(['\n* PD Servers:'])
-        header.append(['Host', 'Name', 'Version',
-                       'URL', 'MemRSS', 'VMS', 'Swap'])
+        header.append(['Host', 'Name', 'Version', 'URL',
+                       'MemRSS', 'VMS', 'Swap', 'Running'])
         for host in self.hosts:
             host = str(host)
             host_alias = 'pd_%s' % host
@@ -214,6 +220,8 @@ class TUIModulePD(TUIModuleBase):
             for proc in self.collector[host_alias]['proc_stats']:
                 if 'pd' in proc['name']:
                     _proc = proc
+                    start_time = util.format_time_seconds(
+                        self.collector[host_alias]['meta']['uptime'] - proc['start_time'])
                 else:
                     continue
                 if not _proc:
@@ -228,7 +236,8 @@ class TUIModulePD(TUIModuleBase):
                     util.format_size_bytes(
                         _proc['memory']['vms']) if _proc else '',
                     util.format_size_bytes(
-                        _proc['memory']['swap']) if _proc else ''
+                        _proc['memory']['swap']) if _proc else '',
+                    start_time
                 ])
         result.append(header)
 
