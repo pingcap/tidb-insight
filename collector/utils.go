@@ -16,10 +16,25 @@ var (
 
 	// InsightBuildDate is initialized during make
 	InsightBuildTime = "Not Provided"
+
+	// Proc dir path for Linux
+	procPath = "/proc/"
 )
 
+func ProcPath(paths ...string) string {
+	switch len(paths) {
+	case 0:
+		return procPath
+	default:
+		all := make([]string, len(paths)+1)
+		all[0] = procPath
+		copy(all[1:], paths)
+		return strings.Join(all, "")
+	}
+}
+
 func GetSysUptime() (float64, float64, error) {
-	contents, err := ioutil.ReadFile("/proc/uptime")
+	contents, err := ioutil.ReadFile(ProcPath("uptime"))
 	if err != nil {
 		return 0, 0, err
 	}
