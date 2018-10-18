@@ -6,6 +6,7 @@ import os
 import sys
 import time
 
+from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
 try:
     # For Python 2
@@ -128,6 +129,12 @@ def parse_timestamp(time_string):
             pass
     raise ValueError(
         "time data '%s' does not match any supported format." % time_string)
+
+
+def format_time_seconds(seconds):
+    sec = timedelta(seconds=float(seconds))
+    day = datetime(1, 1, 1) + sec
+    return '%dd %d:%d:%.1f' % (sec.days, day.hour, day.minute, day.second)
 
 
 def format_size_bytes(size):

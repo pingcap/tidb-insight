@@ -27,6 +27,8 @@ import (
 
 type Meta struct {
 	Timestamp time.Time  `json:"timestamp"`
+	UPTime    float64    `json:"uptime,omitempty"`
+	IdleTime  float64    `json:"idle_time,omitempty"`
 	SiVer     string     `json:"sysinfo_ver"`
 	GitBranch string     `json:"git_branch"`
 	GitCommit string     `json:"git_commit"`
@@ -91,6 +93,11 @@ func (metric *Metrics) getMetrics(opts options) {
 
 func (meta *Meta) getMeta(pidList []string) {
 	meta.Timestamp = time.Now()
+	if sysUptime, sysIdleTime, err := GetSysUptime(); err == nil {
+		meta.UPTime = sysUptime
+		meta.IdleTime = sysIdleTime
+	}
+
 	meta.SiVer = sysinfo.Version
 	meta.GitBranch = InsightGitBranch
 	meta.GitCommit = InsightGitCommit

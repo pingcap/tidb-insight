@@ -1,4 +1,4 @@
-// tikv-insight project tikv.go
+// tidb-insight project tikv.go
 package main
 
 import (

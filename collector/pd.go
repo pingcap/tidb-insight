@@ -1,4 +1,4 @@
-// pd-insight project pd.go
+// tidb-insight project pd.go
 package main
 
 import (

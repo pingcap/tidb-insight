@@ -2,6 +2,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
@@ -12,14 +13,15 @@ import (
 
 // ProcessStat contains basic info of a running process
 type ProcessStat struct {
-	Name     string                  `json:"name"`
-	Pid      int32                   `json:"pid"`
-	Exec     string                  `json:"exec"`
-	Cmdline  string                  `json:"cmd"`
-	Status   string                  `json:"status"`
-	CPUTimes *cpu.TimesStat          `json:"cpu_times"`
-	Memory   *process.MemoryInfoStat `json:"memory"`
-	Rlimit   []RlimitUsage           `json:"resource_limit"`
+	Name      string                  `json:"name"`
+	Pid       int32                   `json:"pid"`
+	Exec      string                  `json:"exec"`
+	Cmdline   string                  `json:"cmd"`
+	Status    string                  `json:"status"`
+	StartTime float64                 `json:"start_time"`
+	CPUTimes  *cpu.TimesStat          `json:"cpu_times"`
+	Memory    *process.MemoryInfoStat `json:"memory"`
+	Rlimit    []RlimitUsage           `json:"resource_limit"`
 }
 
 // RlimitUsage is the resource limit usage of a process
@@ -154,12 +156,27 @@ func getRlimitUsage(proc *process.Process) []RlimitUsage {
 	return result
 }
 
+func getProcStartTime(proc *process.Process) (float64, error) {
+	statPath := GetProcPath(strconv.Itoa(int(proc.Pid)), "stat")
+	contents, err := ioutil.ReadFile(statPath)
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+	fields := strings.Fields(string(contents))
+	if startTime, err := strconv.ParseFloat(fields[21], 64); err == nil {
+		return startTime / process.ClockTicks, err
+	}
+	return 0, err
+}
+
 func (proc_stat *ProcessStat) getProcessStat(proc *process.Process) {
 	proc_stat.Pid = proc.Pid
 	proc_stat.Name, _ = proc.Name()
 	proc_stat.Exec, _ = proc.Exe()
 	proc_stat.Cmdline, _ = proc.Cmdline()
 	proc_stat.Status, _ = proc.Status()
+	proc_stat.StartTime, _ = getProcStartTime(proc)
 	proc_stat.CPUTimes, _ = proc.Times()
 	proc_stat.Memory, _ = proc.MemoryInfo()
 	proc_stat.Rlimit = getRlimitUsage(proc)
