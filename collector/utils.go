@@ -21,7 +21,7 @@ var (
 	procPath = "/proc/"
 )
 
-func ProcPath(paths ...string) string {
+func GetProcPath(paths ...string) string {
 	switch len(paths) {
 	case 0:
 		return procPath
@@ -34,12 +34,11 @@ func ProcPath(paths ...string) string {
 }
 
 func GetSysUptime() (float64, float64, error) {
-	contents, err := ioutil.ReadFile(ProcPath("uptime"))
+	contents, err := ioutil.ReadFile(GetProcPath("uptime"))
 	if err != nil {
 		return 0, 0, err
 	}
-	timeStrings := strings.Split(string(contents), "\n")
-	timerCounts := strings.Split(string(timeStrings[0]), " ")
+	timerCounts := strings.Fields(string(contents))
 	uptime, err := strconv.ParseFloat(timerCounts[0], 64)
 	if err != nil {
 		return 0, 0, err
