@@ -15,15 +15,16 @@ import (
 // BlockDev is similar to blkDev_cxt in lsblk (from util-linux)
 // contains metadata of a block device
 type BlockDev struct {
-	Name      string     `json:"name,omitempty"`
-	Partition bool       `json:"partition,omitempty"`
-	Mount     MountInfo  `json:"mount,omitempty"`
-	UUID      string     `json:"uuid,omitempty"`
-	Sectors   uint64     `json:"sectors,omitempty"`
-	Size      uint64     `json:"size,omitempty"`
-	SubDev    []BlockDev `json:"subdev,omitempty"`
-	Holder    []string   `json:"holder_of,omitempty"`
-	Slave     []string   `json:"slave_of,omitempty"`
+	Name       string     `json:"name,omitempty"`
+	Partition  bool       `json:"partition,omitempty"`
+	Mount      MountInfo  `json:"mount,omitempty"`
+	UUID       string     `json:"uuid,omitempty"`
+	Sectors    uint64     `json:"sectors,omitempty"`
+	Size       uint64     `json:"size,omitempty"`
+	SubDev     []BlockDev `json:"subdev,omitempty"`
+	Holder     []string   `json:"holder_of,omitempty"`
+	Slave      []string   `json:"slave_of,omitempty"`
+	Rotational string     `json:"rotational,omitempty"`
 }
 
 // MountInfo is the metadata of a mounted device
@@ -116,6 +117,8 @@ func (blkDev *BlockDev) getBlockDevice(blk os.FileInfo, parent os.FileInfo) bool
 			blkDev.Holder = append(blkDev.Holder, holder.Name())
 		}
 	}
+
+	blkDev.Rotational = si.SlurpFile(path.Join(fullpath, "queue/rotational"))
 
 	return true
 }
