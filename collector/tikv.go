@@ -29,7 +29,7 @@ func getTiKVVersion(proc *process.Process) TiKVMeta {
 		log.Fatal(err)
 	}
 
-	cmd := exec.Command(file, "-V")
+	cmd := exec.Command(file, "--version")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err = cmd.Run()
