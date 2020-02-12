@@ -10,6 +10,8 @@ ifeq "$(GOBIN)" ""
 else
     GO    := GOPATH=$(GOPATH) $(GOBIN)
 endif
+GOOS    := $(if $(GOOS),$(GOOS),linux)
+GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
 GOBUILD   := $(GO) build
 
 default: release
@@ -27,7 +29,7 @@ release:
 		-i prom2influx.go
 
 static:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) \
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
 		-o ../bin/prom2influx \
 		-i prom2influx.go
