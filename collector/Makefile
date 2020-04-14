@@ -1,18 +1,14 @@
 ### Makefile for collector
 
-# Ensure GOPATH is set before running build process.
-ifeq "$(GOPATH)" ""
-    $(error Please set the environment variable GOPATH before running `make`)
-endif
-
 ifeq "$(GOBIN)" ""
-    GO    := GOPATH=$(GOPATH) go
+    GO    := go
 else
-    GO    := GOPATH=$(GOPATH) $(GOBIN)
+    GO    := $(GOBIN)
 endif
 GOOS    := $(if $(GOOS),$(GOOS),linux)
 GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
-GOBUILD   := $(GO) build
+GOENV   := GO111MODULE=on CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
+GOBUILD   := $(GOENV) $(GO) build
 
 COMMIT    := $(shell git rev-parse HEAD)
 BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
@@ -37,7 +33,6 @@ release:
 		-i *.go
 
 static:
-	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) \
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
 		-o ../bin/collector \
 		-i *.go
