@@ -31,11 +31,14 @@ cp -rf ${BUILD_ROOT}/../* ${BUILD_ROOT}/${PKGNAME}/ 2>/dev/null
 GOROOT="${BUILD_ROOT}/go"
 export GOROOT
 
+BUILD_FLAGS="-trimpath"
+export BUILD_FLAGS
+
 # compile a static binary
 cd ${BUILD_ROOT}/${PKGNAME}/collector/
-GOBIN=${GOROOT}/bin/go GO111MODULE=on GOOS=${GOOS} GOARCH=${GOARCH} make static || exit 1
+GOBIN=${GOROOT}/bin/go GOOS=${GOOS} GOARCH=${GOARCH} make static || exit 1
 cd ${BUILD_ROOT}/${PKGNAME}/tools/
-GOBIN=${GOROOT}/bin/go GO111MODULE=on GOOS=${GOOS} GOARCH=${GOARCH} make static || exit 1
+GOBIN=${GOROOT}/bin/go GOOS=${GOOS} GOARCH=${GOARCH} make static || exit 1
 
 # compile other tools
 cd ${BUILD_ROOT}/${PKGNAME}/tools/vmtouch

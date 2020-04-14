@@ -8,7 +8,7 @@ endif
 GOOS    := $(if $(GOOS),$(GOOS),linux)
 GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
 GOENV   := GO111MODULE=on CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
-GOBUILD   := $(GOENV) $(GO) build
+GOBUILD   := $(GOENV) $(GO) build $(BUILD_FLAGS)
 
 default: release
 
