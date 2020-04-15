@@ -24,15 +24,13 @@ all: default
 
 debug:
 	$(GOBUILD) -ldflags '$(LDFLAGS)' \
-		-o ../bin/collector \
-		-i *.go
+		-o ../bin/collector
 
 release:
 	$(GOBUILD) -ldflags '-s -w $(LDFLAGS)' \
-		-o ../bin/collector \
-		-i *.go
+		-o ../bin/collector
 
 static:
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
-		-o ../bin/collector \
-		-i *.go
+		-o ../bin/collector
+

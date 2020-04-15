@@ -12,11 +12,11 @@ debug: collector tools
 all: default
 
 collector:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) $(MAKE) -C collector $(MAKECMDGOALS)
+	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) $(MAKE) -C collector
 
 tools:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) $(MAKE) -C tools $(MAKECMDGOALS)
-	$(MAKE) -C tools/vmtouch $(MAKECMDGOALS)
+	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) $(MAKE) -C tools
+	$(MAKE) -C tools/vmtouch
 	install -Dm755 tools/vmtouch/vmtouch bin/
 
 package:

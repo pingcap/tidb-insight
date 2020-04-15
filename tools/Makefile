@@ -17,14 +17,14 @@ all: default
 debug:
 	$(GOBUILD) -ldflags '$(LDFLAGS)' \
 		-o ../bin/prom2influx \
-		-i prom2influx.go
+		prom2influx.go
 
 release:
 	$(GOBUILD) -ldflags '-s -w $(LDFLAGS)' \
 		-o ../bin/prom2influx \
-		-i prom2influx.go
+		prom2influx.go
 
 static:
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
 		-o ../bin/prom2influx \
-		-i prom2influx.go
+		prom2influx.go
