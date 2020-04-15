@@ -16,7 +16,6 @@ BUILDTIME := $(shell date -u '+%Y-%m-%d %I:%M:%S')
 
 LDFLAGS   += -X "main.InsightGitBranch=$(BRANCH)"
 LDFLAGS   += -X "main.InsightGitCommit=$(COMMIT)"
-LDFLAGS   += -X "main.InsightBuildTime=$(BUILDTIME)"
 
 default: release
 

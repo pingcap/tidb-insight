@@ -32,14 +32,13 @@ type Meta struct {
 	SiVer     string     `json:"sysinfo_ver"`
 	GitBranch string     `json:"git_branch"`
 	GitCommit string     `json:"git_commit"`
-	BuildTime string     `json:"utc_build_time"`
 	GoVersion string     `json:"go_version"`
 	TiDBVer   []TiDBMeta `json:"tidb"`
 	TiKVVer   []TiKVMeta `json:"tikv"`
 	PDVer     []PDMeta   `json:"pd"`
 }
 
-type Metrics struct {
+type InsightInfo struct {
 	Meta       Meta            `json:"meta"`
 	SysInfo    sysinfo.SysInfo `json:"sysinfo,omitempty"`
 	NTP        TimeStat        `json:"ntp,omitempty"`
@@ -64,10 +63,10 @@ func parseOpts() options {
 func main() {
 	opts := parseOpts()
 
-	var metric Metrics
-	metric.getMetrics(opts)
+	var info InsightInfo
+	info.getInfo(opts)
 
-	data, err := json.MarshalIndent(&metric, "", "  ")
+	data, err := json.MarshalIndent(&info, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,19 +74,19 @@ func main() {
 	fmt.Println(string(data))
 }
 
-func (metric *Metrics) getMetrics(opts options) {
+func (info *InsightInfo) getInfo(opts options) {
 	var pidList []string
 	if len(opts.Pid) > 0 {
 		pidList = strings.Split(opts.Pid, ",")
 	}
 
-	metric.Meta.getMeta(pidList)
+	info.Meta.getMeta(pidList)
 	if opts.Proc {
-		metric.ProcStats = GetProcessStats(pidList)
+		info.ProcStats = GetProcessStats(pidList)
 	} else {
-		metric.SysInfo.GetSysInfo()
-		metric.NTP.getNTPInfo()
-		metric.Partitions = GetPartitionStats()
+		info.SysInfo.GetSysInfo()
+		info.NTP.getNTPInfo()
+		info.Partitions = GetPartitionStats()
 	}
 }
 
@@ -101,7 +100,6 @@ func (meta *Meta) getMeta(pidList []string) {
 	meta.SiVer = sysinfo.Version
 	meta.GitBranch = InsightGitBranch
 	meta.GitCommit = InsightGitCommit
-	meta.BuildTime = InsightBuildTime
 	meta.GoVersion = fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH)
 	if len(pidList) > 0 {
 		meta.TiDBVer = getTiDBVersionByPIDList(pidList)
