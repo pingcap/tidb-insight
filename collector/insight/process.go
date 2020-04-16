@@ -1,5 +1,5 @@
 // process
-package main
+package insight
 
 import (
 	"io/ioutil"

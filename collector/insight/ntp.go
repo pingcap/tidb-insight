@@ -4,7 +4,7 @@
 //
 // Use ntpq to get basic info of NTPd on the system
 
-package main
+package insight
 
 import (
 	"bytes"

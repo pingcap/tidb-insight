@@ -1,6 +1,6 @@
 // get partitions info of the system
 
-package main
+package insight
 
 import (
 	"io/ioutil"

@@ -1,4 +1,4 @@
-package main
+package insight
 
 import (
 	"io/ioutil"
@@ -8,14 +8,11 @@ import (
 
 // Version infomation
 var (
-	// InsightGitBranch is initialized during make
-	InsightGitBranch = "Not Provided"
+	// GitBranch is initialized during make
+	GitBranch = "Not Provided"
 
-	// InsightGitCommit is initialized during make
-	InsightGitCommit = "Not Provided"
-
-	// InsightBuildDate is initialized during make
-	InsightBuildTime = "Not Provided"
+	// GitCommit is initialized during make
+	GitCommit = "Not Provided"
 
 	// Proc dir path for Linux
 	procPath = "/proc"

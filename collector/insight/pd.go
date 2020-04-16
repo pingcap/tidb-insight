@@ -1,5 +1,5 @@
-// tidb-insight project tidb.go
-package main
+// tidb-insight project pd.go
+package insight
 
 import (
 	"bytes"
@@ -11,19 +11,18 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
-// TiDBMeta is the metadata struct of TiDB server
-type TiDBMeta struct {
+// PDMeta is the metadata struct of a PD server
+type PDMeta struct {
 	Pid        int32  `json:"pid,omitempty"`
 	ReleaseVer string `json:"release_version,omitempty"`
 	GitCommit  string `json:"git_commit,omitempty"`
 	GitBranch  string `json:"git_branch,omitempty"`
 	BuildTime  string `json:"utc_build_time,omitempty"`
-	GoVersion  string `json:"go_version,omitempty"`
 }
 
-func getTiDBVersion(proc *process.Process) TiDBMeta {
-	var tidbVer TiDBMeta
-	tidbVer.Pid = proc.Pid
+func getPDVersion(proc *process.Process) PDMeta {
+	var pdVer PDMeta
+	pdVer.Pid = proc.Pid
 	file, err := proc.Exe()
 	if err != nil {
 		log.Fatal(err)
@@ -45,41 +44,39 @@ func getTiDBVersion(proc *process.Process) TiDBMeta {
 		}
 		switch info[0] {
 		case "Release Version":
-			tidbVer.ReleaseVer = strings.TrimSpace(info[1])
+			pdVer.ReleaseVer = strings.TrimSpace(info[1])
 		case "Git Commit Hash":
-			tidbVer.GitCommit = strings.TrimSpace(info[1])
-		case "Git Commit Branch":
-			tidbVer.GitBranch = strings.TrimSpace(info[1])
+			pdVer.GitCommit = strings.TrimSpace(info[1])
+		case "Git Branch":
+			pdVer.GitBranch = strings.TrimSpace(info[1])
 		case "UTC Build Time":
-			tidbVer.BuildTime = strings.TrimSpace(strings.Join(info[1:], ":"))
-		case "GoVersion":
-			infoTrimed := strings.TrimSpace(info[1])
-			tidbVer.GoVersion = strings.TrimPrefix(infoTrimed, "go version ")
+			pdVer.BuildTime = strings.TrimSpace(strings.Join(info[1:], ":"))
 		default:
 			continue
 		}
 	}
-	return tidbVer
+
+	return pdVer
 }
 
-func getTiDBVersionByName() []TiDBMeta {
-	var tidbMeta = make([]TiDBMeta, 0)
-	procList, err := getProcessesByName("tidb-server")
+func getPDVersionByName() []PDMeta {
+	var pdMeta = make([]PDMeta, 0)
+	procList, err := getProcessesByName("pd-server")
 	if err != nil {
 		log.Fatal(err)
 	}
 	if len(procList) < 1 {
-		return tidbMeta
+		return pdMeta
 	}
 
 	for _, proc := range procList {
-		tidbMeta = append(tidbMeta, getTiDBVersion(proc))
+		pdMeta = append(pdMeta, getPDVersion(proc))
 	}
-	return tidbMeta
+	return pdMeta
 }
 
-func getTiDBVersionByPIDList(pidList []string) []TiDBMeta {
-	tidbMeta := make([]TiDBMeta, 0)
+func getPDVersionByPIDList(pidList []string) []PDMeta {
+	pdMeta := make([]PDMeta, 0)
 	for _, pidStr := range pidList {
 		pidNum, err := strconv.Atoi(pidStr)
 		if err != nil {
@@ -93,10 +90,10 @@ func getTiDBVersionByPIDList(pidList []string) []TiDBMeta {
 			continue
 		}
 		procName, _ := proc.Name()
-		if !strings.Contains(procName, "tidb-server") {
+		if !strings.Contains(procName, "pd-server") {
 			continue
 		}
-		tidbMeta = append(tidbMeta, getTiDBVersion(proc))
+		pdMeta = append(pdMeta, getPDVersion(proc))
 	}
-	return tidbMeta
+	return pdMeta
 }

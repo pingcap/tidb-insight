@@ -1,5 +1,5 @@
 // tidb-insight project tikv.go
-package main
+package insight
 
 import (
 	"bytes"
