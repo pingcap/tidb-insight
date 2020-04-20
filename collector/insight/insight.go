@@ -70,7 +70,7 @@ func (info *InsightInfo) GetInfo(opts Options) {
 			"linux",
 			"netbsd",
 			"openbsd":
-			info.EpollExcl = CheckEpollExclusive()
+			info.EpollExcl = checkEpollExclusive()
 		default:
 			info.EpollExcl = false
 		}

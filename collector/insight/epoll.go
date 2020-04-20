@@ -1,6 +1,8 @@
 // Check if epoll exclusive available on the host
 // Ported from https://github.com/pingcap/tidb-ansible/blob/v3.1.0/scripts/check/epoll_chk.cc
 
+// +build cgo
+
 package insight
 
 /*
@@ -14,8 +16,8 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// CheckEpollExclusive checks if the host system support epoll exclusive mode
-func CheckEpollExclusive() bool {
+// checkEpollExclusive checks if the host system support epoll exclusive mode
+func checkEpollExclusive() bool {
 	fd, err := syscall.EpollCreate1(syscall.EPOLL_CLOEXEC)
 	if err != nil || fd < 0 {
 		return false
