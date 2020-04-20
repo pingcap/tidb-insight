@@ -35,7 +35,10 @@ type MountInfo struct {
 	Options string `json:"mount_options,omitempty"`
 }
 
-const sysBlockPath = "/sys/block"
+const (
+	sysBlockPath  = "/sys/block"
+	devMapperPath = "/dev/mapper"
+)
 
 func GetPartitionStats() []BlockDev {
 	partStats := make([]BlockDev, 0)
@@ -234,8 +237,29 @@ func matchMounts(devs []BlockDev, mountPoints map[string]MountInfo) {
 		return
 	}
 
+	// read device mapper info
+	// we build results by block device names, but the names in mount info file
+	// are device mapper names, so we need to find the mapping list of them
+	// errors are ignored when reading the dir
+	devMapperNames := make(map[string]string)
+	if dirDevMapper, err := os.Lstat(devMapperPath); err == nil && dirDevMapper.IsDir() {
+		fi, _ := os.Open(devMapperPath)
+		devMappers, _ := fi.Readdir(0)
+		for _, mapper := range devMappers {
+			fullpath := path.Join(devMapperPath, mapper.Name())
+			dev, _ := os.Readlink(fullpath)
+
+			devMapperNames[path.Base(dev)] = mapper.Name()
+		}
+	}
+
 	for i := 0; i < len(devs); i++ {
-		devs[i].Mount = mountPoints[devs[i].Name]
+		// find mount point info of mapped devices
+		devName := devs[i].Name
+		if mapperName, ok := devMapperNames[devName]; ok {
+			devName = mapperName
+		}
+		devs[i].Mount = mountPoints[devName]
 
 		// sub devices
 		if len(devs[i].SubDev) < 1 {
