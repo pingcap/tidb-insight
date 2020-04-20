@@ -41,6 +41,7 @@ type InsightInfo struct {
 	NTP        TimeStat        `json:"ntp,omitempty"`
 	Partitions []BlockDev      `json:"partitions,omitempty"`
 	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
+	EpollExcl  bool            `json:"epoll_exclusive,omitempty"`
 }
 
 type Options struct {
@@ -61,6 +62,18 @@ func (info *InsightInfo) GetInfo(opts Options) {
 		info.SysInfo.GetSysInfo()
 		info.NTP.getNTPInfo()
 		info.Partitions = GetPartitionStats()
+		switch runtime.GOOS {
+		case "android",
+			"darwin",
+			"dragonfly",
+			"freebsd",
+			"linux",
+			"netbsd",
+			"openbsd":
+			info.EpollExcl = CheckEpollExclusive()
+		default:
+			info.EpollExcl = false
+		}
 	}
 }
 

@@ -36,7 +36,7 @@ export BUILD_FLAGS
 
 # compile a static binary
 cd ${BUILD_ROOT}/${PKGNAME}/collector/
-GOBIN=${GOROOT}/bin/go GOOS=${GOOS} GOARCH=${GOARCH} make static || exit 1
+GOBIN=${GOROOT}/bin/go GOOS=${GOOS} GOARCH=${GOARCH} make || exit 1
 cd ${BUILD_ROOT}/${PKGNAME}/tools/
 GOBIN=${GOROOT}/bin/go GOOS=${GOOS} GOARCH=${GOARCH} make static || exit 1
 
