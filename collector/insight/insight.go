@@ -88,6 +88,7 @@ func (meta *Meta) getMeta(pidList []string) {
 	meta.GitBranch = GitBranch
 	meta.GitCommit = GitCommit
 	meta.GoVersion = fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH)
+	/* not needed for `tiup cluster check`
 	if len(pidList) > 0 {
 		meta.TiDBVer = getTiDBVersionByPIDList(pidList)
 		meta.TiKVVer = getTiKVVersionByPIDList(pidList)
@@ -97,4 +98,5 @@ func (meta *Meta) getMeta(pidList []string) {
 		meta.TiKVVer = getTiKVVersionByName()
 		meta.PDVer = getPDVersionByName()
 	}
+	*/
 }
