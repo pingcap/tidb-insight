@@ -10,7 +10,7 @@ GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
 GOENV   := GO111MODULE=on CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GOBUILD   := $(GOENV) $(GO) build $(BUILD_FLAGS)
 
-COMMIT    := $(shell git describe --no-match --always --dirty)
+COMMIT    := $(shell git describe --tags --always --dirty)
 BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
 
 LDFLAGS   += -X "$(GOPKG)/insight.GitBranch=$(BRANCH)"
