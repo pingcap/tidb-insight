@@ -2,8 +2,8 @@
 package insight
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -158,7 +158,7 @@ func getRlimitUsage(proc *process.Process) []RlimitUsage {
 
 func getProcStartTime(proc *process.Process) (float64, error) {
 	statPath := GetProcPath(strconv.Itoa(int(proc.Pid)), "stat")
-	contents, err := ioutil.ReadFile(statPath)
+	contents, err := os.ReadFile(statPath)
 	if err != nil {
 		log.Fatal(err)
 		return 0, err

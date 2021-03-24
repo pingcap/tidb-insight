@@ -22,6 +22,7 @@ import (
 	"github.com/AstroProfundis/sysinfo"
 )
 
+// Meta are information about insight itself
 type Meta struct {
 	Timestamp time.Time  `json:"timestamp"`
 	UPTime    float64    `json:"uptime,omitempty"`
@@ -35,6 +36,7 @@ type Meta struct {
 	PDVer     []PDMeta   `json:"pd"`
 }
 
+// InsightInfo are information gathered from the system
 type InsightInfo struct {
 	Meta       Meta            `json:"meta"`
 	SysInfo    sysinfo.SysInfo `json:"sysinfo,omitempty"`
@@ -42,6 +44,7 @@ type InsightInfo struct {
 	Partitions []BlockDev      `json:"partitions,omitempty"`
 	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
 	EpollExcl  bool            `json:"epoll_exclusive,omitempty"`
+	SysConfig  SysCfg          `json:"system_configs,omitempty"`
 }
 
 type Options struct {
@@ -75,6 +78,7 @@ func (info *InsightInfo) GetInfo(opts Options) {
 			info.EpollExcl = false
 		}
 	}
+	info.SysConfig.getSysCfg()
 }
 
 func (meta *Meta) getMeta(pidList []string) {
