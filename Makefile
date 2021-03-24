@@ -5,19 +5,19 @@ GOOS    := $(if $(GOOS),$(GOOS),linux)
 GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
 HOSTARCH:= $(if $(HOSTARCH),$(HOSTARCH),amd64)
 
-default: collector tools
+default: collector
 
 debug: collector tools
 
-all: default
+static: collector tools
+
+all: default tools
 
 collector:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) $(MAKE) -C collector
+	$(MAKE) -C collector ${MAKECMDGOALS}
 
 tools:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) $(MAKE) -C tools
-	$(MAKE) -C tools/vmtouch
-	install -Dm755 tools/vmtouch/vmtouch bin/
+	$(MAKE) -C tools ${MAKECMDGOALS}
 
 package:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) HOSTARCH=$(HOSTARCH) ./package.sh

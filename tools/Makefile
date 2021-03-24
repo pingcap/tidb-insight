@@ -12,7 +12,7 @@ GOBUILD   := $(GOENV) $(GO) build $(BUILD_FLAGS)
 
 default: release
 
-all: default
+all: default vmtouch
 
 debug:
 	$(GOBUILD) -ldflags '$(LDFLAGS)' \
@@ -28,3 +28,7 @@ static:
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
 		-o ../bin/prom2influx \
 		prom2influx.go
+
+vmtouch:
+	$(MAKE) -C vmtouch
+	install -Dm755 vmtouch/vmtouch ../bin/
