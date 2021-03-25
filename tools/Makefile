@@ -1,18 +1,19 @@
 ### Makefile for tools
 
 ifeq "$(GOBIN)" ""
-    GO    := go
+    GO  := go
 else
-    GO    := $(GOBIN)
+    GO  := $(GOBIN)
 endif
 GOOS    := $(if $(GOOS),$(GOOS),linux)
 GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
 GOENV   := GO111MODULE=on CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
-GOBUILD   := $(GOENV) $(GO) build $(BUILD_FLAGS)
+GOBUILD := $(GOENV) $(GO) build $(BUILD_FLAGS)
+LDFLAGS += $(EXTRA_LDFLAGS)
 
-default: release
+default: release vmtouch
 
-all: default vmtouch
+tools: default
 
 debug:
 	$(GOBUILD) -ldflags '$(LDFLAGS)' \
@@ -29,6 +30,8 @@ static:
 		-o ../bin/prom2influx \
 		prom2influx.go
 
+.PHONY: vmtouch
+
 vmtouch:
-	$(MAKE) -C vmtouch
-	install -Dm755 vmtouch/vmtouch ../bin/
+	$(MAKE) -C vmtouch vmtouch
+	install -Dm755 vmtouch/vmtouch ../bin/vmtouch

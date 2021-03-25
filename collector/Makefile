@@ -18,7 +18,7 @@ LDFLAGS   += -X "$(GOPKG)/insight.GitCommit=$(COMMIT)"
 
 default: release
 
-all: default
+collector: default
 
 debug:
 	$(GOBUILD) -ldflags '$(LDFLAGS)' \

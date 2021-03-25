@@ -5,13 +5,9 @@ GOOS    := $(if $(GOOS),$(GOOS),linux)
 GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
 HOSTARCH:= $(if $(HOSTARCH),$(HOSTARCH),amd64)
 
-default: collector
-
-debug: collector tools
+default: collector tools
 
 static: collector tools
-
-all: default tools
 
 collector:
 	$(MAKE) -C collector ${MAKECMDGOALS}
