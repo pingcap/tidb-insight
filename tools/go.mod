@@ -1,6 +1,6 @@
 module github.com/pingcap/tidb-insight/tools
 
-go 1.16
+go 1.13
 
 require (
 	github.com/influxdata/influxdb v1.8.4

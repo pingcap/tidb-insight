@@ -1,7 +1,7 @@
 package insight
 
 import (
-	"os"
+	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -31,7 +31,7 @@ func GetProcPath(paths ...string) string {
 }
 
 func GetSysUptime() (float64, float64, error) {
-	contents, err := os.ReadFile(GetProcPath("uptime"))
+	contents, err := ioutil.ReadFile(GetProcPath("uptime"))
 	if err != nil {
 		return 0, 0, err
 	}

@@ -1,6 +1,6 @@
 module github.com/pingcap/tidb-insight/collector
 
-go 1.16
+go 1.13
 
 require (
 	github.com/AstroProfundis/sysinfo v0.0.0-20210324083743-d0a51ed49aa2
