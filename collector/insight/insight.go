@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/AstroProfundis/sysinfo"
+	"github.com/pingcap/tidb-insight/collector/kmsg"
 )
 
 // Meta are information about insight itself
@@ -45,6 +46,7 @@ type InsightInfo struct {
 	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
 	EpollExcl  bool            `json:"epoll_exclusive,omitempty"`
 	SysConfig  SysCfg          `json:"system_configs,omitempty"`
+	DMesg      []*kmsg.Msg     `json:"dmesg,omitempty"`
 }
 
 type Options struct {
@@ -79,6 +81,7 @@ func (info *InsightInfo) GetInfo(opts Options) {
 		}
 	}
 	info.SysConfig.getSysCfg()
+	_ = info.collectDmsg()
 }
 
 func (meta *Meta) getMeta(pidList []string) {
