@@ -11,7 +11,7 @@ else
 fi
 RELPATH=${PKGNAME}-${RELVER}
 
-GO_RELEASE_BIN=go1.13.15.linux-${HOSTARCH}
+GO_RELEASE_BIN=go1.15.12.linux-${HOSTARCH}
 
 BUILD_ROOT="`pwd`/.build"
 mkdir -p ${BUILD_ROOT}
