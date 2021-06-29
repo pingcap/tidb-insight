@@ -10,5 +10,6 @@ require (
 	github.com/shirou/gopsutil v3.21.5+incompatible
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.6 // indirect
+	github.com/vishvananda/netlink v0.0.0-20210530105856-14e832ae1e8f
 	golang.org/x/sys v0.0.0-20210608053332-aa57babbf139
 )
