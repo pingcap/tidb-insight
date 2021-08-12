@@ -47,6 +47,7 @@ type InsightInfo struct {
 	EpollExcl  bool            `json:"epoll_exclusive,omitempty"`
 	SysConfig  SysCfg          `json:"system_configs,omitempty"`
 	DMesg      []*kmsg.Msg     `json:"dmesg,omitempty"`
+	Sockets    []Socket        `json:"sockets,omitempty"`
 }
 
 type Options struct {
@@ -82,6 +83,7 @@ func (info *InsightInfo) GetInfo(opts Options) {
 	}
 	info.SysConfig.getSysCfg()
 	_ = info.collectDmsg()
+	_ = info.collectSockets()
 }
 
 func (meta *Meta) getMeta(pidList []string) {
