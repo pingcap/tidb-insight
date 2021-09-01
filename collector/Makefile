@@ -7,7 +7,7 @@ else
 endif
 GOOS    := $(if $(GOOS),$(GOOS),linux)
 GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
-GOENV   := GO111MODULE=on CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
+GOENV   := GO111MODULE=on CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GOBUILD   := $(GOENV) $(GO) build $(BUILD_FLAGS)
 
 COMMIT    := $(shell git describe --tags --always --dirty)
@@ -22,16 +22,16 @@ collector: default
 
 debug:
 	$(GOBUILD) -ldflags '$(LDFLAGS)' \
-		-o ../bin/collector \
+		-o ../bin/insight \
 		collector.go
 
 release:
 	$(GOBUILD) -ldflags '-s -w $(LDFLAGS)' \
-		-o ../bin/collector \
+		-o ../bin/insight \
 		collector.go
 
 static:
 	$(GOBUILD) -ldflags '-s -w -extldflags "-static" $(LDFLAGS)' \
-		-o ../bin/collector \
+		-o ../bin/insight \
 		collector.go
 

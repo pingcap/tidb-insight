@@ -1,0 +1,108 @@
+---
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: component version
+        required: true
+      mirror:
+        description: tiup mirror url
+        required: true
+      git-ref:
+        description: git ref
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - "linux"
+        arch:
+          - "amd64"
+          - "arm64"
+    env:
+      working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+    steps:
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+          path: go/src/github.com/${{ github.repository }}
+          fetch-depth: 0
+
+      - name: Build for ${{ matrix.os }}-${{ matrix.arch }}
+        id: build_insight
+        working-directory: ${{ env.working-directory }}
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          export GOPATH=${GITHUB_WORKSPACE}/go
+          export PATH=$PATH:$GOPATH/bin
+
+          BUILD_FLAGS='-trimpath' make -C collector static && \
+          echo "Build success."
+
+      - name: Package components
+        id: packaging
+        working-directory: ${{ env.working-directory }}
+        env:
+          ARCH: ${{ matrix.os }}-${{ matrix.arch }}
+          REL_VER: ${{ github.event.inputs.version }}
+        run: |
+          TMP_DIR=`mktemp -d`
+          export TIUP_HOME="$TMP_DIR/home"
+          echo ::set-output name=TIUP_HOME::$TIUP_HOME
+          echo ::set-output name=TIUP_BIN::$TIUP_HOME/bin/tiup
+
+          rm -rf $TIUP_HOME && mkdir -p $TIUP_HOME/{bin,keys}
+          wget -O $TMP_DIR/tiup-linux-amd64.tar.gz -q https://tiup-mirrors.pingcap.com/tiup-linux-amd64.tar.gz
+          tar -zxf $TMP_DIR/tiup-linux-amd64.tar.gz -C $TIUP_HOME/bin && chmod 755 $TIUP_HOME/bin/tiup
+          curl -s https://tiup-mirrors.pingcap.com/root.json -o $TIUP_HOME/bin/root.json
+
+          mkdir -p package
+
+          # download prebuilt fio binary
+          export FIO_VER=fio-3.8.${ARCH}
+          wget https://download.pingcap.org/${FIO_VER}.tar.gz
+          tar zxvf ${FIO_VER}.tar.gz
+          mv ${FIO_VER}/fio bin/
+
+          # make tar reproducible
+          export COMMIT_TIMESTAMP=`git show --no-patch --no-notes --pretty='%aI'`
+          TAR="tar --sort=name --mtime=${{ steps.get_git.outputs.COMMIT_TIMESTAMP }} --owner=0 --group=0 --numeric-owner"
+
+          # package component
+          ${TAR} -C bin -czf package/insight-${REL_VER}-${ARCH}.tar.gz insight fio
+
+      - name: Publish packages
+        working-directory: ${{ env.working-directory }}
+        env:
+          TIUP_HOME: ${{ steps.packaging.outputs.TIUP_HOME }}
+          TIUP_BIN: ${{ steps.packaging.outputs.TIUP_BIN }}
+          ARCH: ${{ matrix.os }}-${{ matrix.arch }}
+          REL_VER: ${{ github.event.inputs.version }}
+          TIUP_MIRRORS: ${{ github.event.inputs.mirror }}
+          desc: "TiDB-Insight collector"
+        run: |
+          ${TIUP_BIN} mirror set ${TIUP_MIRRORS}
+
+          echo ${{ secrets.TIUP_COMP_KEY_PINGCAP }} | base64 -d > $TIUP_HOME/keys/private.json
+
+          # add a random delay before actually publishing, this can help reduce manifest conflict
+          # when there are multiple jobs running in parallel
+          sleep $[ ( $RANDOM % 10 ) ]s
+          ${TIUP_BIN} mirror publish insight ${REL_VER} package/insight-${REL_VER}-${ARCH}.tar.gz insight --arch ${{ matrix.arch }} --os ${{ matrix.os }} --desc="${TIUP_desc}" --standalone --hide
+

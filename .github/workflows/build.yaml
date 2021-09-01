@@ -24,6 +24,7 @@ jobs:
         go:
           - 1.13.x
           - 1.16.x
+          - 1.17.x
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -36,18 +37,13 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
-      - name: Prepare environment
-        id: prepare_env
-        run: |
-          echo ::set-output name=GOROOT::$GOROOT
-          echo ::set-output name=GOPATH::$GOPATH
-
       - name: Check for static build
         run: |
+          export GOPATH=${GITHUB_WORKSPACE}/go
+          export PATH=$PATH:$GOPATH/bin
+
           make clean
-          GOROOT=${{ steps.prepare_env.GOROOT }} \
-          GOPATH=${{ steps.prepare_env.GOPATH }} \
-          PATH=$GOROOT/bin:$PATH \
           BUILD_FLAGS='-trimpath -buildmode=pie' \
-          make static
+          make static && \
+          sudo bin/collector
 
