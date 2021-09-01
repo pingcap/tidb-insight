@@ -45,14 +45,16 @@ type InsightInfo struct {
 	Partitions []BlockDev      `json:"partitions,omitempty"`
 	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
 	EpollExcl  bool            `json:"epoll_exclusive,omitempty"`
-	SysConfig  SysCfg          `json:"system_configs,omitempty"`
+	SysConfig  *SysCfg         `json:"system_configs,omitempty"`
 	DMesg      []*kmsg.Msg     `json:"dmesg,omitempty"`
 	Sockets    []Socket        `json:"sockets,omitempty"`
 }
 
 type Options struct {
-	Pid  string
-	Proc bool
+	Pid    string
+	Proc   bool
+	Syscfg bool // collect kernel configs or not
+	Dmesg  bool // collect kernel logs or not
 }
 
 func (info *InsightInfo) GetInfo(opts Options) {
@@ -64,6 +66,7 @@ func (info *InsightInfo) GetInfo(opts Options) {
 	info.Meta.getMeta(pidList)
 	if opts.Proc {
 		info.ProcStats = GetProcessStats(pidList)
+		return
 	} else {
 		info.SysInfo.GetSysInfo()
 		info.NTP.getNTPInfo()
@@ -81,8 +84,15 @@ func (info *InsightInfo) GetInfo(opts Options) {
 			info.EpollExcl = false
 		}
 	}
-	info.SysConfig.getSysCfg()
-	_ = info.collectDmsg()
+
+	if opts.Syscfg {
+		info.SysConfig = &SysCfg{}
+		info.SysConfig.getSysCfg()
+	}
+	if opts.Dmesg {
+		_ = info.collectDmsg()
+	}
+
 	_ = info.collectSockets()
 }
 

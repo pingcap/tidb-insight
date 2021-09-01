@@ -25,9 +25,16 @@ import (
 func parseOpts() insight.Options {
 	optPid := flag.String("pid", "", "The PID of processes that need to be collected info. Multiple PIDs can be seperatted by ','.")
 	optProc := flag.Bool("proc", false, "Only collect process info, disabled (Collect everything except process info) by default.")
+	optSyscfg := flag.Bool("syscfg", false, "Also collect system configs.")
+	optDmesg := flag.Bool("dmesg", false, "Also collect kernel logs.")
 	flag.Parse()
 
-	opts := insight.Options{Pid: *optPid, Proc: *optProc}
+	opts := insight.Options{
+		Pid:    *optPid,
+		Proc:   *optProc,
+		Syscfg: *optSyscfg,
+		Dmesg:  *optDmesg,
+	}
 	return opts
 }
 

@@ -23,8 +23,8 @@ import (
 
 // SysCfg are extra system configs we collected
 type SysCfg struct {
-	SecLimit []SecLimitField   `json:"sec_limit"`
-	SysCtl   map[string]string `json:"sysctl"`
+	SecLimit []SecLimitField   `json:"sec_limit,omitempty"`
+	SysCtl   map[string]string `json:"sysctl,omitempty"`
 }
 
 // SecLimitField is the config field in security limit file
