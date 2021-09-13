@@ -43,7 +43,7 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
 
           make clean
-          BUILD_FLAGS='-trimpath -buildmode=pie' \
+          BUILD_FLAGS='-trimpath' \
           make static && \
-          sudo bin/collector
+          sudo bin/insight
 

@@ -16,7 +16,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     timeout-minutes: 30
     strategy:
       fail-fast: true
@@ -42,6 +42,10 @@ jobs:
           path: go/src/github.com/${{ github.repository }}
           fetch-depth: 0
 
+      - name: install toolchains
+        id: install_toolchains
+        run: sudo apt-get update && sudo apt-get -qy install gcc-aarch64-linux-gnu
+
       - name: Build for ${{ matrix.os }}-${{ matrix.arch }}
         id: build_insight
         working-directory: ${{ env.working-directory }}
@@ -51,6 +55,9 @@ jobs:
         run: |
           export GOPATH=${GITHUB_WORKSPACE}/go
           export PATH=$PATH:$GOPATH/bin
+          if [ "$GOARCH" = "arm64" ]; then
+            export CC=aarch64-linux-gnu-gcc
+          fi
 
           BUILD_FLAGS='-trimpath' make -C collector static && \
           echo "Build success."
