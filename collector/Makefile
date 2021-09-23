@@ -5,8 +5,8 @@ ifeq "$(GOBIN)" ""
 else
   GO    := $(GOBIN)
 endif
-GOOS    := $(if $(GOOS),$(GOOS),linux)
-GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
+GOOS    := $(if $(GOOS),$(GOOS),"")
+GOARCH  := $(if $(GOARCH),$(GOARCH),"")
 GOENV   := GO111MODULE=on CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GOBUILD := $(GOENV) $(GO) build $(BUILD_FLAGS)
 
