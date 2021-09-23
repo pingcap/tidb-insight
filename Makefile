@@ -1,13 +1,13 @@
 ### Makefile for tidb-insight
 .PHONY: collector tools
 
-GOOS    := $(if $(GOOS),$(GOOS),linux)
-GOARCH  := $(if $(GOARCH),$(GOARCH),amd64)
+GOOS    := $(if $(GOOS),$(GOOS),"")
+GOARCH  := $(if $(GOARCH),$(GOARCH),"")
 HOSTARCH:= $(if $(HOSTARCH),$(HOSTARCH),amd64)
 
-default: collector tools
+default: collector
 
-static: collector tools
+static: collector
 
 collector:
 	$(MAKE) -C collector ${MAKECMDGOALS}

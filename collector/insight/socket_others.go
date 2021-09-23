@@ -11,21 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build !linux
+// +build !linux
+
 package insight
 
-import "github.com/vishvananda/netlink"
-
-type Socket struct {
-	Family     uint8  `json:"family"`
-	State      uint8  `json:"state"`
-	SourceAddr string `json:"source_addr"`
-	SourcePort uint16 `json:"source_port"`
-	DestAddr   string `json:"dest_addr"`
-	DestPort   uint16 `json:"dest_port"`
-}
-
-func (info *InsightInfo) collectSockets() error {
-	sockets, err := GetIPV4Sockets(netlink.TCP_ESTABLISHED)
-	info.Sockets = sockets
-	return err
+func GetIPV4Sockets(states ...uint8) ([]Socket, error) {
+	return nil, nil
 }
