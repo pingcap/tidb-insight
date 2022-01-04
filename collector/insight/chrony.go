@@ -30,7 +30,7 @@ type ChronyStat struct {
 	LastOffset     float64 `json:"last_offset,omitempty"`     // millisecond
 	RMSOffset      float64 `json:"rms_offset,omitempty"`      // millisecond
 	Frequency      float64 `json:"frequency,omitempty"`       // millisecond
-	UpdateInterval float64 `json:"update_interval,omitempty"` // second
+	UpdateInterval float64 `json:"update_interval,omitempty"` // millisecond
 	LeapStatus     string  `json:"leap_status,omitempty"`
 }
 
@@ -102,6 +102,7 @@ func (cs *ChronyStat) getChronyInfo() {
 			if err != nil {
 				log.Fatal(err)
 			}
+			cs.UpdateInterval = cs.UpdateInterval * 1000
 		case strings.HasPrefix(tmp[0], "Leap status"):
 			// none,  normal, close
 			cs.LeapStatus = strings.ToLower(tmp[1])

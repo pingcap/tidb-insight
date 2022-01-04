@@ -42,7 +42,7 @@ type InsightInfo struct {
 	Meta       Meta            `json:"meta"`
 	SysInfo    sysinfo.SysInfo `json:"sysinfo,omitempty"`
 	NTP        TimeStat        `json:"ntp,omitempty"`
-	ChronyStat ChronyStat      `json:"cjrony,omitempty"`
+	ChronyStat ChronyStat      `json:"chrony,omitempty"`
 	Partitions []BlockDev      `json:"partitions,omitempty"`
 	ProcStats  []ProcessStat   `json:"proc_stats,omitempty"`
 	EpollExcl  bool            `json:"epoll_exclusive,omitempty"`
