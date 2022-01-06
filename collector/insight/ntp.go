@@ -16,8 +16,6 @@ import (
 
 type TimeStat struct {
 	Ver       string  `json:"version,omitempty"`
-	Processor string  `json:"processor,omitempty"`
-	System    string  `json:"system,omitempty"`
 	Sync      string  `json:"sync,omitempty"`
 	Stratum   int     `json:"stratum,omitempty"`
 	Precision int     `json:"precision,omitempty"`
@@ -70,10 +68,6 @@ func (ts *TimeStat) getNTPInfo() {
 		switch {
 		case tmp[0] == "version":
 			ts.Ver = strings.Trim(tmp[1], "\"")
-		case tmp[0] == "processor":
-			ts.Processor = strings.Trim(tmp[1], "\"")
-		case tmp[0] == "system":
-			ts.System = strings.Trim(tmp[1], "\"")
 		case tmp[0] == "stratum":
 			ts.Stratum, err = strconv.Atoi(tmp[1])
 			if err != nil {
