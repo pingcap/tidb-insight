@@ -15,12 +15,22 @@ import (
 )
 
 type TimeStat struct {
-	Ver     string  `json:"version,omitempty"`
-	Sync    string  `json:"sync,omitempty"`
-	Stratum int     `json:"stratum,omitempty"`
-	Offset  float64 `json:"offset,omitempty"`
-	Jitter  float64 `json:"jitter,omitempty"`
-	Status  string  `json:"status,omitempty"`
+	Ver       string  `json:"version,omitempty"`
+	Sync      string  `json:"sync,omitempty"`
+	Stratum   int     `json:"stratum,omitempty"`
+	Precision int     `json:"precision,omitempty"`
+	Rootdelay float64 `json:"rootdelay,omitempty"`
+	Rootdisp  float64 `json:"rootdisp,omitempty"`
+	Refid     string  `json:"refid,omitempty"`
+	Peer      int     `json:"peer,omitempty"`
+	TC        int     `json:"tc,omitempty"`
+	Mintc     int     `json:"mintc,omitempty"`
+	Offset    float64 `json:"offset,omitempty"`
+	Frequency float64 `json:"frequency,omitempty"`
+	Jitter    float64 `json:"jitter,omitempty"`
+	ClkJitter float64 `json:"clk_jitter,omitempty"`
+	ClkWander float64 `json:"clk_wander,omitempty"`
+	Status    string  `json:"status,omitempty"`
 }
 
 func (ts *TimeStat) getNTPInfo() {
@@ -63,13 +73,60 @@ func (ts *TimeStat) getNTPInfo() {
 			if err != nil {
 				log.Fatal(err)
 			}
+		case tmp[0] == "precision":
+			ts.Precision, err = strconv.Atoi(tmp[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "rootdelay":
+			ts.Rootdelay, err = strconv.ParseFloat(tmp[1], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "rootdisp":
+			ts.Rootdisp, err = strconv.ParseFloat(tmp[1], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "refid":
+			ts.Refid = tmp[1]
+		case tmp[0] == "peer":
+			ts.Peer, err = strconv.Atoi(tmp[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "tc":
+			ts.TC, err = strconv.Atoi(tmp[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "mintc":
+			ts.Mintc, err = strconv.Atoi(tmp[1])
+			if err != nil {
+				log.Fatal(err)
+			}
 		case tmp[0] == "offset":
 			ts.Offset, err = strconv.ParseFloat(tmp[1], 64)
 			if err != nil {
 				log.Fatal(err)
 			}
+		case tmp[0] == "frequency":
+			ts.Frequency, err = strconv.ParseFloat(tmp[1], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
 		case tmp[0] == "sys_jitter":
 			ts.Jitter, err = strconv.ParseFloat(tmp[1], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "clk_jitter":
+			ts.ClkJitter, err = strconv.ParseFloat(tmp[1], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case tmp[0] == "clk_wander":
+			ts.ClkWander, err = strconv.ParseFloat(tmp[1], 64)
 			if err != nil {
 				log.Fatal(err)
 			}

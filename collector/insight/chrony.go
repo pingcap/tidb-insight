@@ -27,9 +27,14 @@ type ChronyStat struct {
 	ReferenceID    string  `json:"referenceid,omitempty"`
 	Stratum        int     `json:"stratum,omitempty"`
 	RefTime        string  `json:"ref_time,omitempty"`
-	LastOffset     float64 `json:"last_offset,omitempty"`     // millisecond
-	RMSOffset      float64 `json:"rms_offset,omitempty"`      // millisecond
-	Frequency      float64 `json:"frequency,omitempty"`       // millisecond
+	SystemTime     string  `json:"system_time,omitempty"`
+	LastOffset     float64 `json:"last_offset,omitempty"` // millisecond
+	RMSOffset      float64 `json:"rms_offset,omitempty"`  // millisecond
+	Frequency      float64 `json:"frequency,omitempty"`   // millisecond
+	ResidualFreq   string  `json:"residual_freq,omitempty"`
+	Skew           string  `json:"skew,omitempty"`
+	RootDelay      float64 `json:"root_delay,omitempty"`      // millisecond
+	RootDispersion float64 `json:"root_dispersion,omitempty"` // millisecond
 	UpdateInterval float64 `json:"update_interval,omitempty"` // millisecond
 	LeapStatus     string  `json:"leap_status,omitempty"`
 }
@@ -47,7 +52,7 @@ func (cs *ChronyStat) getChronyInfo() {
 		}
 		cs.LeapStatus = err.Error()
 	}
-	// when no `ntpq` found, just return
+	// when no `chrony` found, just return
 	if syncd == "" {
 		return
 	}
@@ -57,7 +62,8 @@ func (cs *ChronyStat) getChronyInfo() {
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		cs.LeapStatus = "none"
+		return
 	}
 
 	// set default sync status to none
@@ -76,6 +82,8 @@ func (cs *ChronyStat) getChronyInfo() {
 			}
 		case strings.HasPrefix(tmp[0], "Ref time"):
 			cs.RefTime = tmp[1]
+		case strings.HasPrefix(tmp[0], "System time"):
+			cs.SystemTime = tmp[1]
 		case strings.HasPrefix(tmp[0], "Last offset"):
 			cs.LastOffset, err = strconv.ParseFloat(strings.Split(tmp[1], " ")[0], 64)
 			if err != nil {
@@ -97,6 +105,24 @@ func (cs *ChronyStat) getChronyInfo() {
 			}
 			// second -> millisecond
 			cs.Frequency = cs.Frequency * 1000
+		case strings.HasPrefix(tmp[0], "Residual freq"):
+			cs.ResidualFreq = tmp[1]
+		case strings.HasPrefix(tmp[0], "Skew"):
+			cs.Skew = tmp[1]
+		case strings.HasPrefix(tmp[0], "Root delay"):
+			cs.RootDelay, err = strconv.ParseFloat(strings.Split(tmp[1], " ")[0], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			// second -> millisecond
+			cs.RootDelay = cs.RootDelay * 1000
+		case strings.HasPrefix(tmp[0], "Root dispersion"):
+			cs.RootDispersion, err = strconv.ParseFloat(strings.Split(tmp[1], " ")[0], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			// second -> millisecond
+			cs.RootDispersion = cs.RootDispersion * 1000
 		case strings.HasPrefix(tmp[0], "Update interval"):
 			cs.UpdateInterval, err = strconv.ParseFloat(strings.Split(tmp[1], " ")[0], 64)
 			if err != nil {
