@@ -45,7 +45,7 @@ jobs:
 
       - name: install toolchains
         id: install_toolchains
-        run: sudo apt-get update && sudo apt-get -qy install gcc-aarch64-linux-gnu
+        run: sudo apt-get update && sudo apt-get -qy install gcc-aarch64-linux-gnu gcc
 
       - name: Build for ${{ matrix.os }}-${{ matrix.arch }}
         id: build_insight
@@ -56,6 +56,7 @@ jobs:
         run: |
           export GOPATH=${GITHUB_WORKSPACE}/go
           export PATH=$PATH:$GOPATH/bin
+          export CGO_ENABLED=1 
           if [ "$GOARCH" = "arm64" ]; then
             export CC=aarch64-linux-gnu-gcc
           fi
